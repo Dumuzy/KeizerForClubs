@@ -79,7 +79,8 @@ namespace KeizerForClubs
         public frmMainform(string[] args)
         {
             this.args = args;
-            this.InitializeComponent();
+            InitializeComponent();
+            CopyCfgDocsExport();
         }
 
         private void OpenStartTournamentToolStripMenuItemClick(object sender, EventArgs e)
@@ -648,6 +649,48 @@ namespace KeizerForClubs
             }
             this.fLoadPairingList();
             return true;
+        }
+        /// <summary> Returns the directory where the cfg, docs and export directories are located after checkout. </summary>
+        private string GetCheckoutBaseDir()
+        {
+            if (baseDir == null)
+            {
+                baseDir = Path.Join(Directory.GetCurrentDirectory(), "..");
+                bool ok = false;
+                for (int i = 0; i < 8 && !ok; ++i)
+                {
+                    var dirsInDir = Directory.EnumerateDirectories(baseDir).Select(d => new DirectoryInfo(d).Name).ToList();
+                    ok = cfgDocsExport.Intersect(dirsInDir).Count() == cfgDocsExport.Count();
+                    if (!ok)
+                        baseDir = Path.Join(baseDir, "..");
+                }
+            }
+            return baseDir;
+        }
+        static string baseDir;
+
+        static string[] cfgDocsExport = "cfg docs export".Split();
+
+        private void CopyCfgDocsExport()
+        {
+            // This is only needed the first time after downloading KFC from Github, compiling and running.
+            // A post-build step in C#. 
+            foreach (var dir in cfgDocsExport)
+                CopyCdeDirectory(dir);
+        }
+
+        private void CopyCdeDirectory(string dir)
+        {
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            var baseDir = GetCheckoutBaseDir();
+            var files = Directory.EnumerateFiles(Path.Join(baseDir, dir));
+            foreach (var f in files)
+            {
+                var target = Path.Join(dir, Path.GetFileName(f));
+                if (!File.Exists(target))
+                    File.Copy(f, target);
+            }
         }
 
         protected override void Dispose(bool disposing)
