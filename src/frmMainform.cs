@@ -74,50 +74,50 @@ namespace KeizerForClubs
         private DataGridView grdPlayers;
         private TabPage tabPlayer;
         private TabControl tabMainWindow;
-        private string[] args;
+        private readonly string[] Args;
 
         public frmMainform(string[] args)
         {
-            this.args = args;
+            Args = args;
             InitializeComponent();
             CopyCfgDocsExport();
         }
 
         private void OpenStartTournamentToolStripMenuItemClick(object sender, EventArgs e)
         {
-            if (this.dlgOpenTournament.ShowDialog() != DialogResult.OK)
+            if (dlgOpenTournament.ShowDialog() != DialogResult.OK)
                 return;
-            string fileName = this.dlgOpenTournament.FileName;
+            string fileName = dlgOpenTournament.FileName;
             OpenTournament(fileName);
-            this.SQLiteIntf.fSetConfigText("TournamentFile", fileName);
+            SQLiteIntf.fSetConfigText("TournamentFile", fileName);
         }
 
         private void OpenTournament(string fileName)
         {
             if (File.Exists(fileName))
-                this.SQLiteIntf.fOpenTournament(fileName);
+                SQLiteIntf.fOpenTournament(fileName);
             else
-                this.SQLiteIntf.fOpenTournament(fileName);
-            this.sTurniername = Path.GetFileName(fileName);
-            this.sTurniername = this.sTurniername.Replace(".s3db", "");
-            this.Text = "KeizerForClubs " + this.sTurniername;
-            if (this.SQLiteIntf.cLangCode == "")
-                this.fSelectLanguage();
-            this.fApplyLanguageText();
-            this.tabMainWindow.Enabled = true;
-            this.mnuListen.Enabled = true;
-            this.mnuHelp.Enabled = true;
-            this.mnuStartLanguage.Enabled = true;
-            this.fLoadPlayerlist();
-            this.fLoadPairingList();
-            this.tbBonusHindered.Value = this.SQLiteIntf.fGetConfigInt("BONUS.Clubgame");
-            this.tbBonusExcused.Value = this.SQLiteIntf.fGetConfigInt("BONUS.Excused");
-            this.tbBonusUnexcused.Value = this.SQLiteIntf.fGetConfigInt("BONUS.Unexcused");
-            this.tbBonusRetired.Value = this.SQLiteIntf.fGetConfigInt("BONUS.Retired");
-            this.chkFreilosVerteilen.Checked = this.SQLiteIntf.fGetConfigBool("OPTION.DistBye");
-            this.chkPairingOnlyPlayed.Checked = this.SQLiteIntf.fGetConfigBool("OPTION.ShowOnlyPlayed");
-            this.numRoundsGameRepeat.Value = (Decimal)this.SQLiteIntf.fGetConfigInt("OPTION.GameRepeat");
-            this.numRoundSelect.Value = (Decimal)this.SQLiteIntf.fGetMaxRound();
+                SQLiteIntf.fOpenTournament(fileName);
+            sTurniername = Path.GetFileName(fileName);
+            sTurniername = sTurniername.Replace(".s3db", "");
+            Text = "KeizerForClubs " + sTurniername;
+            if (SQLiteIntf.cLangCode == "")
+                fSelectLanguage();
+            fApplyLanguageText();
+            tabMainWindow.Enabled = true;
+            mnuListen.Enabled = true;
+            mnuHelp.Enabled = true;
+            mnuStartLanguage.Enabled = true;
+            fLoadPlayerlist();
+            fLoadPairingList();
+            tbBonusHindered.Value = SQLiteIntf.fGetConfigInt("BONUS.Clubgame");
+            tbBonusExcused.Value = SQLiteIntf.fGetConfigInt("BONUS.Excused");
+            tbBonusUnexcused.Value = SQLiteIntf.fGetConfigInt("BONUS.Unexcused");
+            tbBonusRetired.Value = SQLiteIntf.fGetConfigInt("BONUS.Retired");
+            chkFreilosVerteilen.Checked = SQLiteIntf.fGetConfigBool("OPTION.DistBye");
+            chkPairingOnlyPlayed.Checked = SQLiteIntf.fGetConfigBool("OPTION.ShowOnlyPlayed");
+            numRoundsGameRepeat.Value = (Decimal)SQLiteIntf.fGetConfigInt("OPTION.GameRepeat");
+            numRoundSelect.Value = (Decimal)SQLiteIntf.fGetMaxRound();
             // Der Name des db-Files ist einem ini-File gemerkt, alle anderen Settings in 
             // der Config-Datenbank. Weil die Config-Db nur schwer geöffnet werden kann ohne die 
             // Haupt-Db. Weil die Config-Db eine an die Haupt-Db attached DB ist. 
@@ -140,8 +140,8 @@ namespace KeizerForClubs
         {
             frmLangSelect frmLangSelect = new frmLangSelect();
             int num1 = (int)frmLangSelect.ShowDialog();
-            this.SQLiteIntf.cLangCode = !frmLangSelect.radEnglisch.Checked ? (!frmLangSelect.radDeutsch.Checked ? "NL" : "DE") : "EN";
-            double num2 = (double)this.SQLiteIntf.fSetConfigText("LANGCODE", this.SQLiteIntf.cLangCode);
+            SQLiteIntf.cLangCode = !frmLangSelect.radEnglisch.Checked ? (!frmLangSelect.radDeutsch.Checked ? "NL" : "DE") : "EN";
+            double num2 = (double)SQLiteIntf.fSetConfigText("LANGCODE", SQLiteIntf.cLangCode);
         }
 
         private void MnuProgQuitClick(object sender, EventArgs e) => this.Close();
@@ -161,11 +161,11 @@ namespace KeizerForClubs
             fileopener.Start();
         }
 
-        private void MnuHelpDocumentationClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\KeizerForClubs." + this.SQLiteIntf.cLangCode + ".pdf");
+        private void MnuHelpDocumentationClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\KeizerForClubs." + SQLiteIntf.cLangCode + ".pdf");
 
-        private void MnuHelpKeizerClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\Keizer." + this.SQLiteIntf.cLangCode + ".pdf");
+        private void MnuHelpKeizerClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\Keizer." + SQLiteIntf.cLangCode + ".pdf");
 
-        private void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\Keizer.FAQ." + this.SQLiteIntf.cLangCode + ".pdf");
+        private void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\Keizer.FAQ." + SQLiteIntf.cLangCode + ".pdf");
 
         private void NumRoundSelectValueChanged(object sender, EventArgs e) => this.fLoadPairingList();
 
@@ -173,38 +173,38 @@ namespace KeizerForClubs
 
         private void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
-            if (this.SQLiteIntf.fGetPairings_NoResult() == 0)
+            if (SQLiteIntf.fGetPairings_NoResult() == 0)
             {
                 this.fExecutePairing();
             }
             else
             {
-                int num = (int)MessageBox.Show(this.SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
+                int num = (int)MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
             }
         }
 
         private void MnuPairingManualClick(object sender, EventArgs e)
         {
-            if (this.SQLiteIntf.fGetPairings_NoResult() == 0)
+            if (SQLiteIntf.fGetPairings_NoResult() == 0)
             {
                 this.fExecutePairingManual();
             }
             else
             {
-                int num = (int)MessageBox.Show(this.SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
+                int num = (int)MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
             }
         }
 
         private void MnuPairingDropLastClick(object sender, EventArgs e)
         {
-            int maxRound = this.SQLiteIntf.fGetMaxRound();
+            int maxRound = SQLiteIntf.fGetMaxRound();
             if (this.numRoundSelect.Value != (Decimal)maxRound)
             {
-                int num = (int)MessageBox.Show(this.SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.DelLetzteRd"), "No....", MessageBoxButtons.OK);
+                int num = (int)MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.DelLetzteRd"), "No....", MessageBoxButtons.OK);
             }
             else
             {
-                this.SQLiteIntf.fDelPairings(maxRound);
+                SQLiteIntf.fDelPairings(maxRound);
                 this.numRoundSelect.Value = (Decimal)(maxRound - 1);
                 this.fLoadPairingList();
             }
@@ -223,18 +223,18 @@ namespace KeizerForClubs
         private void ChkPairingOnlyPlayedCheckedChanged(object sender, EventArgs e)
         {
             this.fLoadPairingList();
-            this.SQLiteIntf.fSetConfigBool("OPTION.ShowOnlyPlayed", chkPairingOnlyPlayed.Checked);
+            SQLiteIntf.fSetConfigBool("OPTION.ShowOnlyPlayed", chkPairingOnlyPlayed.Checked);
         }
         private void FrmMainformFormClosing(object sender, FormClosingEventArgs e)
         {
             if (this.tabMainWindow.Enabled)
             {
-                double num1 = (double)this.SQLiteIntf.fSetConfigInt("BONUS.Clubgame", this.tbBonusHindered.Value);
-                double num2 = (double)this.SQLiteIntf.fSetConfigInt("BONUS.Excused", this.tbBonusExcused.Value);
-                double num3 = (double)this.SQLiteIntf.fSetConfigInt("BONUS.Unexcused", this.tbBonusUnexcused.Value);
-                double num4 = (double)this.SQLiteIntf.fSetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
-                double num5 = (double)this.SQLiteIntf.fSetConfigInt("OPTION.DistBye", this.chkFreilosVerteilen.Checked ? 1 : 0);
-                double num6 = (double)this.SQLiteIntf.fSetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
+                double num1 = (double)SQLiteIntf.fSetConfigInt("BONUS.Clubgame", this.tbBonusHindered.Value);
+                double num2 = (double)SQLiteIntf.fSetConfigInt("BONUS.Excused", this.tbBonusExcused.Value);
+                double num3 = (double)SQLiteIntf.fSetConfigInt("BONUS.Unexcused", this.tbBonusUnexcused.Value);
+                double num4 = (double)SQLiteIntf.fSetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
+                double num5 = (double)SQLiteIntf.fSetConfigInt("OPTION.DistBye", this.chkFreilosVerteilen.Checked ? 1 : 0);
+                double num6 = (double)SQLiteIntf.fSetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
             }
             e.Cancel = false;
         }
@@ -243,9 +243,9 @@ namespace KeizerForClubs
 
         private void MnuListenStandingClick(object sender, EventArgs e)
         {
-            this.SQLiteIntf.BeginnTransaktion();
+            SQLiteIntf.BeginnTransaktion();
             this.fRankingCalculate();
-            this.SQLiteIntf.EndeTransaktion();
+            SQLiteIntf.EndeTransaktion();
             new cReportingUnit(this.sTurniername).fReport_Tabellenstand(this.SQLiteIntf);
         }
 
@@ -271,76 +271,76 @@ namespace KeizerForClubs
                 if (this.grdPlayers.Rows[e.RowIndex].Cells[2].Value == null)
                     this.grdPlayers.Rows[e.RowIndex].Cells[2].Value = (object)0;
                 if (this.grdPlayers.Rows[e.RowIndex].Cells[3].Value == null)
-                    this.grdPlayers.Rows[e.RowIndex].Cells[3].Value = (object)this.SQLiteIntf.fLocl_GetPlayerStateText(cSqliteInterface.ePlayerState.eAvailable);
-                if (this.SQLiteIntf.fCntPlayerNames(str) > 0)
+                    this.grdPlayers.Rows[e.RowIndex].Cells[3].Value = (object)SQLiteIntf.fLocl_GetPlayerStateText(cSqliteInterface.ePlayerState.eAvailable);
+                if (SQLiteIntf.fCntPlayerNames(str) > 0)
                 {
-                    int num = (int)MessageBox.Show(this.SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.NameDoppelt"), "No....", MessageBoxButtons.OK);
+                    int num = (int)MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.NameDoppelt"), "No....", MessageBoxButtons.OK);
                 }
                 else
                 {
-                    this.SQLiteIntf.fInsPlayerNew(str, (int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[2].Value));
-                    this.grdPlayers.Rows[e.RowIndex].Cells[0].Value = (object)this.SQLiteIntf.fGetPlayerID(str);
+                    SQLiteIntf.fInsPlayerNew(str, (int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[2].Value));
+                    this.grdPlayers.Rows[e.RowIndex].Cells[0].Value = (object)SQLiteIntf.fGetPlayerID(str);
                 }
             }
             else
-                this.SQLiteIntf.fUpdPlayer((int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[0].Value), this.grdPlayers.Rows[e.RowIndex].Cells[1].Value.ToString(), (int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[2].Value), this.SQLiteIntf.fLocl_GetPlayerState(this.grdPlayers.Rows[e.RowIndex].Cells[3].Value.ToString()));
+                SQLiteIntf.fUpdPlayer((int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[0].Value), this.grdPlayers.Rows[e.RowIndex].Cells[1].Value.ToString(), (int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[2].Value), SQLiteIntf.fLocl_GetPlayerState(this.grdPlayers.Rows[e.RowIndex].Cells[3].Value.ToString()));
         }
 
         private void GrdPairingsCellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            cSqliteInterface.eResults gameResult = this.SQLiteIntf.fLocl_GetGameResult(this.grdPairings.Rows[e.RowIndex].Cells[7].Value.ToString());
+            cSqliteInterface.eResults gameResult = SQLiteIntf.fLocl_GetGameResult(this.grdPairings.Rows[e.RowIndex].Cells[7].Value.ToString());
             int int16_1 = (int)Convert.ToInt16(this.grdPairings.Rows[e.RowIndex].Cells[1].Value);
             int int16_2 = (int)Convert.ToInt16(this.grdPairings.Rows[e.RowIndex].Cells[4].Value);
-            this.SQLiteIntf.fUpdPairingResult((int)Convert.ToInt16(this.numRoundSelect.Value), int16_1, int16_2, gameResult);
+            SQLiteIntf.fUpdPairingResult((int)Convert.ToInt16(this.numRoundSelect.Value), int16_1, int16_2, gameResult);
         }
 
         private void fApplyLanguageText()
         {
             string[] texte = new string[20];
-            this.colPlayerState.Items.Clear();
-            int topicTexte1 = this.SQLiteIntf.fLocl_GetTopicTexte("PLAYERSTATE", " AND key<>2 ", ref texte);
+            colPlayerState.Items.Clear();
+            int topicTexte1 = SQLiteIntf.fLocl_GetTopicTexte("PLAYERSTATE", " AND key<>2 ", ref texte);
             for (int index = 0; index < topicTexte1; ++index)
-                this.colPlayerState.Items.Add((object)texte[index]);
-            this.colPairingResult.Items.Clear();
-            int topicTexte2 = this.SQLiteIntf.fLocl_GetTopicTexte("GAMERESULT", " ", ref texte);
+                colPlayerState.Items.Add((object)texte[index]);
+            colPairingResult.Items.Clear();
+            int topicTexte2 = SQLiteIntf.fLocl_GetTopicTexte("GAMERESULT", " ", ref texte);
             for (int index = 0; index < topicTexte2; ++index)
-                this.colPairingResult.Items.Add((object)texte[index]);
-            this.colPlayerState.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Status");
-            this.colRating.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Rating");
-            this.colPlayerName.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Name");
-            this.colPairingNameWhite.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Weiss");
-            this.colPairingWhiteAddinfo.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.WeissAdd");
-            this.colPairingNameBlack.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Schwarz");
-            this.colPairingAddInfoB.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.SchwarzAdd");
-            this.colPairingResult.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Ergebnis");
-            this.mnuPaarungen.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarungen");
-            this.mnuPaarungNext.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarung.Next");
-            this.mnuPaarungManuell.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarung.NextMan");
-            this.mnuPaarungDropLast.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarung.Drop");
-            this.mnuListen.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen");
-            this.mnuListenStanding.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Calc");
-            this.mnuListenPairing.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Paarungen");
-            this.mnuListenParticipants.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
-            this.mnuHelp.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Hilfe");
-            this.mnuHelpDocumentation.Text = this.SQLiteIntf.fLocl_GetText("GUI_MENU", "Hilfe.Doku");
-            this.tabPlayer.Text = this.SQLiteIntf.fLocl_GetText("GUI_TABS", "Spieler");
-            this.tabPairings.Text = this.SQLiteIntf.fLocl_GetText("GUI_TABS", "Paarungen");
-            this.tabSettings.Text = this.SQLiteIntf.fLocl_GetText("GUI_TABS", "Einstellungen");
-            this.lblBonusExcused.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus entschuldigt");
-            this.lblBonusUnexcused.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus unentschuldigt");
-            this.lblBonusClubgame.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus verhindert");
-            this.lblBonusRetired.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus Rueckzug");
-            this.chkPairingOnlyPlayed.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "Nur gespielte");
-            this.chkFreilosVerteilen.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "FreilosVerteilen");
-            this.lblRunde.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
-            this.numRoundSelect.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
-            this.lblRoundsGameRepeat.Text = this.SQLiteIntf.fLocl_GetText("GUI_LABEL", "NumRundeWdh");
+                colPairingResult.Items.Add((object)texte[index]);
+            colPlayerState.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Status");
+            colRating.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Rating");
+            colPlayerName.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Name");
+            colPairingNameWhite.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Weiss");
+            colPairingWhiteAddinfo.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.WeissAdd");
+            colPairingNameBlack.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Schwarz");
+            colPairingAddInfoB.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.SchwarzAdd");
+            colPairingResult.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Ergebnis");
+            mnuPaarungen.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarungen");
+            mnuPaarungNext.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarung.Next");
+            mnuPaarungManuell.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarung.NextMan");
+            mnuPaarungDropLast.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarung.Drop");
+            mnuListen.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen");
+            mnuListenStanding.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Calc");
+            mnuListenPairing.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Paarungen");
+            mnuListenParticipants.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
+            mnuHelp.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Hilfe");
+            mnuHelpDocumentation.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Hilfe.Doku");
+            tabPlayer.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Spieler");
+            tabPairings.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Paarungen");
+            tabSettings.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Einstellungen");
+            lblBonusExcused.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus entschuldigt");
+            lblBonusUnexcused.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus unentschuldigt");
+            lblBonusClubgame.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus verhindert");
+            lblBonusRetired.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus Rueckzug");
+            this.chkPairingOnlyPlayed.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Nur gespielte");
+            this.chkFreilosVerteilen.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "FreilosVerteilen");
+            lblRunde.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
+            this.numRoundSelect.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
+            lblRoundsGameRepeat.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "NumRundeWdh");
         }
 
         private void fLoadPlayerlist()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = this.SQLiteIntf.fGetPlayerList(ref pList, "", " ORDER BY ID ");
+            int playerList = SQLiteIntf.fGetPlayerList(ref pList, "", " ORDER BY ID ");
             this.grdPlayers.Rows.Clear();
             for (int index = 0; index < playerList; ++index)
             {
@@ -348,14 +348,14 @@ namespace KeizerForClubs
                 this.grdPlayers.Rows[index].Cells[0].Value = (object)pList[index].id;
                 this.grdPlayers.Rows[index].Cells[1].Value = (object)pList[index].name;
                 this.grdPlayers.Rows[index].Cells[2].Value = (object)pList[index].rating.ToString();
-                this.grdPlayers.Rows[index].Cells[3].Value = (object)this.SQLiteIntf.fLocl_GetPlayerStateText(pList[index].state);
+                this.grdPlayers.Rows[index].Cells[3].Value = (object)SQLiteIntf.fLocl_GetPlayerStateText(pList[index].state);
             }
         }
 
         private void fLoadPairingList()
         {
             cSqliteInterface.stPairing[] pList = new cSqliteInterface.stPairing[50];
-            int pairingList = this.SQLiteIntf.fGetPairingList(ref pList, " WHERE rnd=" + this.numRoundSelect.Value.ToString(), " ORDER BY board ");
+            int pairingList = SQLiteIntf.fGetPairingList(ref pList, " WHERE rnd=" + this.numRoundSelect.Value.ToString(), " ORDER BY board ");
             this.grdPairings.Rows.Clear();
             for (int index = 0; index < pairingList; ++index)
             {
@@ -364,10 +364,10 @@ namespace KeizerForClubs
                     this.grdPairings.Rows.Add();
                     this.grdPairings.Rows[index].Cells[0].Value = (object)pList[index].board.ToString();
                     this.grdPairings.Rows[index].Cells[1].Value = (object)pList[index].id_w.ToString();
-                    this.grdPairings.Rows[index].Cells[2].Value = (object)this.SQLiteIntf.fGetPlayerName(pList[index].id_w);
+                    this.grdPairings.Rows[index].Cells[2].Value = (object)SQLiteIntf.fGetPlayerName(pList[index].id_w);
                     this.grdPairings.Rows[index].Cells[4].Value = (object)pList[index].id_b.ToString();
-                    this.grdPairings.Rows[index].Cells[5].Value = (object)this.SQLiteIntf.fGetPlayerName(pList[index].id_b);
-                    this.grdPairings.Rows[index].Cells[7].Value = (object)this.SQLiteIntf.fLocl_GetGameResultText(pList[index].result);
+                    this.grdPairings.Rows[index].Cells[5].Value = (object)SQLiteIntf.fGetPlayerName(pList[index].id_b);
+                    this.grdPairings.Rows[index].Cells[7].Value = (object)SQLiteIntf.fLocl_GetGameResultText(pList[index].result);
                 }
             }
         }
@@ -375,8 +375,8 @@ namespace KeizerForClubs
         private void fRankingCalculate()
         {
             cReportingUnit cReportingUnit = (cReportingUnit)null;
-            int maxRound = this.SQLiteIntf.fGetMaxRound();
-            this.SQLiteIntf.fUpdPairing_ResetValues();
+            int maxRound = SQLiteIntf.fGetMaxRound();
+            SQLiteIntf.fUpdPairing_ResetValues();
             this.fRankingInit();
             this.fRanking_PlayerPktSumme();
             if (cReportingUnit != null)
@@ -387,7 +387,7 @@ namespace KeizerForClubs
             }
             for (int runde1 = 1; runde1 <= maxRound; ++runde1)
             {
-                this.SQLiteIntf.fUpdPairing_ResetValues();
+                SQLiteIntf.fUpdPairing_ResetValues();
                 for (int runde2 = 1; runde2 <= runde1; ++runde2)
                     this.fRanking_GameEvals(runde2);
                 this.fRanking_PlayerPktSumme();
@@ -410,12 +410,12 @@ namespace KeizerForClubs
         private void fRankingInit()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerCount = this.SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY rating desc ");
+            int playerCount = SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY rating desc ");
             // Das ist die Stelle, die die anfänglichen Keizer-Punkte verteilt. 
             float single = Convert.ToSingle(playerCount - 1 + (playerCount - 1) / 2);
             for (int index = 0; index < playerCount; ++index)
             {
-                this.SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, single);
+                SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, single);
                 --single;
             }
         }
@@ -423,21 +423,21 @@ namespace KeizerForClubs
         private void fRanking_PlayerPktSumme()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = this.SQLiteIntf.fGetPlayerList(ref pList, "", " ");
+            int playerList = SQLiteIntf.fGetPlayerList(ref pList, "", " ");
             for (int index = 0; index < playerList; ++index)
-                pList[index].Keizer_SumPts = this.SQLiteIntf.fGetPlayer_PunktSumme(pList[index].id);
+                pList[index].Keizer_SumPts = SQLiteIntf.fGetPlayer_PunktSumme(pList[index].id);
             for (int index = 0; index < playerList; ++index)
-                this.SQLiteIntf.fUpdPlayer_PunktSumme(pList[index].id, pList[index].Keizer_SumPts);
+                SQLiteIntf.fUpdPlayer_PunktSumme(pList[index].id, pList[index].Keizer_SumPts);
         }
 
         private void fRankingCalcRanks()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = this.SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY Keizer_SumPts desc, rating desc ");
+            int playerList = SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY Keizer_SumPts desc, rating desc ");
             float single = Convert.ToSingle(playerList - 1 + (playerList - 1) / 2);
             for (int index = 0; index < playerList; ++index)
             {
-                this.SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, single);
+                SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, single);
                 --single;
             }
         }
@@ -447,15 +447,15 @@ namespace KeizerForClubs
             cSqliteInterface.stPairing[] pList1 = new cSqliteInterface.stPairing[50];
             cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
             cSqliteInterface.stPlayer[] pList3 = new cSqliteInterface.stPlayer[1];
-            int pairingList = this.SQLiteIntf.fGetPairingList(ref pList1, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+            int pairingList = SQLiteIntf.fGetPairingList(ref pList1, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
             if (pairingList == 0)
                 return false;
             for (int index = 0; index < pairingList; ++index)
             {
                 float erg_w = 0.0f;
                 float erg_s = 0.0f;
-                this.SQLiteIntf.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList1[index].id_w, " ");
-                this.SQLiteIntf.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList1[index].id_b, " ");
+                SQLiteIntf.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList1[index].id_w, " ");
+                SQLiteIntf.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList1[index].id_b, " ");
                 if (pList1[index].result == cSqliteInterface.eResults.eWin_White)
                     erg_w = pList3[0].Keizer_StartPts;
                 else if (pList1[index].result == cSqliteInterface.eResults.eDraw)
@@ -483,32 +483,32 @@ namespace KeizerForClubs
                     erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)this.tbBonusRetired.Value / 100.0);
                     erg_s = 0.0f;
                 }
-                this.SQLiteIntf.fUpdPairingValues(runde, pList1[index].board, erg_w, erg_s);
+                SQLiteIntf.fUpdPairingValues(runde, pList1[index].board, erg_w, erg_s);
             }
             return true;
         }
 
         private bool fExecutePairing()
         {
-            this.iPairingPlayerCntAvailable = this.SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList);
+            this.iPairingPlayerCntAvailable = SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList);
             this.iPairingMinFreeCnt = 999;
             for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
             {
                 if (this.pPairingPlayerList[index].FreeCnt < this.iPairingMinFreeCnt)
                     this.iPairingMinFreeCnt = this.pPairingPlayerList[index].FreeCnt;
             }
-            this.SQLiteIntf.BeginnTransaktion();
+            SQLiteIntf.BeginnTransaktion();
             this.fRankingCalculate();
-            this.iPairingPlayerCntAll = this.SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
-            var currRunde = this.SQLiteIntf.fGetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
+            this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
+            var currRunde = SQLiteIntf.fGetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             this.iPairingRekursionCnt = 0;
             if (this.fPairingRekursion(0, currRunde))
             {
                 this.numRoundSelect.Value = (Decimal)currRunde;
                 for (int index = 0; index < this.iPairingPlayerCntAvailable / 2; ++index)
-                    this.SQLiteIntf.fInsPairingNew(currRunde, index + 1, this.pPairingList[index].id_w, this.pPairingList[index].id_b);
+                    SQLiteIntf.fInsPairingNew(currRunde, index + 1, this.pPairingList[index].id_w, this.pPairingList[index].id_b);
                 this.fPairingInsertNoPlaying();
-                this.SQLiteIntf.EndeTransaktion();
+                SQLiteIntf.EndeTransaktion();
                 this.fLoadPairingList();
                 return true;
             }
@@ -550,12 +550,12 @@ namespace KeizerForClubs
                     {
                         if (index1 != index2 && this.pPairingPlayerList[index2].state ==
                             cSqliteInterface.ePlayerState.eAvailable
-                            && !this.SQLiteIntf.fGetPairing_CheckVorhanden(minrunde, this.pPairingPlayerList[index1].id,
+                            && !SQLiteIntf.fGetPairing_CheckVorhanden(minrunde, this.pPairingPlayerList[index1].id,
                                     this.pPairingPlayerList[index2].id))
                         {
                             this.pPairingPlayerList[index2].state = cSqliteInterface.ePlayerState.ePaired;
-                            if (this.SQLiteIntf.fGetPlayerFarbzaehlung(this.pPairingPlayerList[index1].id) >=
-                                this.SQLiteIntf.fGetPlayerFarbzaehlung(this.pPairingPlayerList[index2].id))
+                            if (SQLiteIntf.fGetPlayerFarbzaehlung(this.pPairingPlayerList[index1].id) >=
+                                SQLiteIntf.fGetPlayerFarbzaehlung(this.pPairingPlayerList[index2].id))
                             {
                                 this.pPairingList[brett].id_w = this.pPairingPlayerList[index2].id;
                                 this.pPairingList[brett].id_b = this.pPairingPlayerList[index1].id;
@@ -581,29 +581,29 @@ namespace KeizerForClubs
 
         private bool fPairingInsertNoPlaying()
         {
-            int maxRound = this.SQLiteIntf.fGetMaxRound();
+            int maxRound = SQLiteIntf.fGetMaxRound();
             int num = 100;
             for (int index = 0; index < this.iPairingPlayerCntAll; ++index)
             {
                 if (this.pPairingPlayerList[index].state == cSqliteInterface.ePlayerState.eFreilos)
                 {
-                    this.SQLiteIntf.fInsPairingNew(maxRound, num++, this.pPairingPlayerList[index].id, -1);
-                    this.SQLiteIntf.fUpdPairingResult(maxRound, this.pPairingPlayerList[index].id, -1, cSqliteInterface.eResults.eFreeWin);
+                    SQLiteIntf.fInsPairingNew(maxRound, num++, this.pPairingPlayerList[index].id, -1);
+                    SQLiteIntf.fUpdPairingResult(maxRound, this.pPairingPlayerList[index].id, -1, cSqliteInterface.eResults.eFreeWin);
                 }
                 if (this.pPairingPlayerList[index].state == cSqliteInterface.ePlayerState.eHindered)
                 {
-                    this.SQLiteIntf.fInsPairingNew(maxRound, num++, this.pPairingPlayerList[index].id, -1);
-                    this.SQLiteIntf.fUpdPairingResult(maxRound, this.pPairingPlayerList[index].id, -1, cSqliteInterface.eResults.eHindered);
+                    SQLiteIntf.fInsPairingNew(maxRound, num++, this.pPairingPlayerList[index].id, -1);
+                    SQLiteIntf.fUpdPairingResult(maxRound, this.pPairingPlayerList[index].id, -1, cSqliteInterface.eResults.eHindered);
                 }
                 if (this.pPairingPlayerList[index].state == cSqliteInterface.ePlayerState.eExcused)
                 {
-                    this.SQLiteIntf.fInsPairingNew(maxRound, num++, this.pPairingPlayerList[index].id, -1);
-                    this.SQLiteIntf.fUpdPairingResult(maxRound, this.pPairingPlayerList[index].id, -1, cSqliteInterface.eResults.eExcused);
+                    SQLiteIntf.fInsPairingNew(maxRound, num++, this.pPairingPlayerList[index].id, -1);
+                    SQLiteIntf.fUpdPairingResult(maxRound, this.pPairingPlayerList[index].id, -1, cSqliteInterface.eResults.eExcused);
                 }
                 if (this.pPairingPlayerList[index].state == cSqliteInterface.ePlayerState.eUnexcused)
                 {
-                    this.SQLiteIntf.fInsPairingNew(maxRound, num++, this.pPairingPlayerList[index].id, -1);
-                    this.SQLiteIntf.fUpdPairingResult(maxRound, this.pPairingPlayerList[index].id, -1, cSqliteInterface.eResults.eUnexcused);
+                    SQLiteIntf.fInsPairingNew(maxRound, num++, this.pPairingPlayerList[index].id, -1);
+                    SQLiteIntf.fUpdPairingResult(maxRound, this.pPairingPlayerList[index].id, -1, cSqliteInterface.eResults.eUnexcused);
                 }
             }
             return true;
@@ -612,10 +612,10 @@ namespace KeizerForClubs
         private bool fExecutePairingManual()
         {
             frmPairingManual frmPairingManual = new frmPairingManual();
-            frmPairingManual.btnCancel.Text = this.SQLiteIntf.fLocl_GetText("GUI_TEXT", "Abbruch");
-            frmPairingManual.colWhite.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Weiss");
-            frmPairingManual.colBlack.HeaderText = this.SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Schwarz");
-            this.iPairingPlayerCntAvailable = this.SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList);
+            frmPairingManual.btnCancel.Text = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Abbruch");
+            frmPairingManual.colWhite.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Weiss");
+            frmPairingManual.colBlack.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Schwarz");
+            this.iPairingPlayerCntAvailable = SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList);
             for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
             {
                 if (this.pPairingPlayerList[index].state == cSqliteInterface.ePlayerState.eAvailable)
@@ -623,10 +623,10 @@ namespace KeizerForClubs
             }
             for (int index = 0; index < frmPairingManual.lstNames.Items.Count; index += 2)
                 frmPairingManual.grdPaarungen.Rows.Add();
-            this.iPairingPlayerCntAll = this.SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
+            this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
             if (frmPairingManual.ShowDialog() == DialogResult.OK)
             {
-                int runde = this.SQLiteIntf.fGetMaxRound() + 1;
+                int runde = SQLiteIntf.fGetMaxRound() + 1;
                 this.numRoundSelect.Value = (Decimal)runde;
                 int num = 1;
                 for (int index1 = 0; index1 < frmPairingManual.grdPaarungen.Rows.Count; ++index1)
@@ -635,9 +635,9 @@ namespace KeizerForClubs
                     {
                         string sName1 = frmPairingManual.grdPaarungen.Rows[index1].Cells[0].Value.ToString();
                         string sName2 = frmPairingManual.grdPaarungen.Rows[index1].Cells[1].Value.ToString();
-                        int playerId1 = this.SQLiteIntf.fGetPlayerID(sName1);
-                        int playerId2 = this.SQLiteIntf.fGetPlayerID(sName2);
-                        this.SQLiteIntf.fInsPairingNew(runde, num++, playerId1, playerId2);
+                        int playerId1 = SQLiteIntf.fGetPlayerID(sName1);
+                        int playerId2 = SQLiteIntf.fGetPlayerID(sName2);
+                        SQLiteIntf.fInsPairingNew(runde, num++, playerId1, playerId2);
                         for (int index2 = 0; index2 < this.iPairingPlayerCntAll; ++index2)
                         {
                             if (this.pPairingPlayerList[index2].id == playerId1 || this.pPairingPlayerList[index2].id == playerId2)
@@ -702,7 +702,7 @@ namespace KeizerForClubs
 
         private void InitializeComponent()
         {
-            this.tabMainWindow = new TabControl();
+            tabMainWindow = new TabControl();
             this.tabPlayer = new TabPage();
             this.grdPlayers = new DataGridView();
             this.colPlayerID = new DataGridViewTextBoxColumn();
@@ -755,7 +755,7 @@ namespace KeizerForClubs
             this.mnuListenStanding = new ToolStripMenuItem();
             this.mnuListenParticipants = new ToolStripMenuItem();
             this.mnuHelp = new ToolStripMenuItem();
-            this.dlgOpenTournament = new OpenFileDialog();
+            dlgOpenTournament = new OpenFileDialog();
             this.mnuHelpDocumentation = new ToolStripMenuItem();
             this.tabMainWindow.SuspendLayout();
             this.tabPlayer.SuspendLayout();
@@ -1118,11 +1118,11 @@ namespace KeizerForClubs
             this.mnuHelp.Name = "mnuHelp";
             this.mnuHelp.Size = new Size(44, 20);
             this.mnuHelp.Text = "Help";
-            this.dlgOpenTournament.CheckFileExists = false;
-            this.dlgOpenTournament.DefaultExt = "*.s3db";
-            this.dlgOpenTournament.FileName = "turnier_1";
-            this.dlgOpenTournament.Filter = "Tourn.|*.s3db";
-            this.dlgOpenTournament.Title = "Open/Start Tournament";
+            dlgOpenTournament.CheckFileExists = false;
+            dlgOpenTournament.DefaultExt = "*.s3db";
+            dlgOpenTournament.FileName = "turnier_1";
+            dlgOpenTournament.Filter = "Tourn.|*.s3db";
+            dlgOpenTournament.Title = "Open/Start Tournament";
             this.mnuHelpDocumentation.Name = "mnuHelpDocumentation";
             this.mnuHelpDocumentation.Size = new Size(157, 22);
             this.mnuHelpDocumentation.Text = "Documentation";
@@ -1157,8 +1157,8 @@ namespace KeizerForClubs
 
             try
             {
-                if (args.Length > 0)
-                    OpenTournament(args[0]);
+                if (Args.Length > 0)
+                    OpenTournament(Args[0]);
                 else if (File.Exists(ReadDBFileName()))
                     OpenTournament(ReadDBFileName());
             }
