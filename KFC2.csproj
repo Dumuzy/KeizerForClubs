@@ -7,6 +7,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x86</PlatformTarget>
+    <VersionPrefix>1.1.3</VersionPrefix>
+    <Version>$(VersionPrefix)</Version>
   </PropertyGroup>
 
 

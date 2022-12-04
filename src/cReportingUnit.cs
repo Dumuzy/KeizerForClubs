@@ -60,7 +60,7 @@ namespace KeizerForClubs
                 swExportDatei.WriteLine("</board>");
             }
             swExportDatei.WriteLine("<footer>");
-            swExportDatei.WriteLine("KeizerForClubs " + DateTime.Now.ToShortDateString());
+            swExportDatei.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
             swExportDatei.WriteLine("</footer>");
             swExportDatei.WriteLine("</export>");
             swExportDatei.WriteLine("</keizer_pairing>");
@@ -112,7 +112,7 @@ namespace KeizerForClubs
                     swExportDump.WriteLine(str);
             }
             swExportDatei.WriteLine(" ");
-            swExportDatei.WriteLine("KeizerForClubs " + DateTime.Now.ToShortDateString());
+            swExportDatei.WriteLine(KfcFooter+ " " + DateTime.Now.ToShortDateString());
             swExportDatei.Close();
         }
 
@@ -169,7 +169,7 @@ namespace KeizerForClubs
                 }
             }
             swExportDatei.WriteLine("<footer>");
-            swExportDatei.WriteLine("KeizerForClubs " + DateTime.Now.ToShortDateString());
+            swExportDatei.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
             swExportDatei.WriteLine("</footer>");
             swExportDatei.WriteLine("</export>");
             swExportDatei.WriteLine("</keizer_table>");
@@ -233,7 +233,7 @@ namespace KeizerForClubs
                 }
             }
             swExportDatei.WriteLine(" ");
-            swExportDatei.WriteLine("KeizerForClubs " + DateTime.Now.ToShortDateString());
+            swExportDatei.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
             swExportDatei.Close();
         }
 
@@ -335,7 +335,7 @@ namespace KeizerForClubs
                 swExportDatei.WriteLine("</player>");
             }
             swExportDatei.WriteLine("<footer>");
-            swExportDatei.WriteLine("KeizerForClubs " + DateTime.Now.ToShortDateString());
+            swExportDatei.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
             swExportDatei.WriteLine("</footer>");
             swExportDatei.WriteLine("</export>");
             swExportDatei.WriteLine("</keizer_player>");
@@ -349,7 +349,7 @@ namespace KeizerForClubs
             swExportDatei = new StreamWriter(file);
             AddHtmlHeader(swExportDatei);
             swExportDatei.WriteLine($"<h1>{this.sTurnier}</h1>");
-            swExportDatei.WriteLine("<h2>" + text + " " + "</h2>");
+            swExportDatei.WriteLine("<h2>" + text + "</h2>");
             swExportDatei.WriteLine("<table>");
 
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
@@ -382,17 +382,21 @@ namespace KeizerForClubs
             for (int index = 0; index < playerList; ++index)
                 swExportDatei.WriteLine(((index + 1).ToString("00") + ".").PadLeft(4) + "  " + pList[index].name.PadRight(25) + pList[index].rating.ToString("0000").PadLeft(5) + sqlintf.fLocl_GetPlayerStateText(pList[index].state).PadLeft(25));
             swExportDatei.WriteLine(" ");
-            swExportDatei.WriteLine("KeizerForClubs " + DateTime.Now.ToShortDateString());
+            swExportDatei.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
             swExportDatei.Close();
             return true;
         }
 
         private string GetTeilnehmerBasename(cSqliteInterface sqlintf) => "export\\" + this.sTurnier + "_" +
-        sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + sqlintf.fGetMaxRound();
+                sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + sqlintf.fGetMaxRound();
 
-        private string KfcFooter => "KeizerForClubs " + DateTime.Now.ToShortDateString();
 
-        private string KfcFooterHtml => $"<tr><td colspan=\"4\"> {KfcFooter} </td></tr>";
+        Version? Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        string KfcLongVersion => Version.ToString();
+        string KfcShortVersion => $"{Version.Major}.{Version.Minor}";
+        string KfcFooter => "KeizerForClubs v" + KfcShortVersion;
+        string DateHeader => DateTime.Now.ToShortDateString();
+        private string KfcFooterHtml => $"<tr><td colspan=\"2\">{KfcFooter}</td> <td colspan=\"2\">{DateHeader}</td></tr>";
 
         private void AddHtmlHeader(StreamWriter sw)
         {
