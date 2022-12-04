@@ -20,6 +20,7 @@ namespace KeizerForClubs
         private cSqliteInterface.stPairing[] pPairingList = new cSqliteInterface.stPairing[50];
         private IContainer components;
         private ToolStripMenuItem mnuHelpDocumentation;
+        private ToolStripMenuItem mnuHelpFaq;
         private ToolStripMenuItem mnuHelp;
         private Label lblBonus1Value;
         private Label lblBonus2Value;
@@ -138,7 +139,7 @@ namespace KeizerForClubs
 
         private void fSelectLanguage()
         {
-            frmLangSelect frmLangSelect = new frmLangSelect();
+            frmLangSelect frmLangSelect = new frmLangSelect(SQLiteIntf.cLangCode);
             int num1 = (int)frmLangSelect.ShowDialog();
             SQLiteIntf.cLangCode = !frmLangSelect.radEnglisch.Checked ? (!frmLangSelect.radDeutsch.Checked ? "NL" : "DE") : "EN";
             double num2 = (double)SQLiteIntf.fSetConfigText("LANGCODE", SQLiteIntf.cLangCode);
@@ -161,38 +162,44 @@ namespace KeizerForClubs
             fileopener.Start();
         }
 
-        private void MnuHelpDocumentationClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\KeizerForClubs." + SQLiteIntf.cLangCode + ".pdf");
+        void OpenWithDefaultAppByLanguage(string pathWithPlaceholder)
+        {
+            var lngs = new string[] { SQLiteIntf.cLangCode, "en", "de" };
+            foreach (var lng in lngs)
+            {
+                var p = pathWithPlaceholder.Replace("%LNG%", lng);
+                if (File.Exists(p))
+                {
+                    OpenWithDefaultApp(p);
+                    break;
+                }
+            }
+        }
 
-        private void MnuHelpKeizerClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\Keizer." + SQLiteIntf.cLangCode + ".pdf");
+        void MnuHelpDocumentationClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.%LNG%.pdf");
 
-        private void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultApp("docs\\Keizer.FAQ." + SQLiteIntf.cLangCode + ".pdf");
+        void MnuHelpKeizerClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\Keizer.%LNG%.pdf");
 
-        private void NumRoundSelectValueChanged(object sender, EventArgs e) => this.fLoadPairingList();
+        void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.FAQ.%LNG%.pdf");
 
-        private void CalcRankingToolStripMenuItemClick(object sender, EventArgs e) => this.fRankingCalculate();
+        void NumRoundSelectValueChanged(object sender, EventArgs e) => fLoadPairingList();
+
+        void CalcRankingToolStripMenuItemClick(object sender, EventArgs e) => fRankingCalculate();
 
         private void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
             if (SQLiteIntf.fGetPairings_NoResult() == 0)
-            {
-                this.fExecutePairing();
-            }
+                fExecutePairing();
             else
-            {
-                int num = (int)MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
-            }
+                MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
         }
 
         private void MnuPairingManualClick(object sender, EventArgs e)
         {
             if (SQLiteIntf.fGetPairings_NoResult() == 0)
-            {
-                this.fExecutePairingManual();
-            }
+                fExecutePairingManual();
             else
-            {
-                int num = (int)MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
-            }
+                MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
         }
 
         private void MnuPairingDropLastClick(object sender, EventArgs e)
@@ -757,6 +764,7 @@ namespace KeizerForClubs
             this.mnuHelp = new ToolStripMenuItem();
             dlgOpenTournament = new OpenFileDialog();
             this.mnuHelpDocumentation = new ToolStripMenuItem();
+            this.mnuHelpFaq = new ToolStripMenuItem();
             this.tabMainWindow.SuspendLayout();
             this.tabPlayer.SuspendLayout();
             ((ISupportInitialize)this.grdPlayers).BeginInit();
@@ -1110,9 +1118,10 @@ namespace KeizerForClubs
             this.mnuListenParticipants.Size = new Size(158, 22);
             this.mnuListenParticipants.Text = "Participants";
             this.mnuListenParticipants.Click += new EventHandler(this.MnuListenParticipantsClick);
-            this.mnuHelp.DropDownItems.AddRange(new ToolStripItem[1]
+            this.mnuHelp.DropDownItems.AddRange(new ToolStripItem[]
             {
-        (ToolStripItem) this.mnuHelpDocumentation
+        (ToolStripItem) this.mnuHelpDocumentation,
+        (ToolStripItem) this.mnuHelpFaq,
             });
             this.mnuHelp.Enabled = false;
             this.mnuHelp.Name = "mnuHelp";
@@ -1127,6 +1136,10 @@ namespace KeizerForClubs
             this.mnuHelpDocumentation.Size = new Size(157, 22);
             this.mnuHelpDocumentation.Text = "Documentation";
             this.mnuHelpDocumentation.Click += new EventHandler(this.MnuHelpDocumentationClick);
+            this.mnuHelpFaq.Name = "mnuHelpFaq";
+            this.mnuHelpFaq.Size = new Size(157, 22);
+            this.mnuHelpFaq.Text = "FAQ";
+            this.mnuHelpFaq.Click += new EventHandler(this.MnuHelpFAQClick);
             this.AutoScaleDimensions = new SizeF(6f, 13f);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.ClientSize = new Size(704, 425);
