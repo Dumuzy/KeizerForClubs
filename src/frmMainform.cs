@@ -396,7 +396,7 @@ namespace KeizerForClubs
                 {
                     cReportingUnit.swExportDump.WriteLine("");
                     cReportingUnit.swExportDump.WriteLine("Runde " + runde1.ToString());
-                    cReportingUnit.fReport_Paarungen_TXT(runde1, this.SQLiteIntf);
+                    cReportingUnit.fReport_Paarungen_Txt(runde1, this.SQLiteIntf);
                     cReportingUnit.swExportDump.WriteLine("");
                     cReportingUnit.swExportDump.WriteLine("Tabelle ");
                     cReportingUnit.fReport_Tabellenstand_Voll_CSV(this.SQLiteIntf);
