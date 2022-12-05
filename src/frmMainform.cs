@@ -81,8 +81,8 @@ namespace KeizerForClubs
         public frmMainform(string[] args)
         {
             Args = args;
-            InitializeComponent();
             CopyCfgDocsExport();
+            InitializeComponent();
         }
 
         private void OpenStartTournamentToolStripMenuItemClick(object sender, EventArgs e)
