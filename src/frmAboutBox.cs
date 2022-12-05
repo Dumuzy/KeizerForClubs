@@ -24,6 +24,10 @@ Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports.";
             AddLinkLabel(linkLabel1, "Github", "https://github.com/Dumuzy/KeizerForClubs");
             AddLinkLabel(linkLabel1, "Dumuzy@Github", "https://github.com/Dumuzy", 1);
             AddLinkLabel(linkLabel1, "Alakaluf@Lichess", "https://lichess.org/@/Alakaluf", 1);
+
+            linkLabel2.Text = "If you like this software, would you like to buy me a coffee?\nI am   p@atlantis44.de   on Paypal.";
+            AddLinkLabel(linkLabel2, "buy me a coffee", "https://www.paypal.com");
+            AddLinkLabel(linkLabel2, "Paypal", "https://www.paypal.com", 0);
         }
 
         void AddLinkLabel(LinkLabel ll, string linkText, string link, int delta = 0)
@@ -48,6 +52,13 @@ Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports.";
                 frmMainform.OpenWithDefaultApp(target);
         }
 
+        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string target = e.Link.LinkData as string;
+            if (null != target && (target.StartsWith("www") || target.StartsWith("http")))
+                frmMainform.OpenWithDefaultApp(target);
+        }
+
         const string copyright = @"Permission is hereby granted, free of charge, to any person or organization
 obtaining a copy of the software and accompanying documentation covered by
 this license (the ""Software"") to use, reproduce, display, distribute,
@@ -65,7 +76,6 @@ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
 FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.";
-
 
     }
 }
