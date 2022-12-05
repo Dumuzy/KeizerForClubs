@@ -401,7 +401,7 @@ namespace KeizerForClubs
                 sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + sqlintf.fGetMaxRound();
 
 
-        Version? Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        Version Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         string KfcLongVersion => Version.ToString();
         string KfcShortVersion => $"{Version.Major}.{Version.Minor}";
         string KfcFooter => "KeizerForClubs v" + KfcShortVersion;

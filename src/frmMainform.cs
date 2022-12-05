@@ -1,10 +1,5 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Windows.Forms;
-using static System.Windows.Forms.AxHost;
 
 namespace KeizerForClubs
 {
@@ -20,8 +15,7 @@ namespace KeizerForClubs
         private cSqliteInterface.stPairing[] pPairingList = new cSqliteInterface.stPairing[50];
         private IContainer components;
         private ToolStripMenuItem mnuHelpDocumentation;
-        private ToolStripMenuItem mnuHelpFaq;
-        private ToolStripMenuItem mnuHelp;
+        private ToolStripMenuItem mnuHelpFaq,  mnuHelp, mnuHelpAbout;
         private Label lblBonus1Value;
         private Label lblBonus2Value;
         private Label lblBonus3Value;
@@ -150,6 +144,12 @@ namespace KeizerForClubs
             double num2 = (double)SQLiteIntf.fSetConfigText("LANGCODE", SQLiteIntf.cLangCode);
         }
 
+        void fShowAboutBox()
+        {
+            var f = new frmAboutBox();
+            f.ShowDialog();
+        }
+
         private void MnuProgQuitClick(object sender, EventArgs e) => this.Close();
 
         private void TabMainWindowSelectedIndexChanged(object sender, EventArgs e)
@@ -222,7 +222,9 @@ namespace KeizerForClubs
             }
         }
 
-        private void MnuStartLanguageClick(object sender, EventArgs e)
+        void MnuAboutBoxClick(object sender, EventArgs e) => fShowAboutBox();
+
+        void MnuStartLanguageClick(object sender, EventArgs e)
         {
             this.fSelectLanguage();
             this.fApplyLanguageText();
@@ -339,6 +341,7 @@ namespace KeizerForClubs
             mnuListenParticipants.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
             mnuHelp.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Hilfe");
             mnuHelpDocumentation.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Hilfe.Doku");
+            mnuHelpAbout.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Hilfe.About");
             tabPlayer.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Spieler");
             tabPairings.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Paarungen");
             tabSettings.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Einstellungen");
@@ -780,6 +783,7 @@ namespace KeizerForClubs
             dlgOpenTournament = new OpenFileDialog();
             this.mnuHelpDocumentation = new ToolStripMenuItem();
             this.mnuHelpFaq = new ToolStripMenuItem();
+            this.mnuHelpAbout = new ToolStripMenuItem();
             this.tabMainWindow.SuspendLayout();
             this.tabPlayer.SuspendLayout();
             ((ISupportInitialize)this.grdPlayers).BeginInit();
@@ -1183,6 +1187,7 @@ namespace KeizerForClubs
             {
         (ToolStripItem) this.mnuHelpDocumentation,
         (ToolStripItem) this.mnuHelpFaq,
+        (ToolStripItem) this.mnuHelpAbout,
             });
             this.mnuHelp.Enabled = false;
             this.mnuHelp.Name = "mnuHelp";
@@ -1193,14 +1198,18 @@ namespace KeizerForClubs
             dlgOpenTournament.FileName = "turnier_1";
             dlgOpenTournament.Filter = "Tourn.|*.s3db";
             dlgOpenTournament.Title = "Open/Start Tournament";
-            this.mnuHelpDocumentation.Name = "mnuHelpDocumentation";
-            this.mnuHelpDocumentation.Size = new Size(157, 22);
-            this.mnuHelpDocumentation.Text = "Documentation";
-            this.mnuHelpDocumentation.Click += new EventHandler(this.MnuHelpDocumentationClick);
-            this.mnuHelpFaq.Name = "mnuHelpFaq";
-            this.mnuHelpFaq.Size = new Size(157, 22);
-            this.mnuHelpFaq.Text = "FAQ";
-            this.mnuHelpFaq.Click += new EventHandler(this.MnuHelpFAQClick);
+            mnuHelpDocumentation.Name = "mnuHelpDocumentation";
+            mnuHelpDocumentation.Size = new Size(157, 22);
+            mnuHelpDocumentation.Text = "Documentation";
+            mnuHelpDocumentation.Click += new EventHandler(MnuHelpDocumentationClick);
+            mnuHelpFaq.Name = "mnuHelpFaq";
+            mnuHelpFaq.Size = new Size(157, 22);
+            mnuHelpFaq.Text = "FAQ";
+            mnuHelpFaq.Click += new EventHandler(MnuHelpFAQClick);
+            mnuHelpAbout.Name = "mnuHelpFaq";
+            mnuHelpAbout.Size = new Size(157, 22);
+            mnuHelpAbout.Text = "About";
+            mnuHelpAbout.Click += new EventHandler(MnuAboutBoxClick);
             this.AutoScaleDimensions = new SizeF(6f, 13f);
             this.AutoScaleMode = AutoScaleMode.Font;
             this.ClientSize = new Size(704, 425);
