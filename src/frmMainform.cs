@@ -30,10 +30,11 @@ namespace KeizerForClubs
         private ToolStripMenuItem mnuListenStanding;
         private ToolStripMenuItem mnuListenPairing;
         private NumericUpDown numRoundsGameRepeat;
-        private Label lblRoundsGameRepeat;
+        private Label lblRoundsGameRepeat, lblOutputTo;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
         private CheckBox chkFreilosVerteilen;
+        private CheckBox chkHtml, chkXml, chkTxt, chkCsv;
         private TrackBar tbBonusRetired;
         private Label lblBonusRetired;
         private ToolStripMenuItem mnuStartLanguage;
@@ -118,6 +119,10 @@ namespace KeizerForClubs
             chkFreilosVerteilen.Checked = SQLiteIntf.fGetConfigBool("OPTION.DistBye");
             chkPairingOnlyPlayed.Checked = SQLiteIntf.fGetConfigBool("OPTION.ShowOnlyPlayed");
             numRoundsGameRepeat.Value = (Decimal)SQLiteIntf.fGetConfigInt("OPTION.GameRepeat");
+            chkHtml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Html");
+            chkXml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Xml");
+            chkTxt.Checked = SQLiteIntf.fGetConfigBool("OPTION.Txt");
+            chkCsv.Checked = SQLiteIntf.fGetConfigBool("OPTION.Csv");
             numRoundSelect.Value = (Decimal)SQLiteIntf.fGetMaxRound();
             // Der Name des db-Files ist einem ini-File gemerkt, alle anderen Settings in 
             // der Config-Datenbank. Weil die Config-Db nur schwer geöffnet werden kann ohne die 
@@ -236,12 +241,16 @@ namespace KeizerForClubs
         {
             if (this.tabMainWindow.Enabled)
             {
-                double num1 = (double)SQLiteIntf.fSetConfigInt("BONUS.Clubgame", this.tbBonusHindered.Value);
-                double num2 = (double)SQLiteIntf.fSetConfigInt("BONUS.Excused", this.tbBonusExcused.Value);
-                double num3 = (double)SQLiteIntf.fSetConfigInt("BONUS.Unexcused", this.tbBonusUnexcused.Value);
-                double num4 = (double)SQLiteIntf.fSetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
-                double num5 = (double)SQLiteIntf.fSetConfigInt("OPTION.DistBye", this.chkFreilosVerteilen.Checked ? 1 : 0);
-                double num6 = (double)SQLiteIntf.fSetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
+                SQLiteIntf.fSetConfigInt("BONUS.Clubgame", this.tbBonusHindered.Value);
+                SQLiteIntf.fSetConfigInt("BONUS.Excused", this.tbBonusExcused.Value);
+                SQLiteIntf.fSetConfigInt("BONUS.Unexcused", this.tbBonusUnexcused.Value);
+                SQLiteIntf.fSetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
+                SQLiteIntf.fSetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
+                SQLiteIntf.fSetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
+                SQLiteIntf.fSetConfigBool("OPTION.Html", this.chkHtml.Checked);
+                SQLiteIntf.fSetConfigBool("OPTION.Xml", this.chkXml.Checked);
+                SQLiteIntf.fSetConfigBool("OPTION.Txt", this.chkTxt.Checked);
+                SQLiteIntf.fSetConfigBool("OPTION.Csv", this.chkCsv.Checked);
             }
             e.Cancel = false;
         }
@@ -337,11 +346,12 @@ namespace KeizerForClubs
             lblBonusUnexcused.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus unentschuldigt");
             lblBonusClubgame.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus verhindert");
             lblBonusRetired.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus Rueckzug");
-            this.chkPairingOnlyPlayed.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Nur gespielte");
-            this.chkFreilosVerteilen.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "FreilosVerteilen");
+            chkPairingOnlyPlayed.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Nur gespielte");
+            chkFreilosVerteilen.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "FreilosVerteilen");
             lblRunde.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
-            this.numRoundSelect.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
+            numRoundSelect.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
             lblRoundsGameRepeat.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "NumRundeWdh");
+            lblOutputTo.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "OutputTo");
         }
 
         private void fLoadPlayerlist()
@@ -736,8 +746,13 @@ namespace KeizerForClubs
             this.lblBonus2Value = new Label();
             this.lblBonus1Value = new Label();
             this.lblRoundsGameRepeat = new Label();
+            this.lblOutputTo = new Label();
             this.numRoundsGameRepeat = new NumericUpDown();
             this.chkFreilosVerteilen = new CheckBox();
+            this.chkHtml = new CheckBox();
+            this.chkXml = new CheckBox();
+            this.chkTxt = new CheckBox();
+            this.chkCsv = new CheckBox();
             this.lblBonusRetired = new Label();
             this.tbBonusRetired = new TrackBar();
             this.lblBonusClubgame = new Label();
@@ -925,6 +940,11 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add((Control)this.tbBonusHindered);
             this.tabSettings.Controls.Add((Control)this.tbBonusUnexcused);
             this.tabSettings.Controls.Add((Control)this.tbBonusExcused);
+            this.tabSettings.Controls.Add(this.chkHtml);
+            this.tabSettings.Controls.Add(this.chkXml);
+            this.tabSettings.Controls.Add(this.chkTxt);
+            this.tabSettings.Controls.Add(this.chkCsv);
+            this.tabSettings.Controls.Add(this.lblOutputTo);
             this.tabSettings.Location = new Point(4, 4);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.Padding = new Padding(3);
@@ -977,6 +997,47 @@ namespace KeizerForClubs
             this.chkFreilosVerteilen.TabIndex = 8;
             this.chkFreilosVerteilen.Text = "Assign bye's even";
             this.chkFreilosVerteilen.UseVisualStyleBackColor = true;
+
+            var yOutput = 287;
+
+            this.chkHtml.CheckAlign = ContentAlignment.MiddleLeft;
+            this.chkHtml.Location = new Point(246, yOutput);
+            this.chkHtml.Name = "chkHtml";
+            this.chkHtml.Size = new Size(45, 24);
+            this.chkHtml.TabIndex = 10;
+            this.chkHtml.Text = "Html";
+            this.chkHtml.UseVisualStyleBackColor = true;
+
+            this.chkXml.CheckAlign = ContentAlignment.MiddleLeft;
+            this.chkXml.Location = new Point(315, yOutput);
+            this.chkXml.Name = "chkXml";
+            this.chkXml.Size = new Size(44, 24);
+            this.chkXml.TabIndex = 11;
+            this.chkXml.Text = "Xml";
+            this.chkXml.UseVisualStyleBackColor = true;
+
+            this.chkTxt.CheckAlign = ContentAlignment.MiddleLeft;
+            this.chkTxt.Location = new Point(384, yOutput);
+            this.chkTxt.Name = "chkTxt";
+            this.chkTxt.Size = new Size(44, 24);
+            this.chkTxt.TabIndex = 12;
+            this.chkTxt.Text = "Txt";
+            this.chkTxt.UseVisualStyleBackColor = true;
+
+            this.chkCsv.CheckAlign = ContentAlignment.MiddleLeft;
+            this.chkCsv.Location = new Point(453, yOutput);
+            this.chkCsv.Name = "chkCsv";
+            this.chkCsv.Size = new Size(44, 24);
+            this.chkCsv.TabIndex = 13;
+            this.chkCsv.Text = "Csv";
+            this.chkCsv.UseVisualStyleBackColor = true;
+
+            this.lblOutputTo.Location = new Point(44, yOutput);
+            this.lblOutputTo.Name = "lblOutputTo";
+            this.lblOutputTo.Size = new Size(100, 23);
+            this.lblOutputTo.Text = "# Rounds before paired again";
+            this.lblOutputTo.TextAlign = ContentAlignment.MiddleLeft; 
+
             this.lblBonusRetired.Location = new Point(44, 181);
             this.lblBonusRetired.Name = "lblBonusRetired";
             this.lblBonusRetired.Size = new Size(149, 23);

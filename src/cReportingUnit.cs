@@ -21,9 +21,12 @@ namespace KeizerForClubs
         {
             try
             {
-                fReport_Paarungen_Xml(runde, sqlintf);
-                fReport_Paarungen_Html(runde, sqlintf);
-                fReport_Paarungen_Txt(runde, sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Xml"))
+                    fReport_Paarungen_Xml(runde, sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Html"))
+                    fReport_Paarungen_Html(runde, sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Txt"))
+                    fReport_Paarungen_Txt(runde, sqlintf);
             }
             catch (Exception ex)
             {
@@ -112,7 +115,7 @@ namespace KeizerForClubs
                     swExportDump.WriteLine(str);
             }
             swExportDatei.WriteLine(" ");
-            swExportDatei.WriteLine(KfcFooter+ " " + DateTime.Now.ToShortDateString());
+            swExportDatei.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
             swExportDatei.Close();
         }
 
@@ -123,10 +126,14 @@ namespace KeizerForClubs
         {
             try
             {
-                fReport_Tabellenstand_Xml(sqlintf);
-                fReport_Tabellenstand_Voll_CSV(sqlintf);
-                fReport_Tabellenstand_Html(sqlintf);
-                fReport_Tabellenstand_Txt(sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Xml"))
+                    fReport_Tabellenstand_Xml(sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Csv"))
+                    fReport_Tabellenstand_Voll_CSV(sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Html"))
+                    fReport_Tabellenstand_Html(sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Txt"))
+                    fReport_Tabellenstand_Txt(sqlintf);
             }
             catch (Exception ex)
             {
@@ -296,9 +303,12 @@ namespace KeizerForClubs
         {
             try
             {
-                fReport_Teilnehmer_Xml(sqlintf);
-                fReport_Teilnehmer_Txt(sqlintf);
-                fReport_Teilnehmer_Html(sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Xml"))
+                    fReport_Teilnehmer_Xml(sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Txt"))
+                    fReport_Teilnehmer_Txt(sqlintf);
+                if (sqlintf.fGetConfigBool("OPTION.Html"))
+                    fReport_Teilnehmer_Html(sqlintf);
             }
             catch (Exception ex)
             {
