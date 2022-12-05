@@ -32,8 +32,8 @@ th {
 
 #wrapper {
   margin: 20px auto;
-  padding: 10px;
-  width: 50%;
+  padding: 10px 15px 15px 15px;
+  width: clamp(350px, 50%, 700px);
   background-color: #fbfbfb; 
 }
 
