@@ -16,11 +16,12 @@ cd bin\Debug\net6.0-windows
 copy KFC2.exe  %tempdir%\KeizerForClubs.exe
 xcopy *.dll %tempdir% /S
 xcopy *.json  %tempdir% /S
-xcopy  *.s3db  %tempdir% /S
-xcopy   *.pdf %tempdir% /S
-xcopy    *.txt %tempdir% /S
-xcopy    *.css  %tempdir% /S
-xcopy    *.xsl %tempdir% /S
+xcopy *.s3db  %tempdir% /S
+xcopy *.ini %tempdir% /S
+xcopy *.pdf %tempdir% /S
+xcopy *.txt %tempdir% /S
+xcopy *.css  %tempdir% /S
+xcopy *.xsl %tempdir% /S
 
 
 
