@@ -1140,7 +1140,7 @@ namespace KeizerForClubs
             this.mnuStartLanguage.Enabled = false;
             this.mnuStartLanguage.Name = "mnuStartLanguage";
             this.mnuStartLanguage.Size = new Size(218, 22);
-            this.mnuStartLanguage.Text = "Language,Sprache,Spraak...";
+            this.mnuStartLanguage.Text = "Language, Sprache, Spraak...";
             this.mnuStartLanguage.Click += new EventHandler(this.MnuStartLanguageClick);
             this.mnuPaarungen.DropDownItems.AddRange(new ToolStripItem[5]
             {
@@ -1198,7 +1198,6 @@ namespace KeizerForClubs
         (ToolStripItem) this.mnuHelpFaq,
         (ToolStripItem) this.mnuHelpAbout,
             });
-            this.mnuHelp.Enabled = false;
             this.mnuHelp.Name = "mnuHelp";
             this.mnuHelp.Size = new Size(44, 20);
             this.mnuHelp.Text = "Help";

@@ -27,7 +27,7 @@ Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports.";
             AddLinkLabel(linkLabel1, "Dumuzy@Github", "https://github.com/Dumuzy");
             AddLinkLabel(linkLabel1, "Alakaluf@Lichess", "https://lichess.org/@/Alakaluf");
 
-            linkLabel2.Text = @"If you like this software, would you like to buy me a coffee?
+            linkLabel2.Text = @"If you like this software... I would be delighted if you'd buy me a coffee! :-)
 I am   p@atlantis44.de   on Paypal.";
             AddLinkLabel(linkLabel2, "Paypal", "https://www.paypal.com");
         }
