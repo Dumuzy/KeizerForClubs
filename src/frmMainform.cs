@@ -157,6 +157,7 @@ namespace KeizerForClubs
             TabPage selectedTab = this.tabMainWindow.SelectedTab;
             TabPage tabPlayer = this.tabPlayer;
             this.mnuPaarungen.Enabled = this.tabMainWindow.SelectedTab == this.tabPairings;
+            this.mnuListen.Enabled = this.tabMainWindow.SelectedTab != tabSettings;
         }
 
         public static void OpenWithDefaultApp(string path)
@@ -241,6 +242,12 @@ namespace KeizerForClubs
         }
         private void FrmMainformFormClosing(object sender, FormClosingEventArgs e)
         {
+            SaveSettings();
+            e.Cancel = false;
+        }
+
+        private void SaveSettings()
+        {
             if (this.tabMainWindow.Enabled)
             {
                 SQLiteIntf.fSetConfigInt("BONUS.Clubgame", this.tbBonusHindered.Value);
@@ -254,7 +261,6 @@ namespace KeizerForClubs
                 SQLiteIntf.fSetConfigBool("OPTION.Txt", this.chkTxt.Checked);
                 SQLiteIntf.fSetConfigBool("OPTION.Csv", this.chkCsv.Checked);
             }
-            e.Cancel = false;
         }
 
         private void MnuListenPairingClick(object sender, EventArgs e) => new cReportingUnit(this.sTurniername).fReport_Paarungen((int)Convert.ToInt16(this.numRoundSelect.Value), this.SQLiteIntf);
@@ -276,6 +282,8 @@ namespace KeizerForClubs
             this.lblBonus3Value.Text = this.tbBonusUnexcused.Value.ToString();
             this.lblBonus4Value.Text = this.tbBonusRetired.Value.ToString();
         }
+
+        private void TabSettingsLeave(object sender, EventArgs e) => SaveSettings();
 
         private void GrdPlayersCellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
@@ -965,6 +973,7 @@ namespace KeizerForClubs
             this.tabSettings.TabIndex = 2;
             this.tabSettings.Text = "Settings";
             this.tabSettings.UseVisualStyleBackColor = true;
+            this.tabSettings.Leave += TabSettingsLeave;
             this.lblBonus4Value.Location = new Point(485, 181);
             this.lblBonus4Value.Name = "lblBonus4Value";
             this.lblBonus4Value.Size = new Size(100, 23);
