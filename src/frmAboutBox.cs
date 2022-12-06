@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using KeizerForClubs;
@@ -16,24 +17,39 @@ namespace KeizerForClubs
         {
             InitializeComponent();
             this.Text = labelProductName.Text = $"KeizerForClubs v{AssemblyVersion}";
-            labelCopyright.Text = copyright;
+            labelCopyright.Text = GetCopyright();
 
-            linkLabel1.Text = @"Originally written by T. Schlapp. Improved and put to Github by me. Contact me:
+            linkLabel1.Text = @"Originally written by T. Schlapp. He's got a whole website dedicated to the Keizer system, 
+including a nice example tournament. Improved and put to Github by me. Contact me:
 Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports.";
-            AddLinkLabel(linkLabel1, "T. Schlapp", "http://keizer.schlapp.name/");
+            AddLinkLabel(linkLabel1, "example tournament", "http://keizer.schlapp.name/index.php?id=beispielturnier");
             AddLinkLabel(linkLabel1, "Github", "https://github.com/Dumuzy/KeizerForClubs");
-            AddLinkLabel(linkLabel1, "Dumuzy@Github", "https://github.com/Dumuzy", 1);
-            AddLinkLabel(linkLabel1, "Alakaluf@Lichess", "https://lichess.org/@/Alakaluf", 1);
+            AddLinkLabel(linkLabel1, "Dumuzy@Github", "https://github.com/Dumuzy");
+            AddLinkLabel(linkLabel1, "Alakaluf@Lichess", "https://lichess.org/@/Alakaluf");
 
-            linkLabel2.Text = "If you like this software, would you like to buy me a coffee?\nI am   p@atlantis44.de   on Paypal.";
-            AddLinkLabel(linkLabel2, "Paypal", "https://www.paypal.com", 0);
+            linkLabel2.Text = @"If you like this software, would you like to buy me a coffee?
+I am   p@atlantis44.de   on Paypal.";
+            AddLinkLabel(linkLabel2, "Paypal", "https://www.paypal.com");
         }
 
         void AddLinkLabel(LinkLabel ll, string linkText, string link, int delta = 0)
         {
-            var idx = ll.Text.IndexOf(linkText);
+            // In the LinkLabel it seems \r\n is counted as one char. 
+            var lt = ll.Text.Replace("\r", ""); 
+            var idx = lt.IndexOf(linkText);
             if (idx != -1)
                 ll.Links.Add(idx - delta, linkText.Length, link);
+        }
+
+        string GetCopyright()
+        {
+            var c = Regex.Replace(copyright, @" +", " ");
+            // Replace single linebreaks by space, but not double line breaks. 
+            // A double line breaks represents the end of a paragraph, this shall be kept.
+            // A single line break shall be removed, so that the label's word wrap function does all 
+            // the line breaking. 
+            c = Regex.Replace(c, @"(?<!\r\n) *\r\n\b(?!\r\n)", " ");
+            return c;
         }
 
         public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
