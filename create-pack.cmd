@@ -30,8 +30,8 @@ cd %tempdir%\..
 rename kfc.zip %packname%.zip
 
 rd /S /Q %tempdir%\cfg
-rd /S  /Q %tempdir%\docs
-rd /S  /Q %tempdir%\export
+rd /S /Q %tempdir%\docs
+rd /S /Q %tempdir%\export
 del /Q %tempdir%\*.*
 rd %tempdir%
 
