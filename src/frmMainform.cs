@@ -677,13 +677,19 @@ namespace KeizerForClubs
             {
                 baseDir = Path.Join(Directory.GetCurrentDirectory(), "..");
                 bool ok = false;
-                for (int i = 0; i < 8 && !ok; ++i)
+                for (int i = 0; i < 4 && !ok; ++i)
                 {
-                    var dirsInDir = Directory.EnumerateDirectories(baseDir).Select(d => new DirectoryInfo(d).Name).ToList();
-                    ok = cfgDocsExport.Intersect(dirsInDir).Count() == cfgDocsExport.Count();
+                    ok = Directory.EnumerateFiles(baseDir, "KFC*.sln").Count() == 1;
+                    if (ok)
+                    {
+                        var dirsInDir = Directory.EnumerateDirectories(baseDir).Select(d => new DirectoryInfo(d).Name).ToList();
+                        ok = cfgDocsExport.Intersect(dirsInDir).Count() == cfgDocsExport.Count();
+                    } 
                     if (!ok)
                         baseDir = Path.Join(baseDir, "..");
                 }
+                if (!ok)
+                    baseDir = "";
             }
             return baseDir;
         }
@@ -704,12 +710,15 @@ namespace KeizerForClubs
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             var baseDir = GetCheckoutBaseDir();
-            var files = Directory.EnumerateFiles(Path.Join(baseDir, dir));
-            foreach (var f in files)
+            if (!string.IsNullOrEmpty(baseDir))
             {
-                var target = Path.Join(dir, Path.GetFileName(f));
-                if (!File.Exists(target))
-                    File.Copy(f, target);
+                var files = Directory.EnumerateFiles(Path.Join(baseDir, dir));
+                foreach (var f in files)
+                {
+                    var target = Path.Join(dir, Path.GetFileName(f));
+                    if (!File.Exists(target))
+                        File.Copy(f, target);
+                }
             }
         }
 
