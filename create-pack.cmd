@@ -17,6 +17,7 @@ copy KFC2.exe  %tempdir%\KeizerForClubs.exe
 xcopy *.dll %tempdir% /S
 xcopy *.json  %tempdir% /S
 xcopy *.s3db  %tempdir% /S
+xcopy Keizer*.html %tempdir% /S
 xcopy *.ini %tempdir% /S
 xcopy *.pdf %tempdir% /S
 xcopy *.txt %tempdir% /S

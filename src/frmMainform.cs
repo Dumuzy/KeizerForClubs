@@ -173,20 +173,26 @@ namespace KeizerForClubs
             var lngs = new string[] { SQLiteIntf.cLangCode, "en", "de" };
             foreach (var lng in lngs)
             {
-                var p = pathWithPlaceholder.Replace("%LNG%", lng);
-                if (File.Exists(p))
+                var pp = pathWithPlaceholder.Replace("%LNG%", lng);
+                foreach (var ext in new string[] { "pdf", "html" })
                 {
-                    OpenWithDefaultApp(p);
-                    break;
+                    var p = pp.Replace("%X%", ext);
+                    if (File.Exists(p))
+                    {
+                        OpenWithDefaultApp(p);
+                        goto end;
+                    }
                 }
             }
+        end:
+            return;
         }
 
-        void MnuHelpDocumentationClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.%LNG%.pdf");
+        void MnuHelpDocumentationClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.%LNG%.%X%");
 
-        void MnuHelpKeizerClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\Keizer.%LNG%.pdf");
+        void MnuHelpKeizerClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\Keizer.%LNG%.%X%");
 
-        void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.FAQ.%LNG%.pdf");
+        void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.FAQ.%LNG%.%X%");
 
         void NumRoundSelectValueChanged(object sender, EventArgs e) => fLoadPairingList();
 
