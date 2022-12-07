@@ -50,12 +50,12 @@ changed.
 Use "delete last round" to drop the latest pairings. Change options regarding the automatic pairing
 or do it manually.
 
-### I am missing a function.
-Contact [Alakaluf on Lichess](https://lichess.org/@/Alakaluf) or 
-[Dumuzy on Github](https://github.com/Dumuzy/KeizerForClubs).
+### I am missing a function. 
+Contact [Alakaluf at Lichess](https://lichess.org/@/Alakaluf) or 
+[Dumuzy at Github](https://github.com/Dumuzy/KeizerForClubs).
 
 ### I found a bug.
-Contact [Alakaluf on Lichess](https://lichess.org/@/Alakaluf) or 
-[Dumuzy on Github](https://github.com/Dumuzy/KeizerForClubs). Or send a mail
+Contact [Alakaluf at Lichess](https://lichess.org/@/Alakaluf) or 
+[Dumuzy at Github](https://github.com/Dumuzy/KeizerForClubs). Or send a mail
 to keizer@atlantis44.de. Send the *.s3db tournament file along with a description,
 when/how which error occurred and if it can be reproduced.
