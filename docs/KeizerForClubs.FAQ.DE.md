@@ -33,6 +33,18 @@ Ja, fügen Sie ihn einfach in die Teilnehmerliste ein, er wird dann sofort in kün
 Ranglisten etc. berücksichtigt. Sie müssen keine Paarungen für vorhergehende Runden ändern oder
 nachtragen!
 
+### Wofür ist die Option "Freilos verteilen"?
+Wenn diese Option _nicht_ gewählt ist und eine ungerade Anzahl Spieler zur Runde erscheint, bekommt der Tabellenletzte das Freilos.
+ Wenn diese Option gewählt ist und eine ungerade Anzahl Spieler zur Runde erscheint, bekommt der das Freilos, der in der 
+ Tabelle am weitesten hinten steht und kein Freilos hatte und auch nicht anderweitig gefehlt hat. 
+Die Option sorgt dafür, daß kein Spieler ständig Freilos bekommt und dadurch umsonst zum Spielabend erscheint.
+
+### Wofür ist die Option "Paarungen wiederholen nach x Runden"?
+Beim Keizer-System dürfen sich im Allgemeinen Paarungen wiederholen. Da Tabellennachbarn gepaart werden, 
+könnte das sogar direkt in der nächsten Runde passieren, wenn sich die Tabelle
+nicht sehr verändert. Über diese Option wird eingestellt, wieviele Runden vergehen müssen, bevor
+dieselbe Paarung erneut zustande kommt.
+
 ### Wie kann ich Teilnehmer, Ranglisten, ...ausdrucken?
 Benutzen Sie das Menü "Listen". Alle Listen können als als XML-, HTML-oder einfache 
 Textdatei exportiert werden und dann mit anderen

@@ -22,12 +22,12 @@ Yes, simply add him in the players tab. He will appear immediately in coming pai
 tables etc. There is no need for changes in earlier rounds!
 
 ### What is the option "distribute bye's" for?
-The Keizer system gives free tickets by default to the worst ranked player. This option avoids giving them 
-to players who have been non-playing already. The option ensures that no player gets a free ticket all the 
+The Keizer system gives byes by default to the worst ranked player. This option avoids giving them 
+to players who have been non-playing already. The option ensures that no player gets a bye all the 
 time and therefore appears for nothing at the game evening.
 
 ###  What is the option "# rounds before pairings repeat" for?
-In the Keizer system, pairings are allowed to repeat. Because of the pairing between
+In the Keizer system, pairings are generally allowed to repeat. Because of the pairing between
 neighbors in the table, this could happen directly in the next round, if the table does not change much. 
 This option sets how many rounds have to pass before the same pairing is allowed again. 
 
