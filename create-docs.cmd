@@ -1,5 +1,5 @@
 
-set pandoc=c:\tmp\pandoc
+set pandoc=pandoc.exe
 
 cd bin\Debug\net6.0-windows\docs
 rm *.html *.md
