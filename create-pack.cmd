@@ -1,4 +1,18 @@
-set vers=1.1.3
+rem
+rem     This script packs together a Keizer_...zip package.
+rem     It takes the version number from KFC2.csproj. 
+rem     To work, this script needs   tclsh.exe and 7za.exe in PATH. 
+
+@echo off
+set projfile=KFC2.csproj
+rem The following seems to be the way to go to put the result of a command into 
+rem a variable in cmd-scripts. It is truly astonishing. 
+for /f usebackq %%i in (`tclsh extract-vers.tcl %projfile%`) do (
+  set vers=%%i
+)
+
+echo Version parsed from %projfile% is %vers%
+
 set temp0=C:\tmp\kfc-pack\
 set packname=Keizer_%vers%
 set tempdir=%temp0%%packname%
@@ -14,17 +28,8 @@ del /Q %tempdir%\export
 
 cd bin\Debug\net6.0-windows
 copy KFC2.exe  %tempdir%\KeizerForClubs.exe
-xcopy *.dll %tempdir% /S
-xcopy *.json  %tempdir% /S
-xcopy *.s3db  %tempdir% /S
-xcopy Keizer*.html %tempdir% /S
-xcopy *.ini %tempdir% /S
-xcopy *.pdf %tempdir% /S
-xcopy *.txt %tempdir% /S
-xcopy *.css  %tempdir% /S
-xcopy *.xsl %tempdir% /S
 
-
+robocopy .  %tempdir% *.dll *.json *.s3db Keizer*.html *.ini *.pdf *.txt *.css *.xsl /E
 
 cd %tempdir%\..
 
@@ -37,5 +42,4 @@ rd /S /Q %tempdir%\export
 del /Q %tempdir%\*.*
 rd %tempdir%
 
-echo off
-echo "%packname%.zip created in %temp0%"
+echo %packname%.zip created in %temp0%
