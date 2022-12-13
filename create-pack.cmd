@@ -26,7 +26,7 @@ del /Q %tempdir%\docs
 del /Q %tempdir%\export
 
 
-cd bin\Debug\net6.0-windows
+cd bin\Release\net6.0-windows
 copy KFC2.exe  %tempdir%\KeizerForClubs.exe
 
 robocopy .  %tempdir% *.dll *.json *.s3db Keizer*.html *.ini *.pdf *.txt *.css *.xsl /E
