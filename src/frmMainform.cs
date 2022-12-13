@@ -83,7 +83,7 @@ namespace KeizerForClubs
             CopyCfgDocsExport();
             InitializeComponent();
             donateButton1 = new DonateButton(btDonate1, ReadDonated(), () => numClicks, 50, () => true, 20);
-            donateButton2 = new DonateButton(btDonate2, ReadDonated(), () => numClicks, 70, () => true, 20);
+            donateButton2 = new DonateButton(btDonate2, ReadDonated(), () => numClicks, 120, () => true, 20);
             IncNumClicks();
         }
 
