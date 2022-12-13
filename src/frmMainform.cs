@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
-using System.Data.SqlTypes;
 using System.Diagnostics;
+using AwiUtils;
 using PuzzleKnocker;
 
 namespace KeizerForClubs
@@ -72,8 +72,8 @@ namespace KeizerForClubs
         private DataGridView grdPlayers;
         private TabPage tabPlayer;
         private TabControl tabMainWindow;
-        private Button btDonate1, btDonate2, btDonate3;
-        private DonateButton donateButton1, donateButton2, donateButton3;
+        private Button btDonate1, btDonate2;
+        private DonateButton donateButton1, donateButton2;
         private int numClicks;
         private readonly string[] Args;
 
@@ -82,9 +82,8 @@ namespace KeizerForClubs
             Args = args;
             CopyCfgDocsExport();
             InitializeComponent();
-            donateButton1 = new DonateButton(btDonate1, "", () => numClicks, 50, () => true, 20);
-            donateButton2 = new DonateButton(btDonate2, "", () => numClicks, 70, () => true, 20);
-            donateButton3 = new DonateButton(btDonate3, "", () => numClicks, 60, () => true, 20);
+            donateButton1 = new DonateButton(btDonate1, ReadDonated(), () => numClicks, 50, () => true, 20);
+            donateButton2 = new DonateButton(btDonate2, ReadDonated(), () => numClicks, 70, () => true, 20);
             IncNumClicks();
         }
 
@@ -135,16 +134,10 @@ namespace KeizerForClubs
                 SaveDBFileName(fileName);
         }
 
-        const string inifile = "cfg/KFC2.ini";
-        private static string ReadDBFileName()
-        {
-            string s = "";
-            if (File.Exists(inifile))
-                s = File.ReadAllText(inifile).Trim();
-            return s;
-        }
-
-        private static void SaveDBFileName(string filename) => File.WriteAllText(inifile, filename);
+        readonly IniFile inifile = new IniFile("cfg", "KFC2.ini");
+        private string ReadDBFileName() => inifile.ReadValue("A", "DBFile", "");
+        private void SaveDBFileName(string filename) => inifile.WriteValue("A", "DBFile", filename);
+        private string ReadDonated() => inifile.ReadValue("A", "Donated", "a");
 
         private void fSelectLanguage()
         {
@@ -165,7 +158,6 @@ namespace KeizerForClubs
             numClicks += num;
             donateButton1?.SetState();
             donateButton2?.SetState();
-            donateButton3?.SetState();
             if (numClicks % 3 == 0 || num >= 7)
                 SQLiteIntf.fSetConfigInt("INTERNAL.NumClicks", numClicks);
         }
@@ -404,7 +396,7 @@ namespace KeizerForClubs
             numRoundSelect.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
             lblRoundsGameRepeat.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "NumRundeWdh");
             lblOutputTo.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "OutputTo");
-            btDonate1.Text = btDonate2.Text = btDonate3.Text = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Donate");
+            btDonate1.Text = btDonate2.Text = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Donate");
         }
 
         private void fLoadPlayerlist()
@@ -822,7 +814,6 @@ namespace KeizerForClubs
             this.lblBonusExcused = new Label();
             this.btDonate1 = new Button();
             this.btDonate2 = new Button();
-            this.btDonate3 = new Button();
             this.tbBonusHindered = new TrackBar();
             this.tbBonusUnexcused = new TrackBar();
             this.tbBonusExcused = new TrackBar();
@@ -875,7 +866,6 @@ namespace KeizerForClubs
             this.tabMainWindow.TabIndex = 0;
             this.tabMainWindow.SelectedIndexChanged += new EventHandler(this.TabMainWindowSelectedIndexChanged);
             this.tabPlayer.Controls.Add(this.grdPlayers);
-            this.tabPlayer.Controls.Add(this.btDonate3);
             this.tabPlayer.Font = new Font("Microsoft Sans Serif", 8.25f, FontStyle.Regular, GraphicsUnit.Point, (byte)0);
             this.tabPlayer.Location = new Point(4, 4);
             this.tabPlayer.Name = "tabPlayer";
@@ -884,10 +874,6 @@ namespace KeizerForClubs
             this.tabPlayer.TabIndex = 0;
             this.tabPlayer.Text = "Player";
             this.tabPlayer.UseVisualStyleBackColor = true;
-            this.btDonate3.Location = new Point(43, 330);
-            this.btDonate3.Size = new Size(149, 23);
-            this.btDonate3.TabIndex = 30;
-            this.btDonate3.Click += new EventHandler(this.BtDonateClick);
             this.grdPlayers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.grdPlayers.Columns.AddRange((DataGridViewColumn)this.colPlayerID, (DataGridViewColumn)this.colPlayerName, (DataGridViewColumn)this.colRating, (DataGridViewColumn)this.colPlayerState);
             this.grdPlayers.Dock = DockStyle.Fill;
