@@ -13,32 +13,74 @@ namespace KeizerForClubs
 {
     partial class frmAboutBox : Form
     {
-        public frmAboutBox()
+        public frmAboutBox(bool isDonate = false)
         {
             InitializeComponent();
             this.Text = labelProductName.Text = $"KeizerForClubs v{AssemblyVersion}";
             labelCopyright.Text = GetCopyright();
+            linkLabel1.Text = TrimTextForLinkLabel(GetRawText(isDonate));
 
-            linkLabel1.Text = @"Originally written by T. Schlapp. He's got a whole website dedicated to the Keizer system, 
-including a nice example tournament. Improved and put to Github by me. Contact me:
-Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports.";
-            AddLinkLabel(linkLabel1, "example tournament", "http://keizer.schlapp.name/index.php?id=beispielturnier");
-            AddLinkLabel(linkLabel1, "Github", "https://github.com/Dumuzy/KeizerForClubs");
-            AddLinkLabel(linkLabel1, "Dumuzy@Github", "https://github.com/Dumuzy");
-            AddLinkLabel(linkLabel1, "Alakaluf@Lichess", "https://lichess.org/@/Alakaluf");
+            if (!isDonate)
+            {
+                AddLink2Label(linkLabel1, "example tournament", "http://keizer.schlapp.name/index.php?id=beispielturnier");
+                AddLink2Label(linkLabel1, "Github", "https://github.com/Dumuzy/KeizerForClubs");
+                AddLink2Label(linkLabel1, "Dumuzy@Github", "https://github.com/Dumuzy");
+                AddLink2Label(linkLabel1, "Alakaluf@Lichess", "https://lichess.org/@/Alakaluf");
+            }
 
-            linkLabel2.Text = @"If you like this software... I would be delighted if you'd buy me a coffee! :-)
-I am   keizer@atlantis44.de   at Paypal.";
-            AddLinkLabel(linkLabel2, "Paypal", "https://www.paypal.com");
+            linkLabel2.Text = TrimTextForLinkLabel(@"If you like this software and want to support its maintainenance ... 
+I would be delighted if you'd buy me a coffee! :-)
+I am   keizer@atlantis44.de   at Paypal.");
+
+            AddLink2Label(isDonate ? linkLabel1 : linkLabel2, "Paypal", "https://www.paypal.com");
+            if (isDonate)
+            {
+                AddLink2Label(linkLabel1, "Alakaluf at Lichess", "https://lichess.org/@/Alakaluf");
+                linkLabel2.Visible = false;
+                labelCopyright.Visible = false;
+                labelProductName.Font = linkLabel1.Font = new System.Drawing.Font("Segoe UI", 14F,
+                    System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, (byte)(0));
+                tableLayoutPanel.RowStyles[0] = new RowStyle(SizeType.Absolute, 20);
+                tableLayoutPanel.RowStyles[1] = new RowStyle(SizeType.Percent, 60);
+                tableLayoutPanel.RowStyles[2] = new RowStyle(SizeType.Absolute, 0);
+            }
         }
 
-        void AddLinkLabel(LinkLabel ll, string linkText, string link, int delta = 0)
+        string GetRawText(bool isDonate)
         {
-            // In the LinkLabel it seems \r\n is counted as one char. 
-            var lt = ll.Text.Replace("\r", ""); 
-            var idx = lt.IndexOf(linkText);
+            string t;
+            if (!isDonate)
+                t = @"Originally written by T. Schlapp. He's got a whole website dedicated to the Keizer system, 
+including a nice example tournament. Improved and put to Github by me. Contact me:
+Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports.";
+            else
+                t = @"
+
+If you like this software and want to support its maintainenance ... I would be delighted if you'd buy me a coffee! :-)
+I am   keizer@atlantis44.de   at Paypal.
+
+Also, I'm giving chess lessons for players with a Lichess rapid rating below 1750. 
+Only 5 Eu per hour in deutsch or english. Contact Alakaluf at Lichess.";
+            return t;
+        }
+
+        void AddLink2Label(LinkLabel ll, string linkText, string link, int delta = 0)
+        {
+            var idx = ll.Text.IndexOf(linkText);
             if (idx != -1)
                 ll.Links.Add(idx - delta, linkText.Length, link);
+        }
+
+        string TrimTextForLinkLabel(string text)
+        {
+            // Replace single linebreaks by space, but not double line breaks. 
+            // A double line breaks represents the end of a paragraph, this shall be kept.
+            // A single line break shall be removed, so that the label's word wrap function does all 
+            // the line breaking. 
+            var t = Regex.Replace(text, @"(?<!\r\n) *\r\n\b(?!\r\n)", " ");
+            // Replace \r\ by \n for that counting of characters in AddLink2Label works. 
+            t = t.Replace("\r\n", "\n");
+            return t;
         }
 
         string GetCopyright()

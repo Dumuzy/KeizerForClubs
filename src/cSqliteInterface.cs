@@ -134,31 +134,38 @@ namespace KeizerForClubs
             return true;
         }
 
-        public float fSetConfigText(string key, string text)
+        public int fSetConfigText(string key, string text)
         {
             sqlCommand.CommandText = " UPDATE config_db.ConfigTab  SET CfgText= @pCfgTxt  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgTxt", text);
             sqlCommand.Prepare();
-            return (float)sqlCommand.ExecuteNonQuery();
+            return sqlCommand.ExecuteNonQuery();
         }
 
-        public float fSetConfigValue(string key, float wert)
+        public int fSetConfigFloat(string key, float wert)
         {
             sqlCommand.CommandText = " UPDATE config_db.ConfigTab  SET CfgValue= @pCfgValue  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgValue", wert);
             sqlCommand.Prepare();
-            return (float)sqlCommand.ExecuteNonQuery();
+            return sqlCommand.ExecuteNonQuery();
         }
 
-        public float fSetConfigInt(string key, int wert)
+        public int fSetConfigInt(string key, int wert)
         {
             sqlCommand.CommandText = " UPDATE config_db.ConfigTab  SET CfgValue= @pCfgValue  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgValue", wert);
             sqlCommand.Prepare();
-            return (float)sqlCommand.ExecuteNonQuery();
+            var res = sqlCommand.ExecuteNonQuery();
+            if (res == 0)
+            {
+                sqlCommand.CommandText = " INSERT INTO config_db.ConfigTab (CfgKey, CfgValue) VALUES (@pKey, @pCfgValue)";
+                sqlCommand.Prepare();
+                res = sqlCommand.ExecuteNonQuery();
+            }
+            return res;
         }
 
         public float fSetConfigBool(string key, bool wert) => fSetConfigInt(key, wert ? 1 : 0);
@@ -343,11 +350,11 @@ namespace KeizerForClubs
             return true;
         }
 
-         // Prüft, ob die Paarung IDW-IDS in den Runden 
-         //  seit Minrunde schon vorkam.
-         //  Umgekehrte Farben werden mitgeprüft.
-         // 
-         //  RC=TRUE: Paarung vorhanden.
+        // Prüft, ob die Paarung IDW-IDS in den Runden 
+        //  seit Minrunde schon vorkam.
+        //  Umgekehrte Farben werden mitgeprüft.
+        // 
+        //  RC=TRUE: Paarung vorhanden.
         public bool fGetPairing_CheckVorhanden(int minrunde, int idw, int ids)
         {
             bool pairingCheckVorhanden = false;
@@ -451,8 +458,8 @@ namespace KeizerForClubs
             return Convert.ToSingle(sqlCommand.ExecuteScalar());
         }
 
-         // Spielerliste abfragen. 
- 		 // Auch Tabellenstand möglich über SortOrder   
+        // Spielerliste abfragen. 
+        // Auch Tabellenstand möglich über SortOrder   
         public int fGetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder)
         {
             string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
@@ -499,6 +506,13 @@ namespace KeizerForClubs
         {
             string sWhere = " WHERE state NOT IN (9) ";
             return fGetPlayerList(ref pList, sWhere, sOrder);
+        }
+
+        public int fGetPlayerCount()
+        {
+            sqlCommand.CommandText = @" SELECT Count(1) FROM Player p ";
+            int playerCount = Convert.ToInt32(sqlCommand.ExecuteScalar());
+            return playerCount;
         }
 
         public int fGetPairingList(

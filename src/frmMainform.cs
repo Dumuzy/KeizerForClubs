@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
+using System.Data.SqlTypes;
 using System.Diagnostics;
+using PuzzleKnocker;
 
 namespace KeizerForClubs
 {
@@ -15,7 +17,7 @@ namespace KeizerForClubs
         private cSqliteInterface.stPairing[] pPairingList = new cSqliteInterface.stPairing[50];
         private IContainer components;
         private ToolStripMenuItem mnuHelpDocumentation;
-        private ToolStripMenuItem mnuHelpFaq,  mnuHelp, mnuHelpAbout;
+        private ToolStripMenuItem mnuHelpFaq, mnuHelp, mnuHelpAbout;
         private Label lblBonus1Value;
         private Label lblBonus2Value;
         private Label lblBonus3Value;
@@ -70,6 +72,9 @@ namespace KeizerForClubs
         private DataGridView grdPlayers;
         private TabPage tabPlayer;
         private TabControl tabMainWindow;
+        private Button btDonate1, btDonate2, btDonate3;
+        private DonateButton donateButton1, donateButton2, donateButton3;
+        private int numClicks;
         private readonly string[] Args;
 
         public frmMainform(string[] args)
@@ -77,6 +82,10 @@ namespace KeizerForClubs
             Args = args;
             CopyCfgDocsExport();
             InitializeComponent();
+            donateButton1 = new DonateButton(btDonate1, "", () => numClicks, 50, () => true, 20);
+            donateButton2 = new DonateButton(btDonate2, "", () => numClicks, 70, () => true, 20);
+            donateButton3 = new DonateButton(btDonate3, "", () => numClicks, 60, () => true, 20);
+            IncNumClicks();
         }
 
         private void OpenStartTournamentToolStripMenuItemClick(object sender, EventArgs e)
@@ -117,6 +126,7 @@ namespace KeizerForClubs
             chkXml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Xml");
             chkTxt.Checked = SQLiteIntf.fGetConfigBool("OPTION.Txt");
             chkCsv.Checked = SQLiteIntf.fGetConfigBool("OPTION.Csv");
+            numClicks = SQLiteIntf.fGetConfigInt("INTERNAL.NumClicks");
             numRoundSelect.Value = (Decimal)SQLiteIntf.fGetMaxRound();
             // Der Name des db-Files ist einem ini-File gemerkt, alle anderen Settings in 
             // der Config-Datenbank. Weil die Config-Db nur schwer geöffnet werden kann ohne die 
@@ -141,7 +151,7 @@ namespace KeizerForClubs
             frmLangSelect frmLangSelect = new frmLangSelect(SQLiteIntf.cLangCode);
             int num1 = (int)frmLangSelect.ShowDialog();
             SQLiteIntf.cLangCode = !frmLangSelect.radEnglisch.Checked ? (!frmLangSelect.radDeutsch.Checked ? "NL" : "DE") : "EN";
-            double num2 = (double)SQLiteIntf.fSetConfigText("LANGCODE", SQLiteIntf.cLangCode);
+            SQLiteIntf.fSetConfigText("LANGCODE", SQLiteIntf.cLangCode);
         }
 
         void fShowAboutBox()
@@ -150,10 +160,21 @@ namespace KeizerForClubs
             f.ShowDialog();
         }
 
+        void IncNumClicks(int num = 1)
+        {
+            numClicks += num;
+            donateButton1?.SetState();
+            donateButton2?.SetState();
+            donateButton3?.SetState();
+            if (numClicks % 3 == 0 || num >= 7)
+                SQLiteIntf.fSetConfigInt("INTERNAL.NumClicks", numClicks);
+        }
+
         private void MnuProgQuitClick(object sender, EventArgs e) => this.Close();
 
         private void TabMainWindowSelectedIndexChanged(object sender, EventArgs e)
         {
+            IncNumClicks();
             TabPage selectedTab = this.tabMainWindow.SelectedTab;
             TabPage tabPlayer = this.tabPlayer;
             this.mnuPaarungen.Enabled = this.tabMainWindow.SelectedTab == this.tabPairings;
@@ -170,6 +191,7 @@ namespace KeizerForClubs
 
         void OpenWithDefaultAppByLanguage(string pathWithPlaceholder)
         {
+            IncNumClicks();
             var lngs = new string[] { SQLiteIntf.cLangCode, "en", "de" };
             foreach (var lng in lngs)
             {
@@ -198,24 +220,27 @@ namespace KeizerForClubs
 
         void CalcRankingToolStripMenuItemClick(object sender, EventArgs e) => fRankingCalculate();
 
-        private void MnuPairingNextRoundClick(object sender, EventArgs e)
+        void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
+            IncNumClicks();
             if (SQLiteIntf.fGetPairings_NoResult() == 0)
                 fExecutePairing();
             else
                 MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
         }
 
-        private void MnuPairingManualClick(object sender, EventArgs e)
+        void MnuPairingManualClick(object sender, EventArgs e)
         {
+            IncNumClicks();
             if (SQLiteIntf.fGetPairings_NoResult() == 0)
                 fExecutePairingManual();
             else
                 MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
         }
 
-        private void MnuPairingDropLastClick(object sender, EventArgs e)
+        void MnuPairingDropLastClick(object sender, EventArgs e)
         {
+            IncNumClicks();
             int maxRound = SQLiteIntf.fGetMaxRound();
             if (this.numRoundSelect.Value != (Decimal)maxRound)
             {
@@ -243,11 +268,14 @@ namespace KeizerForClubs
 
         private void ChkPairingOnlyPlayedCheckedChanged(object sender, EventArgs e)
         {
+            IncNumClicks();
             this.fLoadPairingList();
             SQLiteIntf.fSetConfigBool("OPTION.ShowOnlyPlayed", chkPairingOnlyPlayed.Checked);
         }
+
         private void FrmMainformFormClosing(object sender, FormClosingEventArgs e)
         {
+            IncNumClicks();
             SaveSettings();
             e.Cancel = false;
         }
@@ -269,13 +297,18 @@ namespace KeizerForClubs
             }
         }
 
-        private void MnuListenPairingClick(object sender, EventArgs e) => new cReportingUnit(this.sTurniername).fReport_Paarungen((int)Convert.ToInt16(this.numRoundSelect.Value), this.SQLiteIntf);
+        private void MnuListenPairingClick(object sender, EventArgs e)
+        {
+            IncNumClicks(SQLiteIntf.fGetPlayerCount() / 2);
+            new cReportingUnit(sTurniername).fReport_Paarungen(Convert.ToInt16(this.numRoundSelect.Value), SQLiteIntf);
+        }
 
         private void MnuListenStandingClick(object sender, EventArgs e)
         {
             SQLiteIntf.BeginnTransaktion();
             this.fRankingCalculate();
             SQLiteIntf.EndeTransaktion();
+            IncNumClicks(SQLiteIntf.fGetPlayerCount());
             new cReportingUnit(this.sTurniername).fReport_Tabellenstand(this.SQLiteIntf);
         }
 
@@ -288,6 +321,8 @@ namespace KeizerForClubs
             this.lblBonus3Value.Text = this.tbBonusUnexcused.Value.ToString();
             this.lblBonus4Value.Text = this.tbBonusRetired.Value.ToString();
         }
+
+        private void BtDonateClick(object sender, EventArgs e) => new frmAboutBox(true).ShowDialog();
 
         private void TabSettingsLeave(object sender, EventArgs e) => SaveSettings();
 
@@ -369,6 +404,7 @@ namespace KeizerForClubs
             numRoundSelect.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
             lblRoundsGameRepeat.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "NumRundeWdh");
             lblOutputTo.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "OutputTo");
+            btDonate1.Text = btDonate2.Text = btDonate3.Text = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Donate");
         }
 
         private void fLoadPlayerlist()
@@ -698,7 +734,7 @@ namespace KeizerForClubs
                     {
                         var dirsInDir = Directory.EnumerateDirectories(baseDir).Select(d => new DirectoryInfo(d).Name).ToList();
                         ok = cfgDocsExport.Intersect(dirsInDir).Count() == cfgDocsExport.Count();
-                    } 
+                    }
                     if (!ok)
                         baseDir = Path.Join(baseDir, "..");
                 }
@@ -784,6 +820,9 @@ namespace KeizerForClubs
             this.lblBonusClubgame = new Label();
             this.lblBonusUnexcused = new Label();
             this.lblBonusExcused = new Label();
+            this.btDonate1 = new Button();
+            this.btDonate2 = new Button();
+            this.btDonate3 = new Button();
             this.tbBonusHindered = new TrackBar();
             this.tbBonusUnexcused = new TrackBar();
             this.tbBonusExcused = new TrackBar();
@@ -835,7 +874,8 @@ namespace KeizerForClubs
             this.tabMainWindow.Size = new Size(704, 401);
             this.tabMainWindow.TabIndex = 0;
             this.tabMainWindow.SelectedIndexChanged += new EventHandler(this.TabMainWindowSelectedIndexChanged);
-            this.tabPlayer.Controls.Add((Control)this.grdPlayers);
+            this.tabPlayer.Controls.Add(this.grdPlayers);
+            this.tabPlayer.Controls.Add(this.btDonate3);
             this.tabPlayer.Font = new Font("Microsoft Sans Serif", 8.25f, FontStyle.Regular, GraphicsUnit.Point, (byte)0);
             this.tabPlayer.Location = new Point(4, 4);
             this.tabPlayer.Name = "tabPlayer";
@@ -844,6 +884,10 @@ namespace KeizerForClubs
             this.tabPlayer.TabIndex = 0;
             this.tabPlayer.Text = "Player";
             this.tabPlayer.UseVisualStyleBackColor = true;
+            this.btDonate3.Location = new Point(43, 330);
+            this.btDonate3.Size = new Size(149, 23);
+            this.btDonate3.TabIndex = 30;
+            this.btDonate3.Click += new EventHandler(this.BtDonateClick);
             this.grdPlayers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.grdPlayers.Columns.AddRange((DataGridViewColumn)this.colPlayerID, (DataGridViewColumn)this.colPlayerName, (DataGridViewColumn)this.colRating, (DataGridViewColumn)this.colPlayerState);
             this.grdPlayers.Dock = DockStyle.Fill;
@@ -865,8 +909,8 @@ namespace KeizerForClubs
             this.colPlayerState.HeaderText = "State";
             this.colPlayerState.Name = "colPlayerState";
             this.colPlayerState.Width = 200;
-            this.tabPairings.Controls.Add((Control)this.pnlPairingPanel);
-            this.tabPairings.Controls.Add((Control)this.grdPairings);
+            this.tabPairings.Controls.Add(this.pnlPairingPanel);
+            this.tabPairings.Controls.Add(this.grdPairings);
             this.tabPairings.Location = new Point(4, 4);
             this.tabPairings.Name = "tabPairings";
             this.tabPairings.Padding = new Padding(3);
@@ -874,9 +918,15 @@ namespace KeizerForClubs
             this.tabPairings.TabIndex = 1;
             this.tabPairings.Text = "Pairings";
             this.tabPairings.UseVisualStyleBackColor = true;
-            this.pnlPairingPanel.Controls.Add((Control)this.chkPairingOnlyPlayed);
-            this.pnlPairingPanel.Controls.Add((Control)this.numRoundSelect);
-            this.pnlPairingPanel.Controls.Add((Control)this.lblRunde);
+            this.btDonate2.Location = new Point(18, 10);
+            this.btDonate2.Font = new Font("Microsoft Sans Serif", 12f, FontStyle.Bold, GraphicsUnit.Point, (byte)0);
+            this.btDonate2.Size = new Size(108, 30);
+            this.btDonate2.TabIndex = 30;
+            this.btDonate2.Click += new EventHandler(this.BtDonateClick);
+            this.pnlPairingPanel.Controls.Add(this.chkPairingOnlyPlayed);
+            this.pnlPairingPanel.Controls.Add(this.numRoundSelect);
+            this.pnlPairingPanel.Controls.Add(this.lblRunde);
+            this.pnlPairingPanel.Controls.Add(this.btDonate2);
             this.pnlPairingPanel.Dock = DockStyle.Top;
             this.pnlPairingPanel.Location = new Point(3, 3);
             this.pnlPairingPanel.Name = "pnlPairingPanel";
@@ -905,9 +955,9 @@ namespace KeizerForClubs
             this.numRoundSelect.TabIndex = 1;
             this.numRoundSelect.ValueChanged += new EventHandler(this.NumRoundSelectValueChanged);
             this.lblRunde.Font = new Font("Microsoft Sans Serif", 12f, FontStyle.Bold, GraphicsUnit.Point, (byte)0);
-            this.lblRunde.Location = new Point(109, 17);
+            this.lblRunde.Location = new Point(129, 17);
             this.lblRunde.Name = "lblRunde";
-            this.lblRunde.Size = new Size(113, 23);
+            this.lblRunde.Size = new Size(93, 23);
             this.lblRunde.TabIndex = 0;
             this.lblRunde.Text = "Round";
             this.lblRunde.TextAlign = ContentAlignment.MiddleRight;
@@ -964,6 +1014,7 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add((Control)this.lblBonusClubgame);
             this.tabSettings.Controls.Add((Control)this.lblBonusUnexcused);
             this.tabSettings.Controls.Add((Control)this.lblBonusExcused);
+            this.tabSettings.Controls.Add((Control)this.btDonate1);
             this.tabSettings.Controls.Add((Control)this.tbBonusHindered);
             this.tabSettings.Controls.Add((Control)this.tbBonusUnexcused);
             this.tabSettings.Controls.Add((Control)this.tbBonusExcused);
@@ -1064,7 +1115,7 @@ namespace KeizerForClubs
             this.lblOutputTo.Name = "lblOutputTo";
             this.lblOutputTo.Size = new Size(100, 23);
             this.lblOutputTo.Text = "# Rounds before paired again";
-            this.lblOutputTo.TextAlign = ContentAlignment.MiddleLeft; 
+            this.lblOutputTo.TextAlign = ContentAlignment.MiddleLeft;
 
             this.lblBonusRetired.Location = new Point(44, 181);
             this.lblBonusRetired.Name = "lblBonusRetired";
@@ -1096,6 +1147,11 @@ namespace KeizerForClubs
             this.lblBonusExcused.Size = new Size(149, 23);
             this.lblBonusExcused.TabIndex = 3;
             this.lblBonusExcused.Text = "Bonus: missing excused";
+            this.btDonate1.Location = new Point(43, 330);
+            this.btDonate1.Name = "lblBonusExcused";
+            this.btDonate1.Size = new Size(149, 23);
+            this.btDonate1.TabIndex = 30;
+            this.btDonate1.Click += new EventHandler(this.BtDonateClick);
             this.tbBonusHindered.LargeChange = 20;
             this.tbBonusHindered.Location = new Point(245, 30);
             this.tbBonusHindered.Maximum = 100;
