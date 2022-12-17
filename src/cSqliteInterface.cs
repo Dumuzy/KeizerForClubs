@@ -240,8 +240,104 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
             return true;
         }
+
+        // Partien eines Spieler abfragen(für Kreuztabelle)
+        public bool fGetPlayerGames(int ID, ref string[] sResults)
+        {
+            sqlCommand.CommandText = " Select pr.Rnd, pr.PID_W, pr.PID_B, pr.Result,  (Select Player.Rank from Player   where PID IN (pr.PID_W, pr.PID_B) and PID<>:pNr) as Gegnerrang  from Pairing pr  where (PID_W=:pID or PID_B=:pID)  order by rnd ";
+            sqlCommand.Parameters.AddWithValue("pID", (object)ID);
+            sqlCommand.Prepare();
+            using (SQLiteDataReader reader = sqlCommand.ExecuteReader())
+            {
+                if (reader.HasRows)
+                {
+                    int index = 0;
+                    while (reader.Read())
+                    {
+                        if (index < sResults.Length)
+                        {
+                            string str = (reader.IsDBNull(0) ? "" : reader.GetString(0)) + (reader.IsDBNull(0) ? "" : reader.GetString(1)) + (reader.IsDBNull(0) ? "" : reader.GetString(2)) + (reader.IsDBNull(0) ? "" : reader.GetString(3)) + (reader.IsDBNull(0) ? "" : reader.GetString(4));
+                            sResults[index] = str;
+                            ++index;
+                        }
+                        else
+                            break;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Farbverteilung eines Spieler abfragen:
+        //  rc >0: rc mehr Weiß- als Schwarzpartien 
+        //  rc <0: rc mehr Schwarz- als Weißpartien 
+        public int fGetPlayerFarbzaehlung(int ID)
+        {
+            int playerFarbzaehlung = 0;
+            string str = ID.ToString();
+            string sWhere = " where ((PID_W=" + str + " and PID_B>=0) or PID_B=" + str + ") ";
+            cSqliteInterface.stPairing[] pList = new cSqliteInterface.stPairing[50];
+            int cnt = fGetPairingList(ref pList, sWhere, "");
+            for (int index = 0; index < cnt; ++index)
+            {
+                if (pList[index].id_w == ID)
+                    ++playerFarbzaehlung;
+                if (pList[index].id_b == ID)
+                    --playerFarbzaehlung;
+            }
+            return playerFarbzaehlung;
+        }
+
+        public string fGetPlayerName(int ID)
+        {
+            if (ID < 0)
+                return "NN";
+            sqlCommand.CommandText = " Select name from player  where ID=:pID ";
+            sqlCommand.Parameters.AddWithValue("pID", (object)ID);
+            return sqlCommand.ExecuteScalar().ToString();
+        }
+
+        public int fGetPlayerID(string sName)
+        {
+            sqlCommand.CommandText = " Select ID from player  where name=:pName ";
+            sqlCommand.Parameters.AddWithValue("pName", (object)sName);
+            return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
+        }
+
+        public int fCntPlayerNames(string sName)
+        {
+            sqlCommand.CommandText = " Select Count(*) from player  where name=:pName ";
+            sqlCommand.Parameters.AddWithValue("pName", (object)sName);
+            return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
+        }
+
+        // Keizer-PunkteSumme eines Spielers über die ID holen.
+        public float fGetPlayer_PunktSumme(int ID)
+        {
+            sqlCommand.CommandText = @" select  Keizer_StartPts +   
+                (Select ifnull(Sum( Pts_W),0.0) from Pairing where PID_W = p1.ID) +    
+                (Select ifnull(Sum( Pts_B),0.0) from Pairing where PID_B = p1.ID)  as summe    
+                from player p1  where ID=:pID ";
+            sqlCommand.Parameters.AddWithValue("pID", (object)ID);
+            sqlCommand.Prepare();
+            return Convert.ToSingle(Convert.ToDouble(sqlCommand.ExecuteScalar()));
+        }
+
+        // Partiepunkte (Sieg=1, remis=1/2) liefern  
+        public float fGetPlayer_PartiePunkte(int ID)
+        {
+            sqlCommand.CommandText = @" select  (Select Count(*) from Pairing where PID_W= p1.ID and result=1) +
+                (Select Count(*) from Pairing where PID_B= p1.ID and result=3) +
+                (Select Count(*) from Pairing where (PID_W= p1.ID OR PID_B= p1.ID) 
+                    and result=2)/2.0  from player p1  where ID=:pID ";
+            sqlCommand.Parameters.AddWithValue("pID", (object)ID);
+            sqlCommand.Prepare();
+            return Convert.ToSingle(sqlCommand.ExecuteScalar());
+        }
+
         #endregion Player
 
+        #region Pairing
         // Alle Paarungen einer Runde löschen 
         public bool fDelPairings(int runde)
         {
@@ -362,97 +458,38 @@ namespace KeizerForClubs
             return pairingCheckVorhanden;
         }
 
-        // Partien eines Spieler abfragen(für Kreuztabelle)
-        public bool fGetPlayerGames(int ID, ref string[] sResults)
+        public int fGetPairingList(ref cSqliteInterface.stPairing[] pList, string sWhere, string sSortorder)
         {
-            sqlCommand.CommandText = " Select pr.Rnd, pr.PID_W, pr.PID_B, pr.Result,  (Select Player.Rank from Player   where PID IN (pr.PID_W, pr.PID_B) and PID<>:pNr) as Gegnerrang  from Pairing pr  where (PID_W=:pID or PID_B=:pID)  order by rnd ";
-            sqlCommand.Parameters.AddWithValue("pID", (object)ID);
-            sqlCommand.Prepare();
-            using (SQLiteDataReader reader = sqlCommand.ExecuteReader())
+            int pairingList = 0;
+            sqlCommand.CommandText = " SELECT Rnd, board, pid_w, pid_b, result, pts_w, pts_b  FROM Pairing " + sWhere + sSortorder;
+            using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
             {
-                if (reader.HasRows)
+                if (sqLiteDataReader.HasRows)
                 {
-                    int index = 0;
-                    while (reader.Read())
+                    while (sqLiteDataReader.Read())
                     {
-                        if (index < sResults.Length)
+                        if (pairingList < pList.Length)
                         {
-                            string str = (reader.IsDBNull(0) ? "" : reader.GetString(0)) + (reader.IsDBNull(0) ? "" : reader.GetString(1)) + (reader.IsDBNull(0) ? "" : reader.GetString(2)) + (reader.IsDBNull(0) ? "" : reader.GetString(3)) + (reader.IsDBNull(0) ? "" : reader.GetString(4));
-                            sResults[index] = str;
-                            ++index;
+                            pList[pairingList].round = sqLiteDataReader.IsDBNull(0) ? 0 : (int)sqLiteDataReader.GetInt16(0);
+                            pList[pairingList].board = sqLiteDataReader.IsDBNull(1) ? 0 : (int)sqLiteDataReader.GetInt16(1);
+                            pList[pairingList].id_w = sqLiteDataReader.IsDBNull(2) ? 0 : (int)sqLiteDataReader.GetInt16(2);
+                            pList[pairingList].id_b = sqLiteDataReader.IsDBNull(3) ? 0 : (int)sqLiteDataReader.GetInt16(3);
+                            int num = sqLiteDataReader.IsDBNull(4) ? 0 : sqLiteDataReader.GetInt32(4);
+                            pList[pairingList].result = (cSqliteInterface.eResults)num;
+                            pList[pairingList].pts_w = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
+                            pList[pairingList].pts_b = sqLiteDataReader.IsDBNull(6) ? 0.0f : sqLiteDataReader.GetFloat(6);
+                            ++pairingList;
                         }
                         else
                             break;
                     }
                 }
             }
-            return true;
+            return pairingList;
         }
+        #endregion Pairing
 
-        // Farbverteilung eines Spieler abfragen:
-        //  rc >0: rc mehr Weiß- als Schwarzpartien 
-        //  rc <0: rc mehr Schwarz- als Weißpartien 
-        public int fGetPlayerFarbzaehlung(int ID)
-        {
-            int playerFarbzaehlung = 0;
-            string str = ID.ToString();
-            string sWhere = " where ((PID_W=" + str + " and PID_B>=0) or PID_B=" + str + ") ";
-            cSqliteInterface.stPairing[] pList = new cSqliteInterface.stPairing[50];
-            int cnt = fGetPairingList(ref pList, sWhere, "");
-            for (int index = 0; index < cnt; ++index)
-            {
-                if (pList[index].id_w == ID)
-                    ++playerFarbzaehlung;
-                if (pList[index].id_b == ID)
-                    --playerFarbzaehlung;
-            }
-            return playerFarbzaehlung;
-        }
-
-        public string fGetPlayerName(int ID)
-        {
-            if (ID < 0)
-                return "NN";
-            sqlCommand.CommandText = " Select name from player  where ID=:pID ";
-            sqlCommand.Parameters.AddWithValue("pID", (object)ID);
-            return sqlCommand.ExecuteScalar().ToString();
-        }
-
-        public int fGetPlayerID(string sName)
-        {
-            sqlCommand.CommandText = " Select ID from player  where name=:pName ";
-            sqlCommand.Parameters.AddWithValue("pName", (object)sName);
-            return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
-        }
-
-        public int fCntPlayerNames(string sName)
-        {
-            sqlCommand.CommandText = " Select Count(*) from player  where name=:pName ";
-            sqlCommand.Parameters.AddWithValue("pName", (object)sName);
-            return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
-        }
-
-        // Keizer-PunkteSumme eines Spielers über die ID holen.
-        public float fGetPlayer_PunktSumme(int ID)
-        {
-            sqlCommand.CommandText = @" select  Keizer_StartPts +   
-                (Select ifnull(Sum( Pts_W),0.0) from Pairing where PID_W = p1.ID) +    
-                (Select ifnull(Sum( Pts_B),0.0) from Pairing where PID_B = p1.ID)  as summe    
-                from player p1  where ID=:pID ";
-            sqlCommand.Parameters.AddWithValue("pID", (object)ID);
-            sqlCommand.Prepare();
-            return Convert.ToSingle(Convert.ToDouble(sqlCommand.ExecuteScalar()));
-        }
-
-        // Partiepunkte (Sieg=1, remis=1/2) liefern  
-        public float fGetPlayer_PartiePunkte(int ID)
-        {
-            sqlCommand.CommandText = " select  (Select Count(*) from Pairing where PID_W= p1.ID and result=1)+   (Select Count(*) from Pairing where PID_B= p1.ID and result=3)+   (Select Count(*) from Pairing where (PID_W= p1.ID OR PID_B= p1.ID) and result=2)/2.0  from player p1  where ID=:pID ";
-            sqlCommand.Parameters.AddWithValue("pID", (object)ID);
-            sqlCommand.Prepare();
-            return Convert.ToSingle(sqlCommand.ExecuteScalar());
-        }
-
+        #region Playerlist
         // Spielerliste abfragen. 
         // Auch Tabellenstand möglich über SortOrder   
         public int fGetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder)
@@ -509,40 +546,9 @@ namespace KeizerForClubs
             int playerCount = Convert.ToInt32(sqlCommand.ExecuteScalar());
             return playerCount;
         }
+        #endregion Playerlist
 
-        public int fGetPairingList(
-          ref cSqliteInterface.stPairing[] pList,
-          string sWhere,
-          string sSortorder)
-        {
-            int pairingList = 0;
-            sqlCommand.CommandText = " SELECT Rnd, board, pid_w, pid_b, result, pts_w, pts_b  FROM Pairing " + sWhere + sSortorder;
-            using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
-            {
-                if (sqLiteDataReader.HasRows)
-                {
-                    while (sqLiteDataReader.Read())
-                    {
-                        if (pairingList < pList.Length)
-                        {
-                            pList[pairingList].round = sqLiteDataReader.IsDBNull(0) ? 0 : (int)sqLiteDataReader.GetInt16(0);
-                            pList[pairingList].board = sqLiteDataReader.IsDBNull(1) ? 0 : (int)sqLiteDataReader.GetInt16(1);
-                            pList[pairingList].id_w = sqLiteDataReader.IsDBNull(2) ? 0 : (int)sqLiteDataReader.GetInt16(2);
-                            pList[pairingList].id_b = sqLiteDataReader.IsDBNull(3) ? 0 : (int)sqLiteDataReader.GetInt16(3);
-                            int num = sqLiteDataReader.IsDBNull(4) ? 0 : sqLiteDataReader.GetInt32(4);
-                            pList[pairingList].result = (cSqliteInterface.eResults)num;
-                            pList[pairingList].pts_w = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
-                            pList[pairingList].pts_b = sqLiteDataReader.IsDBNull(6) ? 0.0f : sqLiteDataReader.GetFloat(6);
-                            ++pairingList;
-                        }
-                        else
-                            break;
-                    }
-                }
-            }
-            return pairingList;
-        }
-
+        #region Localization
         public string fLocl_GetText(string topic, string key)
         {
             string s = key;
@@ -624,6 +630,7 @@ namespace KeizerForClubs
             }
             return topicTexte;
         }
+        #endregion Localization
 
     }
 }
