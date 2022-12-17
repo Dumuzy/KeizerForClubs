@@ -122,6 +122,9 @@ namespace KeizerForClubs
         private string GetFileTabellenstandBasename(cSqliteInterface sqlintf) =>
             "export\\" + this.sTurnier + "_" + sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + "-" + sqlintf.fGetMaxRound();
 
+        private string GetFileTabellenstandExBasename(cSqliteInterface sqlintf) =>
+            "export\\" + this.sTurnier + "_" + sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + sqlintf.fGetMaxRound();
+
         public bool fReport_Tabellenstand(cSqliteInterface sqlintf)
         {
             try
@@ -131,7 +134,10 @@ namespace KeizerForClubs
                 if (sqlintf.fGetConfigBool("OPTION.Csv"))
                     fReport_Tabellenstand_Voll_CSV(sqlintf);
                 if (sqlintf.fGetConfigBool("OPTION.Html"))
+                {
                     fReport_Tabellenstand_Html(sqlintf);
+                    fReport_Tabellenstand_Voll_Html(sqlintf);
+                }
                 if (sqlintf.fGetConfigBool("OPTION.Txt"))
                     fReport_Tabellenstand_Txt(sqlintf);
             }
@@ -299,6 +305,96 @@ namespace KeizerForClubs
             swExportDatei.Close();
         }
 
+        public void fReport_Tabellenstand_Voll_Html(cSqliteInterface sqlintf)
+        {
+            int num1 = 1;
+            int maxRound = sqlintf.fGetMaxRound();
+            cSqliteInterface.stPlayer[] pList1 = new cSqliteInterface.stPlayer[100];
+            cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
+            cSqliteInterface.stPlayer[] pList3 = new cSqliteInterface.stPlayer[1];
+            cSqliteInterface.stPairing[] pList4 = new cSqliteInterface.stPairing[1];
+            int nPlayer = sqlintf.fGetPlayerList(ref pList1, "", " ORDER BY Keizer_SumPts desc, Rating desc ");
+
+            string file = GetFileTabellenstandExBasename(sqlintf) + ".html";
+            string strr = sqlintf.fLocl_GetText("GUI_LABEL", "Runde") + " " + sqlintf.fGetMaxRound();
+            Directory.CreateDirectory(Path.GetDirectoryName(file));
+            swExportDatei = new StreamWriter(file);
+            AddHtmlHeader(swExportDatei, true);
+            swExportDatei.WriteLine($"<h1>{this.sTurnier}</h1>");
+            swExportDatei.WriteLine("<h2>");
+            swExportDatei.WriteLine(sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr);
+            swExportDatei.WriteLine("</h2>");
+            swExportDatei.WriteLine("<table>");
+
+            swExportDatei.Write("<tr><td>Platz</td><td>Name</td><td>Rating</td><td>Keizer-P</td><td>Keizer-Sum</td><td>GamePts</td>");
+            for (int i = 0; i < sqlintf.fGetMaxRound(); ++i)
+                swExportDatei.Write($"<td>R {i}</td>");
+            swExportDatei.WriteLine("</tr>");
+            string td2 = "</td><td>";
+            for (int index1 = 0; index1 < nPlayer; ++index1)
+            {
+                string str1="<tr><td>";
+                if (pList1[index1].state != cSqliteInterface.ePlayerState.eRetired)
+                {
+                    str1 += num1.ToString("00") + td2;
+                    ++num1;
+                }
+                else
+                    str1 += "(ret)" + td2;
+                string name = pList1[index1].name;
+                string str2 = str1 + name + td2 + pList1[index1].rating.ToString() + td2 +
+                    pList1[index1].Keizer_StartPts.ToString() + td2 +
+                    pList1[index1].Keizer_SumPts.ToString() + td2 +
+                    sqlintf.fGetPlayer_PartiePunkte(pList1[index1].id).ToString() + td2;
+                for (int index2 = 1; index2 <= maxRound; ++index2)
+                {
+                    string sWhere = " WHERE (PID_W=" + pList1[index1].id.ToString() + 
+                        " OR    PID_B=" + pList1[index1].id.ToString() + ")  AND rnd=" + index2.ToString();
+                    string str3;
+                    if (sqlintf.fGetPairingList(ref pList4, sWhere, "  ") > 0)
+                    {
+                        sqlintf.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList4[0].id_w, " ");
+                        sqlintf.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList4[0].id_b, " ");
+                        string str4 = sqlintf.fLocl_GetGameResultShort(pList4[0].result) + " ";
+                        if (pList4[0].result > cSqliteInterface.eResults.eWin_Black)
+                        {
+                            str3 = str4 + " - - p=" + pList4[0].pts_w.ToString();
+                        }
+                        else
+                        {
+                            if (pList1[index1].id == pList4[0].id_w)
+                            {
+                                string str5 = str4 + "w ";
+                                str3 = (pList3[0].state != cSqliteInterface.ePlayerState.eRetired ?
+                                    str5 + " " + pList3[0].name + " " :
+                                    str5 + " (ret) ") + "p=" + pList4[0].pts_w.ToString() + " ";
+                            }
+                            else
+                            {
+                                string str6 = str4 + "b ";
+                                str3 = (pList2[0].state != cSqliteInterface.ePlayerState.eRetired ?
+                                    str6 + " " + pList2[0].name + " " : str6 + " (ret) ") +
+                                    "p=" + pList4[0].pts_b.ToString() + " ";
+                            }
+                        }
+                    }
+                    else
+                        str3 = "_";
+                    str2 += str3 + td2;
+                }
+                str2 = str2.Substring(0, str2.Length - 4);
+                str2 += "</tr>";
+                if (swExportDump != null)
+                    swExportDump.WriteLine(str2);
+                swExportDatei.WriteLine(str2);
+            }
+
+            swExportDatei.WriteLine("</table> ");
+            swExportDatei.Close();
+        }
+
+
+
         public bool fReport_Teilnehmer(cSqliteInterface sqlintf)
         {
             try
@@ -408,10 +504,11 @@ namespace KeizerForClubs
         string DateHeader => DateTime.Now.ToShortDateString();
         private string KfcFooterHtml => $"<tr><td colspan=\"2\">{KfcFooter}</td> <td colspan=\"2\">{DateHeader}</td></tr>";
 
-        private void AddHtmlHeader(StreamWriter sw)
+        private void AddHtmlHeader(StreamWriter sw, bool isEx = false)
         {
-            sw.WriteLine(@"<!DOCTYPE html><html><head>
-                <link rel=""stylesheet"" href=""keizer.css""></head><body><div id=""wrapper"">");
+            var ex = isEx ? "ex" : "";
+            sw.WriteLine($@"<!DOCTYPE html><html><head>
+                <link rel=""stylesheet"" href=""keizer.css""></head><body><div id=""{ex}wrapper"">");
         }
 
         private void AddHtmlFooter(StreamWriter sw)

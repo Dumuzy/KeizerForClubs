@@ -96,7 +96,6 @@ namespace KeizerForClubs
                 SQLiteMyTrans.Rollback();
         }
 
-
         public bool fOpenTournament(string sDatei)
         {
             SQLiteMyDB.Close();
@@ -134,6 +133,7 @@ namespace KeizerForClubs
             return true;
         }
 
+        #region Config
         public int fSetConfigText(string key, string text)
         {
             sqlCommand.CommandText = " UPDATE config_db.ConfigTab  SET CfgText= @pCfgTxt  WHERE CfgKey= @pKey ";
@@ -195,18 +195,9 @@ namespace KeizerForClubs
             sqlCommand.Prepare();
             return Convert.ToSingle(sqlCommand.ExecuteScalar());
         }
+        #endregion Config
 
-        public bool fUpdPaarungPkt_W(int runde, int id_w, float pkte)
-        {
-            sqlCommand.CommandText = " UPDATE Pairing Set Pts_W = @pPkt  WHERE Rnd= @pRunde and PID_W=@pNr_W ";
-            sqlCommand.Parameters.AddWithValue("pPkt", pkte);
-            sqlCommand.Parameters.AddWithValue("pRunde", runde);
-            sqlCommand.Parameters.AddWithValue("pNr_W", id_w);
-            sqlCommand.Prepare();
-            sqlCommand.ExecuteNonQuery();
-            return true;
-        }
-
+        #region Player
         public bool fInsPlayerNew(string name, int rtg)
         {
             sqlCommand.CommandText = " INSERT INTO Player (Name,Rating, Rank)  VALUES (@pName, @pRtg, 99) ";
@@ -249,6 +240,7 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
             return true;
         }
+        #endregion Player
 
         // Alle Paarungen einer Runde löschen 
         public bool fDelPairings(int runde)
@@ -443,7 +435,10 @@ namespace KeizerForClubs
         // Keizer-PunkteSumme eines Spielers über die ID holen.
         public float fGetPlayer_PunktSumme(int ID)
         {
-            sqlCommand.CommandText = " select  Keizer_StartPts+   (Select ifnull(Sum( Pts_W),0.0) from Pairing where PID_W= p1.ID)+    (Select ifnull(Sum( Pts_B),0.0) from Pairing where PID_B= p1.ID)  as summe    from player p1  where ID=:pID ";
+            sqlCommand.CommandText = @" select  Keizer_StartPts +   
+                (Select ifnull(Sum( Pts_W),0.0) from Pairing where PID_W = p1.ID) +    
+                (Select ifnull(Sum( Pts_B),0.0) from Pairing where PID_B = p1.ID)  as summe    
+                from player p1  where ID=:pID ";
             sqlCommand.Parameters.AddWithValue("pID", (object)ID);
             sqlCommand.Prepare();
             return Convert.ToSingle(Convert.ToDouble(sqlCommand.ExecuteScalar()));
@@ -593,6 +588,21 @@ namespace KeizerForClubs
         }
 
         public string fLocl_GetGameResultText(cSqliteInterface.eResults result) => fLocl_GetText("GAMERESULT", ((int)result).ToString());
+
+        public string fLocl_GetGameResultShort(cSqliteInterface.eResults result)
+        {
+            var s = fLocl_GetGameResultText(result);
+            if (s.StartsWith("-") || s.StartsWith("+"))
+            {
+                s = s.Substring(3, s.Length - 4);
+                s = s.Substring(0, 4);
+                if (s == "ents" || s == "unen")
+                    s = "fehl";
+                if (s == "Frei")
+                    s = "frei";
+            }
+            return s;
+        }
 
         public int fLocl_GetTopicTexte(string topic, string sWhereAdd, ref string[] texte)
         {
