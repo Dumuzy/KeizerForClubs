@@ -45,14 +45,14 @@ namespace KeizerForClubs
                 var table = fReport_Paarungen_Table(runde, sqlintf);
                 var fileBase = GetPaarungenBasename(runde, sqlintf);
                 if (sqlintf.fGetConfigBool("OPTION.Xml"))
-                    fReport_Paarungen_Xml(runde, sqlintf);
+                    fReport_Table_Xml(table, fileBase, "keizer_pairing", "board", "nr w b res".Split());
                 if (sqlintf.fGetConfigBool("OPTION.Html"))
                 {
-                    var file = fReport_Table_Html(table, sqlintf, fileBase);
+                    var file = fReport_Table_Html(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
                 if (sqlintf.fGetConfigBool("OPTION.Txt"))
-                    fReport_Table_Txt(table, sqlintf, fileBase, new int[] {4, -20, -20, 0});
+                    fReport_Table_Txt(table, fileBase, new int[] { 4, -20, -20, 0 });
             }
             catch (Exception ex)
             {
@@ -60,40 +60,6 @@ namespace KeizerForClubs
                 return false;
             }
             return true;
-        }
-
-        void fReport_Paarungen_Xml(int runde, cSqliteInterface sqlintf)
-        {
-            string text = sqlintf.fLocl_GetText("GUI_LABEL", "Runde");
-            string xmlFile = GetPaarungenBasename(runde, sqlintf) + ".xml";
-            swExport = new StreamWriter(xmlFile);
-            swExport.WriteLine("<?xml version='1.0' encoding='UTF-8'?>");
-            swExport.WriteLine("<?xml-stylesheet type='text/xsl' href='keizer_pairing.xsl' ?>");
-            swExport.WriteLine("<keizer_pairing>");
-            swExport.WriteLine("<export>");
-            swExport.WriteLine("<tournament>");
-            swExport.WriteLine(this.sTurnier);
-            swExport.WriteLine("</tournament>");
-            swExport.WriteLine("<title>");
-            swExport.WriteLine(text + " " + runde.ToString());
-            swExport.WriteLine("</title>");
-            cSqliteInterface.stPairing[] pList = new cSqliteInterface.stPairing[50];
-            int pairingList = sqlintf.fGetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
-            for (int index = 0; index < pairingList; ++index)
-            {
-                swExport.WriteLine("<board>");
-                swExport.WriteLine("<nr>" + (index + 1).ToString() + ".</nr>");
-                swExport.WriteLine("<w>" + sqlintf.fGetPlayerName(pList[index].id_w) + "</w>");
-                swExport.WriteLine("<b>" + sqlintf.fGetPlayerName(pList[index].id_b) + "</b>");
-                swExport.WriteLine("<res>" + sqlintf.fLocl_GetGameResultText(pList[index].result) + "</res>");
-                swExport.WriteLine("</board>");
-            }
-            swExport.WriteLine("<footer>");
-            swExport.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
-            swExport.WriteLine("</footer>");
-            swExport.WriteLine("</export>");
-            swExport.WriteLine("</keizer_pairing>");
-            swExport.Close();
         }
 
         TableW2Headers fReport_Paarungen_Table(int runde, cSqliteInterface sqlintf)
@@ -107,10 +73,10 @@ namespace KeizerForClubs
             for (int index = 0; index < pairingList; ++index)
             {
                 var r = new Li<string>();
-                r.Add( (index + 1).ToString() + ".");
+                r.Add((index + 1).ToString() + ".");
                 r.Add(sqlintf.fGetPlayerName(pList[index].id_w));
                 r.Add(sqlintf.fGetPlayerName(pList[index].id_b));
-                r.Add(sqlintf.fLocl_GetGameResultText(pList[index].result) );
+                r.Add(sqlintf.fLocl_GetGameResultText(pList[index].result));
                 t.AddRow(r);
             }
             return t;
@@ -399,12 +365,12 @@ namespace KeizerForClubs
                 var table = fReport_Teilnehmer_Table(sqlintf);
                 var fileBase = GetTeilnehmerBasename(sqlintf);
                 if (sqlintf.fGetConfigBool("OPTION.Xml"))
-                    fReport_Teilnehmer_Xml(sqlintf);
+                    fReport_Table_Xml(table, fileBase, "keizer_player", "player", "nr name rating state".Split());
                 if (sqlintf.fGetConfigBool("OPTION.Txt"))
-                    fReport_Table_Txt(table, sqlintf, fileBase, new int[] { 4, -25, 5, 25 });
+                    fReport_Table_Txt(table, fileBase, new int[] { 4, -25, 5, 25 });
                 if (sqlintf.fGetConfigBool("OPTION.Html"))
                 {
-                    var file = fReport_Table_Html(table, sqlintf, fileBase);
+                    var file = fReport_Table_Html(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
             }
@@ -414,40 +380,6 @@ namespace KeizerForClubs
                 return false;
             }
             return true;
-        }
-
-        void fReport_Teilnehmer_Xml(cSqliteInterface sqlintf)
-        {
-            string text = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
-            string xmlFile = GetTeilnehmerBasename(sqlintf) + ".xml";
-            swExport = new StreamWriter(xmlFile);
-            swExport.WriteLine("<?xml version='1.0' encoding='UTF-8'?>");
-            swExport.WriteLine("<?xml-stylesheet type='text/xsl' href='keizer_player.xsl' ?>");
-            swExport.WriteLine("<keizer_player>");
-            swExport.WriteLine("<export>");
-            swExport.WriteLine("<tournament>");
-            swExport.WriteLine(this.sTurnier);
-            swExport.WriteLine("</tournament>");
-            swExport.WriteLine("<title>");
-            swExport.WriteLine(text);
-            swExport.WriteLine("</title>");
-            cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = sqlintf.fGetPlayerList(ref pList, "", " ORDER BY ID ");
-            for (int index = 0; index < playerList; ++index)
-            {
-                swExport.WriteLine("<player>");
-                swExport.WriteLine("<nr>" + (index + 1).ToString() + ".</nr>");
-                swExport.WriteLine("<name>" + pList[index].name + "</name>");
-                swExport.WriteLine("<rating>" + pList[index].rating.ToString() + "</rating>");
-                swExport.WriteLine("<state>" + sqlintf.fLocl_GetPlayerStateText(pList[index].state) + "</state>");
-                swExport.WriteLine("</player>");
-            }
-            swExport.WriteLine("<footer>");
-            swExport.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
-            swExport.WriteLine("</footer>");
-            swExport.WriteLine("</export>");
-            swExport.WriteLine("</keizer_player>");
-            swExport.Close();
         }
 
         TableW2Headers fReport_Teilnehmer_Table(cSqliteInterface sqlintf)
@@ -474,7 +406,7 @@ namespace KeizerForClubs
                 sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + sqlintf.fGetMaxRound();
         #endregion Teilnehmer
 
-        string fReport_Table_Txt(TableW2Headers t, cSqliteInterface sqlintf, string fileBase, int[] paddings)
+        string fReport_Table_Txt(TableW2Headers t, string fileBase, int[] paddings)
         {
             string fileName = fileBase + ".txt";
             swExport = new StreamWriter(fileName);
@@ -484,7 +416,7 @@ namespace KeizerForClubs
             for (int i = 0; i < t.Count; ++i)
             {
                 var line = "";
-                for(int j = 0; j < t[i].Count; ++j)
+                for (int j = 0; j < t[i].Count; ++j)
                 {
                     var c = t[i][j];
                     if (paddings[j] >= 0)
@@ -497,12 +429,12 @@ namespace KeizerForClubs
                 swExport.WriteLine(line);
             }
             swExport.WriteLine("");
-            swExport. WriteLine(KfcFooter + "   " +  DateHeader);
+            swExport.WriteLine(KfcFooter + "   " + DateHeader);
             swExport.Close();
             return fileName;
         }
 
-        string fReport_Table_Html(TableW2Headers t, cSqliteInterface sqlintf, string fileBase)
+        string fReport_Table_Html(TableW2Headers t, string fileBase)
         {
             string fileName = fileBase + ".html";
             swExport = new StreamWriter(fileName);
@@ -521,6 +453,33 @@ namespace KeizerForClubs
             swExport.WriteLine(KfcFooterHtml);
             swExport.WriteLine("</table>");
             AddHtmlFooter(swExport);
+            swExport.Close();
+            return fileName;
+        }
+
+        string fReport_Table_Xml(TableW2Headers t, string fileBase, string toplevelName,
+                string rowName, IList<string> tdnames)
+        {
+            var fileName = fileBase + ".xml";
+            swExport = new StreamWriter(fileName);
+            swExport.WriteLine("<?xml version='1.0' encoding='UTF-8'?>");
+            swExport.WriteLine($"<?xml-stylesheet type='text/xsl' href='{toplevelName}.xsl' ?>");
+            swExport.WriteLine($"<{toplevelName}>");
+            swExport.WriteLine("<export>");
+            swExport.WriteLine($"<tournament>{t.Header1}</tournament>");
+            swExport.WriteLine($"<title>{t.Header2}</title>");
+            for (int i = 0; i < t.Count; ++i)
+            {
+                swExport.Write($"<{rowName}>");
+                for (int j = 0; j < t[i].Count; ++j)
+                    swExport.Write($"<{tdnames[j]}>{t[i][j]}</{tdnames[j]}>");
+                swExport.WriteLine($"</{rowName}>");
+            }
+            swExport.WriteLine("<footer>");
+            swExport.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
+            swExport.WriteLine("</footer>");
+            swExport.WriteLine("</export>");
+            swExport.WriteLine($"</{toplevelName}>");
             swExport.Close();
             return fileName;
         }
