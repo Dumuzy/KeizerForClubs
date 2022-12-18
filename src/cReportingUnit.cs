@@ -9,24 +9,9 @@ using static System.Net.WebRequestMethods;
 
 namespace KeizerForClubs
 {
-    interface ISimpleTable
-    {
-        public void AddRow(Li<string> row);
-        public int Count { get; }
-        public Li<string> this[int i] { get; }
-    }
 
-    class TableW2Headers : ISimpleTable
-    {
-        public string Header1, Header2;
-        public void AddRow(Li<string> row) => rows.Add(row);
-        public int Count => rows.Count;
-        public Li<string> this[int i] { get { return rows[i]; } }
 
-        Li<Li<string>> rows = new Li<Li<string>>();
-    }
-
-    public class cReportingUnit
+    public class cReportingUnit : ReportingBase
     {
         string sTurnier = "";
         StreamWriter swExport;
@@ -45,14 +30,14 @@ namespace KeizerForClubs
                 var table = fReportPaarungenTable(runde, sqlintf);
                 var fileBase = GetPaarungenBasename(runde, sqlintf);
                 if (sqlintf.fGetConfigBool("OPTION.Xml"))
-                    fReportTableXml(table, fileBase, "keizer_pairing", "board", "nr w b res".Split());
+                    ExportAsXml(table, fileBase, "keizer_pairing", "board", "nr w b res".Split());
                 if (sqlintf.fGetConfigBool("OPTION.Html"))
                 {
-                    var file = fReportTableHtml(table, fileBase);
+                    var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
                 if (sqlintf.fGetConfigBool("OPTION.Txt"))
-                    fReportTableTxt(table, fileBase, new int[] { 4, -20, -20, 0 });
+                    ExportAsTxt(table, fileBase, new int[] { 4, -20, -20, 0 });
             }
             catch (Exception ex)
             {
@@ -94,17 +79,17 @@ namespace KeizerForClubs
                 var table = fReportTabellenstandTable(sqlintf);
                 var fileBase = GetFileTabellenstandBasename(sqlintf);
                 if (sqlintf.fGetConfigBool("OPTION.Xml"))
-                    fReportTableXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
+                    ExportAsXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
                 if (sqlintf.fGetConfigBool("OPTION.Csv"))
                     fReport_Tabellenstand_Voll_CSV(sqlintf);
                 if (sqlintf.fGetConfigBool("OPTION.Html"))
                 {
                     fReport_Tabellenstand_Voll_Html(sqlintf);
-                    var file = fReportTableHtml(table, fileBase);
+                    var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
                 if (sqlintf.fGetConfigBool("OPTION.Txt"))
-                    fReportTableTxt(table, fileBase, new int[] { 4, -25, 6, 6 });
+                    ExportAsTxt(table, fileBase, new int[] { 4, -25, 6, 6 });
             }
             catch (Exception ex)
             {
@@ -295,12 +280,12 @@ namespace KeizerForClubs
                 var table = fReportTeilnehmerTable(sqlintf);
                 var fileBase = GetTeilnehmerBasename(sqlintf);
                 if (sqlintf.fGetConfigBool("OPTION.Xml"))
-                    fReportTableXml(table, fileBase, "keizer_player", "player", "nr name rating state".Split());
+                    ExportAsXml(table, fileBase, "keizer_player", "player", "nr name rating state".Split());
                 if (sqlintf.fGetConfigBool("OPTION.Txt"))
-                    fReportTableTxt(table, fileBase, new int[] { 4, -25, 5, 25 });
+                    ExportAsTxt(table, fileBase, new int[] { 4, -25, 5, 25 });
                 if (sqlintf.fGetConfigBool("OPTION.Html"))
                 {
-                    var file = fReportTableHtml(table, fileBase);
+                    var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
             }
@@ -336,103 +321,13 @@ namespace KeizerForClubs
                 sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + sqlintf.fGetMaxRound();
         #endregion Teilnehmer
 
-        string fReportTableTxt(TableW2Headers t, string fileBase, int[] paddings)
-        {
-            string fileName = fileBase + ".txt";
-            swExport = new StreamWriter(fileName);
-            swExport.WriteLine(t.Header1);
-            swExport.WriteLine(t.Header2);
-            swExport.WriteLine(" ");
-            for (int i = 0; i < t.Count; ++i)
-            {
-                var line = "";
-                for (int j = 0; j < t[i].Count; ++j)
-                {
-                    var c = t[i][j];
-                    if (paddings[j] >= 0)
-                        line += c.PadLeft(paddings[j]);
-                    else
-                        line += c.PadRight(-paddings[j]);
-                    if (!line.EndsWith(" "))
-                        line += " ";
-                }
-                swExport.WriteLine(line);
-            }
-            swExport.WriteLine("");
-            swExport.WriteLine(KfcFooter + "   " + DateHeader);
-            swExport.Close();
-            return fileName;
-        }
-
-        string fReportTableHtml(TableW2Headers t, string fileBase)
-        {
-            string fileName = fileBase + ".html";
-            swExport = new StreamWriter(fileName);
-            AddHtmlHeader(swExport);
-            swExport.WriteLine($"<h1>{t.Header1}</h1>");
-            swExport.WriteLine($"<h2>{t.Header2}</h2>");
-            swExport.WriteLine("<table>");
-            for (int i = 0; i < t.Count; ++i)
-            {
-                var row = t[i];
-                swExport.Write("<tr>");
-                foreach (var c in row)
-                    swExport.Write("<td>" + c + "</td>");
-                swExport.WriteLine("</tr>");
-            }
-            swExport.WriteLine(KfcFooterHtml);
-            swExport.WriteLine("</table>");
-            AddHtmlFooter(swExport);
-            swExport.Close();
-            return fileName;
-        }
-
-        string fReportTableXml(TableW2Headers t, string fileBase, string toplevelName,
-                string rowName, IList<string> tdnames)
-        {
-            var fileName = fileBase + ".xml";
-            swExport = new StreamWriter(fileName);
-            swExport.WriteLine("<?xml version='1.0' encoding='UTF-8'?>");
-            swExport.WriteLine($"<?xml-stylesheet type='text/xsl' href='{toplevelName}.xsl' ?>");
-            swExport.WriteLine($"<{toplevelName}>");
-            swExport.WriteLine("<export>");
-            swExport.WriteLine($"<tournament>{t.Header1}</tournament>");
-            swExport.WriteLine($"<title>{t.Header2}</title>");
-            for (int i = 0; i < t.Count; ++i)
-            {
-                swExport.Write($"<{rowName}>");
-                for (int j = 0; j < t[i].Count; ++j)
-                    swExport.Write($"<{tdnames[j]}>{t[i][j]}</{tdnames[j]}>");
-                swExport.WriteLine($"</{rowName}>");
-            }
-            swExport.WriteLine("<footer>");
-            swExport.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
-            swExport.WriteLine("</footer>");
-            swExport.WriteLine("</export>");
-            swExport.WriteLine($"</{toplevelName}>");
-            swExport.Close();
-            return fileName;
-        }
-
 
         Version Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         string KfcLongVersion => Version.ToString();
         string KfcShortVersion => $"{Version.Major}.{Version.Minor}";
-        string KfcFooter => "KeizerForClubs v" + KfcShortVersion;
-        string DateHeader => DateTime.Now.ToShortDateString();
-        private string KfcFooterHtml => $"<tr><td colspan=\"2\">{KfcFooter}</td> <td colspan=\"2\">{DateHeader}</td></tr>";
+        protected override string KfcFooter => "KeizerForClubs v" + KfcShortVersion;
+        protected override string KfcFooterHtml => $"<tr><td colspan=\"2\">{KfcFooter}</td> <td colspan=\"2\">{DateHeader}</td></tr>";
 
-        private void AddHtmlHeader(StreamWriter sw, bool isEx = false)
-        {
-            var ex = isEx ? "ex" : "";
-            sw.WriteLine($@"<!DOCTYPE html><html><head>
-                <link rel=""stylesheet"" href=""keizer.css""></head><body><div id=""{ex}wrapper"">");
-        }
-
-        private void AddHtmlFooter(StreamWriter sw)
-        {
-            sw.WriteLine(@"</div></body></html>");
-        }
 
     }
 }
