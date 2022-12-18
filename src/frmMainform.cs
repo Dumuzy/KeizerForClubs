@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Windows.Forms;
 using AwiUtils;
 using PuzzleKnocker;
 
@@ -26,13 +27,12 @@ namespace KeizerForClubs
         private ToolStripMenuItem mnuListenStanding;
         private ToolStripMenuItem mnuListenPairing;
         private NumericUpDown numRoundsGameRepeat;
-        private Label lblRoundsGameRepeat, lblOutputTo;
+        private ComboBox ddlRatioFirst2Last;
+        private Label lblRoundsGameRepeat, lblOutputTo, lblRatioFirst2Last;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
         private CheckBox chkFreilosVerteilen;
         private CheckBox chkHtml, chkXml, chkTxt, chkCsv;
-        private TrackBar tbBonusRetired;
-        private Label lblBonusRetired;
         private ToolStripMenuItem mnuStartLanguage;
         private CheckBox chkPairingOnlyPlayed;
         private ToolStripMenuItem mnuPaarungDropLast;
@@ -50,12 +50,8 @@ namespace KeizerForClubs
         private OpenFileDialog dlgOpenTournament;
         private DataGridViewComboBoxColumn colPairingResult;
         private DataGridViewComboBoxColumn colPlayerState;
-        private TrackBar tbBonusExcused;
-        private TrackBar tbBonusUnexcused;
-        private TrackBar tbBonusHindered;
-        private Label lblBonusExcused;
-        private Label lblBonusUnexcused;
-        private Label lblBonusClubgame;
+        private TrackBar tbBonusExcused, tbBonusUnexcused, tbBonusHindered, tbBonusRetired;
+        private Label lblBonusExcused, lblBonusUnexcused, lblBonusClubgame, lblBonusRetired;
         private TabPage tabSettings;
         private DataGridViewTextBoxColumn colPairingAddInfoB;
         private DataGridViewTextBoxColumn colPairingNameBlack;
@@ -121,6 +117,11 @@ namespace KeizerForClubs
             chkFreilosVerteilen.Checked = SQLiteIntf.fGetConfigBool("OPTION.DistBye");
             chkPairingOnlyPlayed.Checked = SQLiteIntf.fGetConfigBool("OPTION.ShowOnlyPlayed");
             numRoundsGameRepeat.Value = (Decimal)SQLiteIntf.fGetConfigInt("OPTION.GameRepeat");
+            var ratio = SQLiteIntf.fGetConfigFloat("OPTION.RatioFirst2Last", 3);
+            var idx = (ddlRatioFirst2Last.DataSource as List<float>).IndexOf(ratio);
+            ddlRatioFirst2Last.CreateControl();  // Without this CreateControl, the following SelectedIndex= crashes. God knows why. 
+            if (idx != ddlRatioFirst2Last.SelectedIndex)
+                ddlRatioFirst2Last.SelectedIndex = idx;
             chkHtml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Html");
             chkXml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Xml");
             chkTxt.Checked = SQLiteIntf.fGetConfigBool("OPTION.Txt");
@@ -282,6 +283,7 @@ namespace KeizerForClubs
                 SQLiteIntf.fSetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
                 SQLiteIntf.fSetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
                 SQLiteIntf.fSetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
+                SQLiteIntf.fSetConfigFloat("OPTION.RatioFirst2Last", Helper.ToSingle(ddlRatioFirst2Last.SelectedValue));
                 SQLiteIntf.fSetConfigBool("OPTION.Html", this.chkHtml.Checked);
                 SQLiteIntf.fSetConfigBool("OPTION.Xml", this.chkXml.Checked);
                 SQLiteIntf.fSetConfigBool("OPTION.Txt", this.chkTxt.Checked);
@@ -395,6 +397,7 @@ namespace KeizerForClubs
             lblRunde.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
             numRoundSelect.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
             lblRoundsGameRepeat.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "NumRundeWdh");
+            lblRatioFirst2Last.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "First2Last");
             lblOutputTo.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "OutputTo");
             btDonate1.Text = btDonate2.Text = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Donate");
         }
@@ -469,16 +472,27 @@ namespace KeizerForClubs
             cReportingUnit?.swExportDump.Close();
         }
 
+        int FirstStartPts(int playerCount)
+        {
+            // ratioFirst2Last: Ein Sieg gegen den 1. in der Tabelle zählt ratioFirst2Last mal soviel wie gegen den letzten. 
+            // ratioFirst2Last = 3 ist das was üblicherweise beim Keizersystem empfohlen wird. 
+            // Kleinere Zahlen scheinen mir angemessener.
+            // Verwendet in fRanking_Init und fRankingCalcRanks.
+            var ratioFirst2Last = SQLiteIntf.fGetConfigFloat("OPTION.RatioFirst2Last", 3);
+            double firstStartPtsFaktor = ratioFirst2Last / (ratioFirst2Last - 1);
+            return Convert.ToInt32((playerCount - 1) * firstStartPtsFaktor);
+        }
+
         private void fRankingInit()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
             int playerCount = SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY rating desc ");
             // Das ist die Stelle, die die anfänglichen Keizer-Punkte verteilt. 
-            float single = Convert.ToSingle(playerCount - 1 + (playerCount - 1) / 2);
+            int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
-                SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, single);
-                --single;
+                SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, firstStartPts);
+                --firstStartPts;
             }
         }
 
@@ -495,12 +509,13 @@ namespace KeizerForClubs
         private void fRankingCalcRanks()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY Keizer_SumPts desc, rating desc ");
-            float single = Convert.ToSingle(playerList - 1 + (playerList - 1) / 2);
-            for (int index = 0; index < playerList; ++index)
+            int playerCount = SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ",
+                " ORDER BY Keizer_SumPts desc, rating desc ");
+            int firstStartPts = FirstStartPts(playerCount);
+            for (int index = 0; index < playerCount; ++index)
             {
-                SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, single);
-                --single;
+                SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, firstStartPts);
+                --firstStartPts;
             }
         }
 
@@ -800,8 +815,10 @@ namespace KeizerForClubs
             this.lblBonus2Value = new Label();
             this.lblBonus1Value = new Label();
             this.lblRoundsGameRepeat = new Label();
+            this.lblRatioFirst2Last = new Label();
             this.lblOutputTo = new Label();
             this.numRoundsGameRepeat = new NumericUpDown();
+            this.ddlRatioFirst2Last = new ComboBox();
             this.chkFreilosVerteilen = new CheckBox();
             this.chkHtml = new CheckBox();
             this.chkXml = new CheckBox();
@@ -993,17 +1010,19 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add((Control)this.lblBonus2Value);
             this.tabSettings.Controls.Add((Control)this.lblBonus1Value);
             this.tabSettings.Controls.Add((Control)this.lblRoundsGameRepeat);
+            this.tabSettings.Controls.Add((Control)this.lblRatioFirst2Last);
             this.tabSettings.Controls.Add((Control)this.numRoundsGameRepeat);
+            this.tabSettings.Controls.Add((Control)this.ddlRatioFirst2Last);
             this.tabSettings.Controls.Add((Control)this.chkFreilosVerteilen);
-            this.tabSettings.Controls.Add((Control)this.lblBonusRetired);
-            this.tabSettings.Controls.Add((Control)this.tbBonusRetired);
             this.tabSettings.Controls.Add((Control)this.lblBonusClubgame);
             this.tabSettings.Controls.Add((Control)this.lblBonusUnexcused);
             this.tabSettings.Controls.Add((Control)this.lblBonusExcused);
+            this.tabSettings.Controls.Add((Control)this.lblBonusRetired);
             this.tabSettings.Controls.Add((Control)this.btDonate1);
             this.tabSettings.Controls.Add((Control)this.tbBonusHindered);
             this.tabSettings.Controls.Add((Control)this.tbBonusUnexcused);
             this.tabSettings.Controls.Add((Control)this.tbBonusExcused);
+            this.tabSettings.Controls.Add((Control)this.tbBonusRetired);
             this.tabSettings.Controls.Add(this.chkHtml);
             this.tabSettings.Controls.Add(this.chkXml);
             this.tabSettings.Controls.Add(this.chkTxt);
@@ -1037,12 +1056,21 @@ namespace KeizerForClubs
             this.lblBonus1Value.Size = new Size(100, 23);
             this.lblBonus1Value.TabIndex = 11;
             this.lblBonus1Value.Text = "...";
+
+            this.lblRatioFirst2Last.Location = new Point(370, 264);
+            this.lblRatioFirst2Last.Size = new Size(200, 23);
+            this.lblRatioFirst2Last.Text = "# Rounds before paired again";
+            this.ddlRatioFirst2Last.Location = new Point(570, 262);
+            this.ddlRatioFirst2Last.Size = new Size(40, 21);
+            List<float> list = new List<float>(new float[] { 3, 2.5f, 2, 1.5f, 1.2f });
+            this.ddlRatioFirst2Last.DataSource = list;
+
             this.lblRoundsGameRepeat.Location = new Point(44, 264);
             this.lblRoundsGameRepeat.Name = "lblRoundsGameRepeat";
-            this.lblRoundsGameRepeat.Size = new Size(222, 23);
+            this.lblRoundsGameRepeat.Size = new Size(166, 23);
             this.lblRoundsGameRepeat.TabIndex = 10;
             this.lblRoundsGameRepeat.Text = "# Rounds before paired again";
-            this.numRoundsGameRepeat.Location = new Point(301, 262);
+            this.numRoundsGameRepeat.Location = new Point(246, 262);
             this.numRoundsGameRepeat.Maximum = new Decimal(new int[4]
             {
         50,
@@ -1053,12 +1081,13 @@ namespace KeizerForClubs
             this.numRoundsGameRepeat.Name = "numRoundsGameRepeat";
             this.numRoundsGameRepeat.Size = new Size(40, 21);
             this.numRoundsGameRepeat.TabIndex = 9;
+
             this.chkFreilosVerteilen.CheckAlign = ContentAlignment.MiddleRight;
             this.chkFreilosVerteilen.Checked = true;
             this.chkFreilosVerteilen.CheckState = CheckState.Checked;
             this.chkFreilosVerteilen.Location = new Point(44, 232);
             this.chkFreilosVerteilen.Name = "chkFreilosVerteilen";
-            this.chkFreilosVerteilen.Size = new Size(270, 24);
+            this.chkFreilosVerteilen.Size = new Size(215, 24);
             this.chkFreilosVerteilen.TabIndex = 8;
             this.chkFreilosVerteilen.Text = "Assign bye's even";
             this.chkFreilosVerteilen.UseVisualStyleBackColor = true;
@@ -1161,7 +1190,7 @@ namespace KeizerForClubs
             this.tbBonusExcused.Location = new Point(245, 80);
             this.tbBonusExcused.Maximum = 100;
             this.tbBonusExcused.Name = "tbBonusExcused";
-            this.tbBonusExcused.Size = new Size(207, 45);
+            this.tbBonusExcused.Size = new Size(207, 65);
             this.tbBonusExcused.SmallChange = 5;
             this.tbBonusExcused.TabIndex = 0;
             this.tbBonusExcused.TickFrequency = 5;

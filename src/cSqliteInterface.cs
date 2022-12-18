@@ -149,7 +149,9 @@ namespace KeizerForClubs
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgValue", wert);
             sqlCommand.Prepare();
-            return sqlCommand.ExecuteNonQuery();
+            var res = sqlCommand.ExecuteNonQuery();
+            res = fInsertConfigNumberIfNeeded(res);
+            return res;
         }
 
         public int fSetConfigInt(string key, int wert)
@@ -159,6 +161,12 @@ namespace KeizerForClubs
             sqlCommand.Parameters.AddWithValue("pCfgValue", wert);
             sqlCommand.Prepare();
             var res = sqlCommand.ExecuteNonQuery();
+            res = fInsertConfigNumberIfNeeded(res);
+            return res;
+        }
+
+        private int fInsertConfigNumberIfNeeded(int res)
+        {
             if (res == 0)
             {
                 sqlCommand.CommandText = " INSERT INTO config_db.ConfigTab (CfgKey, CfgValue) VALUES (@pKey, @pCfgValue)";
@@ -188,12 +196,14 @@ namespace KeizerForClubs
 
         public bool fGetConfigBool(string key) => fGetConfigInt(key) != 0;
 
-        public float fGetConfigFloat(string key)
+        public float fGetConfigFloat(string key, float defaultVal)
         {
             sqlCommand.CommandText = " SELECT CfgValue FROM config_db.ConfigTab  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Prepare();
-            return Convert.ToSingle(sqlCommand.ExecuteScalar());
+            var res = sqlCommand.ExecuteScalar();
+            float val = res == null ? defaultVal : Convert.ToSingle(res);
+            return val;
         }
         #endregion Config
 
