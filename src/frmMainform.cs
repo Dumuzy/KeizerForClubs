@@ -299,9 +299,9 @@ namespace KeizerForClubs
 
         private void MnuListenStandingClick(object sender, EventArgs e)
         {
-            SQLiteIntf.BeginnTransaktion();
+            //SQLiteIntf.BeginnTransaktion();
             this.fRankingCalculate();
-            SQLiteIntf.EndeTransaktion();
+            //SQLiteIntf.EndeTransaktion();
             IncNumClicks(SQLiteIntf.fGetPlayerCount());
             new cReportingUnit(this.sTurniername).fReport_Tabellenstand(this.SQLiteIntf);
         }
@@ -442,9 +442,9 @@ namespace KeizerForClubs
             cReportingUnit cReportingUnit = (cReportingUnit)null;
             int maxRound = SQLiteIntf.fGetMaxRound();
 
-            SQLiteIntf.fUpdPairing_ResetValues();
-            this.fRankingInit();
-            this.fRanking_PlayerPktSumme();
+            SQLiteIntf.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
+            this.fRanking_AllPlayersSetInitialStartPts();    // Keizer_StartPts in die DB setzen.
+            this.fRanking_AllPlayersSetKeizerSumPts(); // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             if (cReportingUnit != null)
             {
                 cReportingUnit.swExportDump = new StreamWriter("export\\dumpcalc.csv");
@@ -453,11 +453,11 @@ namespace KeizerForClubs
             }
             for (int runde1 = 1; runde1 <= maxRound; ++runde1)
             {
-                SQLiteIntf.fUpdPairing_ResetValues();
+                SQLiteIntf.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
                 for (int runde2 = 1; runde2 <= runde1; ++runde2)
-                    this.fRanking_GameEvals(runde2);
-                this.fRanking_PlayerPktSumme();
-                this.fRankingCalcRanks();
+                    this.fRanking_OneRoundAllPairingsSetKeizerPts(runde2);
+                this.fRanking_AllPlayersSetKeizerSumPts();
+                this.fRanking_AllPlayersSetRankAndStartPts();
                 if (cReportingUnit != null)
                 {
                     cReportingUnit.swExportDump.WriteLine("");
@@ -473,6 +473,7 @@ namespace KeizerForClubs
             cReportingUnit?.swExportDump.Close();
         }
 
+        /// <summary> Gibt die Keizer-Start-Pts für den 1. Spieler zurück. </summary>
         int FirstStartPts(int playerCount)
         {
             // ratioFirst2Last: Ein Sieg gegen den 1. in der Tabelle zählt ratioFirst2Last mal soviel wie gegen den letzten. 
@@ -484,51 +485,58 @@ namespace KeizerForClubs
             return Convert.ToInt32((playerCount - 1) * firstStartPtsFaktor);
         }
 
-        private void fRankingInit()
+        /// <summary> Das ist die Funktion, die die anfänglichen Keizer-Punkte verteilt. </summary>
+        private void fRanking_AllPlayersSetInitialStartPts()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
             int playerCount = SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY rating desc ");
-            // Das ist die Stelle, die die anfänglichen Keizer-Punkte verteilt. 
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
-                SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, firstStartPts);
+                SQLiteIntf.fUpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, firstStartPts);
                 --firstStartPts;
             }
         }
 
-        private void fRanking_PlayerPktSumme()
+        /// <summary> Berechnet die Keizer-Punkt-Summe aller Spieler anhand der in der DB stehende Punkte 
+        /// für die Spiele und schreibt die Summen in die DB. </summary>
+        private void fRanking_AllPlayersSetKeizerSumPts()
         {
-            cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = SQLiteIntf.fGetPlayerList(ref pList, "", " ");
-            for (int index = 0; index < playerList; ++index)
-                pList[index].Keizer_SumPts = SQLiteIntf.fGetPlayer_PunktSumme(pList[index].id);
-            for (int index = 0; index < playerList; ++index)
-                SQLiteIntf.fUpdPlayer_PunktSumme(pList[index].id, pList[index].Keizer_SumPts);
+            cSqliteInterface.stPlayer[] players = new cSqliteInterface.stPlayer[100];
+            int playerCount = SQLiteIntf.fGetPlayerList(ref players, "", " ");
+            for (int index = 0; index < playerCount; ++index)
+                players[index].Keizer_SumPts = SQLiteIntf.fGetPlayer_PunktSumme(players[index].id);
+            for (int index = 0; index < playerCount; ++index)
+                SQLiteIntf.fUpdPlayer_KeizerSumPts(players[index].id, players[index].Keizer_SumPts);
         }
 
-        private void fRankingCalcRanks()
+        /// <summary> For all players: calc his current rank and set the rank and the resulting 
+        /// Keizer_StartPts into the DB. </summary>
+        private void fRanking_AllPlayersSetRankAndStartPts()
         {
-            cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerCount = SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ",
+            cSqliteInterface.stPlayer[] players = new cSqliteInterface.stPlayer[100];
+            int playerCount = SQLiteIntf.fGetPlayerList(ref players, " WHERE state NOT IN (9) ",
                 " ORDER BY Keizer_SumPts desc, rating desc ");
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
-                SQLiteIntf.fUpdPlayer_Init_RankPts(pList[index].id, index + 1, firstStartPts);
+                SQLiteIntf.fUpdPlayer_SetRankAndStartPts(players[index].id, index + 1, firstStartPts);
                 --firstStartPts;
             }
         }
 
-        private bool fRanking_GameEvals(int runde)
+        /// <summary> Setzt für eine Runde für alle Bretter die KeizerPts in die DB. </summary>
+        /// <returns>false, wenn keine Runden da sind, true sonst. </returns>
+        /// <remarks> Die Punkte sind bei Sieg gleich der momentanen Keizer_StartPts der Gegner. </remarks>
+        private bool fRanking_OneRoundAllPairingsSetKeizerPts(int runde)
         {
             cSqliteInterface.stPairing[] pList1 = new cSqliteInterface.stPairing[50];
             cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
             cSqliteInterface.stPlayer[] pList3 = new cSqliteInterface.stPlayer[1];
-            int pairingList = SQLiteIntf.fGetPairingList(ref pList1, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
-            if (pairingList == 0)
+            int pairingCnt = SQLiteIntf.fGetPairingList(ref pList1, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+            if (pairingCnt == 0)
                 return false;
-            for (int index = 0; index < pairingList; ++index)
+            for (int index = 0; index < pairingCnt; ++index)
             {
                 float erg_w = 0.0f;
                 float erg_s = 0.0f;

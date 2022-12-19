@@ -230,17 +230,17 @@ namespace KeizerForClubs
             return true;
         }
 
-        public bool fUpdPlayer_PunktSumme(int id, float summe)
+        /// <summary> Schreibt die Summe nach Keizer_SumPts des Spielers mit der ID. </summary>
+        public void fUpdPlayer_KeizerSumPts(int id, float summe)
         {
             sqlCommand.CommandText = " UPDATE Player  SET Keizer_SumPts=@pPts  WHERE ID=@pID ";
             sqlCommand.Parameters.AddWithValue("pPts", summe);
             sqlCommand.Parameters.AddWithValue("pID", id);
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
-            return true;
         }
 
-        public bool fUpdPlayer_Init_RankPts(int id, int rang, float pkte)
+        public bool fUpdPlayer_SetRankAndStartPts(int id, int rang, float pkte)
         {
             sqlCommand.CommandText = " UPDATE Player  SET Rank = @pRang, Keizer_StartPts=@pPts  WHERE ID=@pID ";
             sqlCommand.Parameters.AddWithValue("pRang", rang);
@@ -321,7 +321,10 @@ namespace KeizerForClubs
             return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
         }
 
-        // Keizer-PunkteSumme eines Spielers über die ID holen.
+        /// <summary> Keizer-PunkteSumme des Spielers mit der ID aus der DB berechnen. So wie sie sich 
+        /// momentan aus der DB ergibt. Das ist zu Anfang der Berechnung des Tabellenstands einer Runde 
+        /// ein anderer Wert als am Ende. </summary>
+        /// <param name="ID">Spieler-ID</param>
         public float fGetPlayer_PunktSumme(int ID)
         {
             sqlCommand.CommandText = @" select  Keizer_StartPts +   
@@ -423,9 +426,8 @@ namespace KeizerForClubs
             return true;
         }
 
-        //  Bewertungen der Paarungen zurücksetzen.
-        //  Setzt auch die Spieler-Summen zurück
-        public void fUpdPairing_ResetValues()
+        /// <summary> Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0. </summary>
+        public void fUpdPairing_AllPairingsAndAllKeizerSumsResetValues()
         {
             sqlCommand.CommandText = " UPDATE Pairing  SET PTS_W=0, PTS_B=0 ";
             sqlCommand.Prepare();
@@ -435,6 +437,10 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
         }
 
+        /// <summary> Setzt die KeizerPts für eine Runde für ein Brett in die DB. </summary>
+        /// <param name="erg_w"> KeizerPts für W. </param>
+        /// <param name="erg_s"> KeizerPts für S. </param>
+        /// <returns></returns>
         public bool fUpdPairingValues(int runde, int board, float erg_w, float erg_s)
         {
             sqlCommand.CommandText = " UPDATE Pairing  SET Pts_W=@pPts_W, Pts_B=@pPts_B " +
