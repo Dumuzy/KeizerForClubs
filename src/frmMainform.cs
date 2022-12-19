@@ -441,7 +441,8 @@ namespace KeizerForClubs
         /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>
         private void fRanking_AllPlayersAllRoundsCalculate()
         {
-            cReportingUnit cReportingUnit = null; // new cReportingUnit(sTurniername);
+            cReportingUnit cReportingUnit = null; //  new cReportingUnit(sTurniername);
+            cReportingUnit?.DeleteDump();
             int maxRound = SQLiteIntf.fGetMaxRound();
 
             SQLiteIntf.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();

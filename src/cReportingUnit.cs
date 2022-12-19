@@ -259,16 +259,17 @@ namespace KeizerForClubs
         #endregion Teilnehmer
 
         #region Debugging
-        public void DebugPairingsAndStandings(cSqliteInterface db, int runde1)
+        public void DebugPairingsAndStandings(cSqliteInterface db, int runde)
         {
-            using (StreamWriter swExportDump = new StreamWriter("export\\dumpcalc.csv", true))
+            using (StreamWriter swExportDump = new StreamWriter(dumpcalcFile, true))
             {
-
                 swExportDump.WriteLine("");
-                if (runde1 > 0)
+                if (runde > 0)
                 {
-                    swExportDump.WriteLine("Runde " + runde1.ToString());
-                    // fReport_Paarungen_Txt(runde1, db);
+                    swExportDump.WriteLine("Runde " + runde.ToString());
+                    var tpair = fReportPaarungenTable(runde, db);
+                    var sbp = ToStringBuilderAsCsv(tpair);
+                    swExportDump.WriteLine(sbp.ToString());
                 }
                 else
                     swExportDump.WriteLine("Stand vor 1. Runde");
@@ -283,11 +284,12 @@ namespace KeizerForClubs
             }
         }
 
-        public void DumpLine(string s)
+        public void DeleteDump()
         {
-            using (StreamWriter swExportDump = new StreamWriter("export\\dumpcalc.csv", true))
-                swExportDump.WriteLine(s);
+            try { System.IO.File.Delete(dumpcalcFile); } catch (Exception) { }
         }
+
+        const string dumpcalcFile = "export\\dumpcalc.csv";
         #endregion Debugging
 
         Version Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
