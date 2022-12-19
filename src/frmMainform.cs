@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Text;
 using System.Windows.Forms;
 using AwiUtils;
 using PuzzleKnocker;
@@ -211,7 +212,7 @@ namespace KeizerForClubs
 
         void NumRoundSelectValueChanged(object sender, EventArgs e) => fLoadPairingList();
 
-        void CalcRankingToolStripMenuItemClick(object sender, EventArgs e) => fRankingCalculate();
+        void CalcRankingToolStripMenuItemClick(object sender, EventArgs e) => fRanking_AllPlayersAllRoundsCalculate();
 
         void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
@@ -300,7 +301,7 @@ namespace KeizerForClubs
         private void MnuListenStandingClick(object sender, EventArgs e)
         {
             //SQLiteIntf.BeginnTransaktion();
-            this.fRankingCalculate();
+            this.fRanking_AllPlayersAllRoundsCalculate();
             //SQLiteIntf.EndeTransaktion();
             IncNumClicks(SQLiteIntf.fGetPlayerCount());
             new cReportingUnit(this.sTurniername).fReport_Tabellenstand(this.SQLiteIntf);
@@ -437,20 +438,19 @@ namespace KeizerForClubs
             }
         }
 
-        private void fRankingCalculate()
+        /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>
+        private void fRanking_AllPlayersAllRoundsCalculate()
         {
-            cReportingUnit cReportingUnit = (cReportingUnit)null;
+            cReportingUnit cReportingUnit = null; // new cReportingUnit(sTurniername);
             int maxRound = SQLiteIntf.fGetMaxRound();
 
             SQLiteIntf.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
-            this.fRanking_AllPlayersSetInitialStartPts();    // Keizer_StartPts in die DB setzen.
-            this.fRanking_AllPlayersSetKeizerSumPts(); // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
-            if (cReportingUnit != null)
-            {
-                cReportingUnit.swExportDump = new StreamWriter("export\\dumpcalc.csv");
-                cReportingUnit.swExportDump.WriteLine("Stand vor 1. Runde");
-                cReportingUnit.fReport_Tabellenstand_Voll_CSV(this.SQLiteIntf);
-            }
+            this.fRanking_AllPlayersSetInitialStartPts(); // Keizer_StartPts in die DB setzen.
+            this.fRanking_AllPlayersSetKeizerSumPts();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
+            cReportingUnit?.DebugPairingsAndStandings(SQLiteIntf, 0);
+            // If nExtraRecursions is > 0, at the end of the calculation, that many
+            // extra rounds of calculation are appended. 
+            int nExtraRecursions = 0;  
             for (int runde1 = 1; runde1 <= maxRound; ++runde1)
             {
                 SQLiteIntf.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
@@ -458,19 +458,10 @@ namespace KeizerForClubs
                     this.fRanking_OneRoundAllPairingsSetKeizerPts(runde2);
                 this.fRanking_AllPlayersSetKeizerSumPts();
                 this.fRanking_AllPlayersSetRankAndStartPts();
-                if (cReportingUnit != null)
-                {
-                    cReportingUnit.swExportDump.WriteLine("");
-                    cReportingUnit.swExportDump.WriteLine("Runde " + runde1.ToString());
-                    // cReportingUnit.fReport_Paarungen_Txt(runde1, this.SQLiteIntf);
-                    cReportingUnit.swExportDump.WriteLine("");
-                    cReportingUnit.swExportDump.WriteLine("Tabelle ");
-                    cReportingUnit.fReport_Tabellenstand_Voll_CSV(this.SQLiteIntf);
-                    cReportingUnit.swExportDump.WriteLine("");
-                    cReportingUnit.swExportDump.WriteLine("");
-                }
+                cReportingUnit?.DebugPairingsAndStandings(SQLiteIntf, runde1);
+                if (runde1 == maxRound && nExtraRecursions-- > 0)
+                    --runde1;
             }
-            cReportingUnit?.swExportDump.Close();
         }
 
         /// <summary> Gibt die Keizer-Start-Pts für den 1. Spieler zurück. </summary>
@@ -584,7 +575,7 @@ namespace KeizerForClubs
                     this.iPairingMinFreeCnt = this.pPairingPlayerList[index].FreeCnt;
             }
             SQLiteIntf.BeginnTransaktion();
-            this.fRankingCalculate();
+            this.fRanking_AllPlayersAllRoundsCalculate();
             this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
             var currRunde = SQLiteIntf.fGetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             this.iPairingRekursionCnt = 0;

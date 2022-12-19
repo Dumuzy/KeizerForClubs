@@ -38,12 +38,34 @@ namespace AwiUtils
             return fileName;
         }
 
-        public string ExportAsHtml(TableW2Headers t, string fileBase)
+        public string ExportAsCsv(TableW2Headers t, string fileBase)
+        {
+            var sb = ToStringBuilderAsCsv(t);
+            string fileName = fileBase + ".csv";
+            File.WriteAllText(fileName, sb.ToString());
+            return fileName;
+        }
+
+        public StringBuilder ToStringBuilderAsCsv(TableW2Headers t)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(t.Header1);
+            sb.AppendLine(t.Header2);
+            sb.AppendLine("");
+            for (int i = 0; i < t.Count; ++i)
+            {
+                var s = string.Join(';', t[i]);
+                sb.AppendLine(s);
+            }
+            return sb;
+        }
+
+        public string ExportAsHtml(TableW2Headers t, string fileBase, bool isExWrapper = false)
         {
             string fileName = fileBase + ".html";
             using (var swExport = new StreamWriter(fileName))
             {
-                AddHtmlHeader(swExport);
+                AddHtmlHeader(swExport, isExWrapper);
                 swExport.WriteLine($"<h1>{t.Header1}</h1>");
                 swExport.WriteLine($"<h2>{t.Header2}</h2>");
                 swExport.WriteLine("<table>");

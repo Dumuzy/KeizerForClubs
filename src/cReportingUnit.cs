@@ -14,8 +14,6 @@ namespace KeizerForClubs
     public class cReportingUnit : ReportingBase
     {
         string sTurnier = "";
-        StreamWriter swExport;
-        public StreamWriter swExportDump;
 
         public cReportingUnit(string sTurniername) => this.sTurnier = sTurniername;
 
@@ -78,13 +76,20 @@ namespace KeizerForClubs
             {
                 var table = fReportTabellenstandTable(sqlintf);
                 var fileBase = GetFileTabellenstandBasename(sqlintf);
+
+                var tableVoll = fReportTabellenstandVollTable(sqlintf);
+                var fileBaseVoll = GetFileTabellenstandExBasename(sqlintf);
+
                 if (sqlintf.fGetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
                 if (sqlintf.fGetConfigBool("OPTION.Csv"))
-                    fReport_Tabellenstand_Voll_CSV(sqlintf);
+                {
+                    ExportAsCsv(tableVoll, fileBaseVoll);
+                    ExportAsCsv(table, fileBase);
+                }
                 if (sqlintf.fGetConfigBool("OPTION.Html"))
                 {
-                    fReport_Tabellenstand_Voll_Html(sqlintf);
+                    ExportAsHtml(tableVoll, fileBaseVoll, true);
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
@@ -128,64 +133,9 @@ namespace KeizerForClubs
         private string GetFileTabellenstandExBasename(cSqliteInterface sqlintf) =>
             "export\\" + this.sTurnier + "_" + sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + sqlintf.fGetMaxRound();
 
-        public void fReport_Tabellenstand_Voll_CSV(cSqliteInterface sqlintf)
+        public TableW2Headers fReportTabellenstandVollTable(cSqliteInterface sqlintf)
         {
-            int num1 = 1;
-            int maxRound = sqlintf.fGetMaxRound();
-            cSqliteInterface.stPlayer[] pList1 = new cSqliteInterface.stPlayer[100];
-            cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
-            cSqliteInterface.stPlayer[] pList3 = new cSqliteInterface.stPlayer[1];
-            cSqliteInterface.stPairing[] pList4 = new cSqliteInterface.stPairing[1];
-            swExport = new StreamWriter(GetFileTabellenstandBasename(sqlintf) + ".csv");
-            int playerList = sqlintf.fGetPlayerList(ref pList1, "", " ORDER BY Keizer_SumPts desc, Rating desc ");
-            swExport.WriteLine("Platz;Name;Rating;Keizer-RangPkte;Keizer-SummePkte;PartiePkt;Status;Runden...;");
-            for (int index1 = 0; index1 < playerList; ++index1)
-            {
-                string str1;
-                if (pList1[index1].state != cSqliteInterface.ePlayerState.eRetired)
-                {
-                    str1 = num1.ToString("00") + ";";
-                    ++num1;
-                }
-                else
-                    str1 = "(ret);";
-                string name = pList1[index1].name;
-                string str2 = str1 + name + ";" + pList1[index1].rating.ToString() + ";" + pList1[index1].Keizer_StartPts.ToString() + ";" + pList1[index1].Keizer_SumPts.ToString() + ";" + sqlintf.fGetPlayer_PartiePunkte(pList1[index1].id).ToString() + ";" + sqlintf.fLocl_GetPlayerStateText(pList1[index1].state) + ";";
-                for (int index2 = 1; index2 <= maxRound; ++index2)
-                {
-                    string sWhere = " WHERE (PID_W=" + pList1[index1].id.ToString() + " OR    PID_B=" + pList1[index1].id.ToString() + ")  AND rnd=" + index2.ToString();
-                    string str3;
-                    if (sqlintf.fGetPairingList(ref pList4, sWhere, "  ") > 0)
-                    {
-                        sqlintf.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList4[0].id_w, " ");
-                        sqlintf.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList4[0].id_b, " ");
-                        string str4 = sqlintf.fLocl_GetGameResultText(pList4[0].result) + " ";
-                        if (pList1[index1].id == pList4[0].id_w)
-                        {
-                            string str5 = str4 + "w ";
-                            str3 = (pList3[0].state != cSqliteInterface.ePlayerState.eRetired ? str5 + " " + pList3[0].rank.ToString() + " " : str5 + " (ret) ") + "pkt=" + pList4[0].pts_w.ToString() + " ";
-                        }
-                        else
-                        {
-                            string str6 = str4 + "b ";
-                            str3 = (pList2[0].state != cSqliteInterface.ePlayerState.eRetired ? str6 + " " + pList2[0].rank.ToString() + " " : str6 + " (ret) ") + "pkt=" + pList4[0].pts_b.ToString() + " ";
-                        }
-                    }
-                    else
-                        str3 = "_";
-                    str2 = str2 + str3 + ";";
-                }
-                if (swExportDump != null)
-                    swExportDump.WriteLine(str2);
-                swExport.WriteLine(str2);
-            }
-            swExport.WriteLine(" ");
-            swExport.Close();
-        }
-
-        public void fReport_Tabellenstand_Voll_Html(cSqliteInterface sqlintf)
-        {
-            int num1 = 1;
+            var t = new TableW2Headers();
             int maxRound = sqlintf.fGetMaxRound();
             cSqliteInterface.stPlayer[] pList1 = new cSqliteInterface.stPlayer[100];
             cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
@@ -193,37 +143,27 @@ namespace KeizerForClubs
             cSqliteInterface.stPairing[] pList4 = new cSqliteInterface.stPairing[1];
             int nPlayer = sqlintf.fGetPlayerList(ref pList1, "", " ORDER BY Keizer_SumPts desc, Rating desc ");
 
-            string file = GetFileTabellenstandExBasename(sqlintf) + ".html";
             string strr = sqlintf.fLocl_GetText("GUI_LABEL", "Runde") + " " + sqlintf.fGetMaxRound();
-            Directory.CreateDirectory(Path.GetDirectoryName(file));
-            swExport = new StreamWriter(file);
-            AddHtmlHeader(swExport, true);
-            swExport.WriteLine($"<h1>{this.sTurnier}</h1>");
-            swExport.WriteLine("<h2>");
-            swExport.WriteLine(sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr);
-            swExport.WriteLine("</h2>");
-            swExport.WriteLine("<table>");
-
-            swExport.Write("<tr><td>Platz</td><td>Name</td><td>Rating</td><td>Keizer-P</td><td>Keizer-Sum</td><td>GamePts</td>");
-            for (int i = 0; i < sqlintf.fGetMaxRound(); ++i)
-                swExport.Write($"<td>R {i}</td>");
-            swExport.WriteLine("</tr>");
-            string td2 = "</td><td>";
-            for (int index1 = 0; index1 < nPlayer; ++index1)
+            t.Header1 = sTurnier;
+            t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
+            var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
+            for (int i = 0; i < maxRound; ++i)
+                thead.Add("R " + i);
+            t.AddRow(thead);
+            for (int index1 = 0, numPlayer = 1; index1 < nPlayer; ++index1)
             {
-                string str1 = "<tr><td>";
+                var str1 = new Li<string>();
                 if (pList1[index1].state != cSqliteInterface.ePlayerState.eRetired)
-                {
-                    str1 += num1.ToString("00") + td2;
-                    ++num1;
-                }
+                    str1.Add(numPlayer++.ToString("00"));
                 else
-                    str1 += "(ret)" + td2;
+                    str1.Add("(ret)");
                 string name = pList1[index1].name;
-                string str2 = str1 + name + td2 + pList1[index1].rating.ToString() + td2 +
-                    pList1[index1].Keizer_StartPts.ToString() + td2 +
-                    pList1[index1].Keizer_SumPts.ToString() + td2 +
-                    sqlintf.fGetPlayer_PartiePunkte(pList1[index1].id).ToString() + td2;
+                str1.Add(name);
+                str1.Add(pList1[index1].rating.ToString());
+                str1.Add(pList1[index1].Keizer_StartPts.ToString());
+                str1.Add(pList1[index1].Keizer_SumPts.ToString());
+                str1.Add(sqlintf.fGetPlayer_PartiePunkte(pList1[index1].id).ToString());
+
                 for (int index2 = 1; index2 <= maxRound; ++index2)
                 {
                     string sWhere = " WHERE (PID_W=" + pList1[index1].id.ToString() +
@@ -257,19 +197,16 @@ namespace KeizerForClubs
                         }
                     }
                     else
-                        str3 = "_";
-                    str2 += str3 + td2;
+                        str3 = "-";
+                    str1.Add(str3);
                 }
-                str2 = str2.Substring(0, str2.Length - 4);
-                str2 += "</tr>";
-                if (swExportDump != null)
-                    swExportDump.WriteLine(str2);
-                swExport.WriteLine(str2);
+                // str2 = str2.Substring(0, str2.Length - 4);  // Hä??
+                // DumpLine(str2);
+                t.AddRow(str1);
             }
-
-            swExport.WriteLine("</table> ");
-            swExport.Close();
+            return t;
         }
+
         #endregion TabellenstandVoll
 
         #region Teilnehmer
@@ -321,6 +258,37 @@ namespace KeizerForClubs
                 sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + sqlintf.fGetMaxRound();
         #endregion Teilnehmer
 
+        #region Debugging
+        public void DebugPairingsAndStandings(cSqliteInterface db, int runde1)
+        {
+            using (StreamWriter swExportDump = new StreamWriter("export\\dumpcalc.csv", true))
+            {
+
+                swExportDump.WriteLine("");
+                if (runde1 > 0)
+                {
+                    swExportDump.WriteLine("Runde " + runde1.ToString());
+                    // fReport_Paarungen_Txt(runde1, db);
+                }
+                else
+                    swExportDump.WriteLine("Stand vor 1. Runde");
+
+                swExportDump.WriteLine("");
+                swExportDump.WriteLine("Tabelle ");
+                var table = fReportTabellenstandVollTable(db);
+                var sb = ToStringBuilderAsCsv(table);
+                swExportDump.WriteLine(sb.ToString());
+                swExportDump.WriteLine("");
+                swExportDump.WriteLine("");
+            }
+        }
+
+        public void DumpLine(string s)
+        {
+            using (StreamWriter swExportDump = new StreamWriter("export\\dumpcalc.csv", true))
+                swExportDump.WriteLine(s);
+        }
+        #endregion Debugging
 
         Version Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         string KfcLongVersion => Version.ToString();
