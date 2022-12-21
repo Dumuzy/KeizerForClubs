@@ -11,14 +11,14 @@
         /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>
         internal void AllPlayersAllRoundsCalculate()
         {
-            cReportingUnit cReportingUnit = null; //  new cReportingUnit(sTurniername);
+            cReportingUnit cReportingUnit = null; //  new cReportingUnit(sTurniername, db);
             cReportingUnit?.DeleteDump();
             int maxRound = db.fGetMaxRound();
 
             db.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
             this.AllPlayersSetInitialStartPts(); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPts();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
-            cReportingUnit?.DebugPairingsAndStandings(db, 0);
+            cReportingUnit?.DebugPairingsAndStandings(0);
             // If nExtraRecursions is > 0, at the end of the calculation, that many
             // extra rounds of calculation are appended. Only for testing stuff, currently. 
             int nExtraRecursions = 0;
@@ -29,7 +29,7 @@
                     this.OneRoundAllPairingsSetKeizerPts(runde2);
                 this.AllPlayersSetKeizerSumPts();
                 this.AllPlayersSetRankAndStartPts();
-                cReportingUnit?.DebugPairingsAndStandings(db, runde1);
+                cReportingUnit?.DebugPairingsAndStandings(runde1);
                 if (runde1 == maxRound && nExtraRecursions-- > 0)
                     --runde1;
             }

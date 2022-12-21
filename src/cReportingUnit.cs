@@ -14,52 +14,55 @@ namespace KeizerForClubs
     public class cReportingUnit : ReportingBase
     {
         string sTurnier = "";
+        cSqliteInterface db;
 
-        public cReportingUnit(string sTurniername) => this.sTurnier = sTurniername;
-
+        public cReportingUnit(string sTurniername, cSqliteInterface db)
+        {
+            this.sTurnier = sTurniername;
+            this.db = db;
+        }
         #region Paarungen 
-        private string GetPaarungenBasename(int runde, cSqliteInterface sqlintf) => "export\\" + this.sTurnier + "_" +
-            sqlintf.fLocl_GetText("GUI_LABEL", "Runde") + "-" + runde;
+        private string GetPaarungenBasename(int runde) => "export\\" + this.sTurnier + "_" +
+            db.fLocl_GetText("GUI_LABEL", "Runde") + "-" + runde;
 
-        public bool fReport_Paarungen(int runde, cSqliteInterface sqlintf)
+        public bool fReport_Paarungen(int runde)
         {
             try
             {
-                var table = fReportPaarungenTable(runde, sqlintf);
-                var fileBase = GetPaarungenBasename(runde, sqlintf);
-                if (sqlintf.fGetConfigBool("OPTION.Xml"))
+                var table = fReportPaarungenTable(runde);
+                var fileBase = GetPaarungenBasename(runde);
+                if (db.fGetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_pairing", "board", "nr w b res".Split());
-                if (sqlintf.fGetConfigBool("OPTION.Html"))
+                if (db.fGetConfigBool("OPTION.Html"))
                 {
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
-                if (sqlintf.fGetConfigBool("OPTION.Txt"))
+                if (db.fGetConfigBool("OPTION.Txt"))
                     ExportAsTxt(table, fileBase, new int[] { 4, -20, -20, 0 });
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, sqlintf.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
+                MessageBox.Show(ex.Message, db.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
             return true;
         }
 
-        TableW2Headers fReportPaarungenTable(int runde, cSqliteInterface sqlintf)
+        TableW2Headers fReportPaarungenTable(int runde)
         {
-            var t = new TableW2Headers();
-            t.Header1 = this.sTurnier;
-            t.Header2 = sqlintf.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
+            var t = new TableW2Headers(sTurnier);
+            t.Header2 = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
 
             cSqliteInterface.stPairing[] pList = new cSqliteInterface.stPairing[50];
-            int pairingList = sqlintf.fGetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+            int pairingList = db.fGetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
             for (int index = 0; index < pairingList; ++index)
             {
                 var r = new Li<string>();
                 r.Add((index + 1).ToString() + ".");
-                r.Add(sqlintf.fGetPlayerName(pList[index].id_w));
-                r.Add(sqlintf.fGetPlayerName(pList[index].id_b));
-                r.Add(sqlintf.fLocl_GetGameResultText(pList[index].result));
+                r.Add(db.fGetPlayerName(pList[index].id_w));
+                r.Add(db.fGetPlayerName(pList[index].id_b));
+                r.Add(db.fLocl_GetGameResultText(pList[index].result));
                 t.AddRow(r);
             }
             return t;
@@ -67,51 +70,50 @@ namespace KeizerForClubs
         #endregion Paarungen 
 
         #region Tabellenstand
-        private string GetFileTabellenstandBasename(cSqliteInterface sqlintf) =>
-            "export\\" + this.sTurnier + "_" + sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + "-" + sqlintf.fGetMaxRound();
+        private string GetFileTabellenstandBasename() =>
+            "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "-" + db.fGetMaxRound();
 
-        public bool fReport_Tabellenstand(cSqliteInterface sqlintf)
+        public bool fReport_Tabellenstand()
         {
             try
             {
-                var table = fReportTabellenstandTable(sqlintf);
-                var fileBase = GetFileTabellenstandBasename(sqlintf);
+                var table = fReportTabellenstandTable();
+                var fileBase = GetFileTabellenstandBasename();
 
-                var tableVoll = fReportTabellenstandVollTable(sqlintf);
-                var fileBaseVoll = GetFileTabellenstandExBasename(sqlintf);
+                var tableVoll = fReportTabellenstandVollTable();
+                var fileBaseVoll = GetFileTabellenstandExBasename();
 
-                if (sqlintf.fGetConfigBool("OPTION.Xml"))
+                if (db.fGetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
-                if (sqlintf.fGetConfigBool("OPTION.Csv"))
+                if (db.fGetConfigBool("OPTION.Csv"))
                 {
                     ExportAsCsv(tableVoll, fileBaseVoll);
                     ExportAsCsv(table, fileBase);
                 }
-                if (sqlintf.fGetConfigBool("OPTION.Html"))
+                if (db.fGetConfigBool("OPTION.Html"))
                 {
                     ExportAsHtml(tableVoll, fileBaseVoll, true);
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
-                if (sqlintf.fGetConfigBool("OPTION.Txt"))
+                if (db.fGetConfigBool("OPTION.Txt"))
                     ExportAsTxt(table, fileBase, new int[] { 4, -25, 6, 6 });
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, sqlintf.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
+                MessageBox.Show(ex.Message, db.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
             return true;
         }
 
-        TableW2Headers fReportTabellenstandTable(cSqliteInterface sqlintf)
+        TableW2Headers fReportTabellenstandTable()
         {
-            var t = new TableW2Headers();
-            t.Header1 = this.sTurnier;
-            string str2 = sqlintf.fLocl_GetText("GUI_LABEL", "Runde") + " " + sqlintf.fGetMaxRound();
-            t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
+            var t = new TableW2Headers(sTurnier);
+            string str2 = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
+            t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = sqlintf.fGetPlayerList(ref pList, "", " ORDER BY Keizer_SumPts desc ");
+            int playerList = db.fGetPlayerList(ref pList, "", " ORDER BY Keizer_SumPts desc ");
             for (int index = 0, num1 = 1; index < playerList; ++index)
             {
                 if (pList[index].state != cSqliteInterface.ePlayerState.eRetired)
@@ -120,7 +122,7 @@ namespace KeizerForClubs
                     li.Add(num1++.ToString() + ".");
                     li.Add(pList[index].name);
                     li.Add(pList[index].Keizer_SumPts.ToString());
-                    li.Add(sqlintf.fGetPlayer_PartiePunkte(pList[index].id).ToString());
+                    li.Add(db.fGetPlayer_PartiePunkte(pList[index].id).ToString());
                     t.AddRow(li);
                 }
             }
@@ -130,22 +132,21 @@ namespace KeizerForClubs
 
         #region TabellenstandVoll
 
-        private string GetFileTabellenstandExBasename(cSqliteInterface sqlintf) =>
-            "export\\" + this.sTurnier + "_" + sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + sqlintf.fGetMaxRound();
+        private string GetFileTabellenstandExBasename() =>
+            "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + db.fGetMaxRound();
 
-        public TableW2Headers fReportTabellenstandVollTable(cSqliteInterface sqlintf)
+        public TableW2Headers fReportTabellenstandVollTable()
         {
-            var t = new TableW2Headers();
-            int maxRound = sqlintf.fGetMaxRound();
+            var t = new TableW2Headers(sTurnier);
+            int maxRound = db.fGetMaxRound();
             cSqliteInterface.stPlayer[] pList1 = new cSqliteInterface.stPlayer[100];
             cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
             cSqliteInterface.stPlayer[] pList3 = new cSqliteInterface.stPlayer[1];
             cSqliteInterface.stPairing[] pList4 = new cSqliteInterface.stPairing[1];
-            int nPlayer = sqlintf.fGetPlayerList(ref pList1, "", " ORDER BY Keizer_SumPts desc, Rating desc ");
+            int nPlayer = db.fGetPlayerList(ref pList1, "", " ORDER BY Keizer_SumPts desc, Rating desc ");
 
-            string strr = sqlintf.fLocl_GetText("GUI_LABEL", "Runde") + " " + sqlintf.fGetMaxRound();
-            t.Header1 = sTurnier;
-            t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
+            string strr = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
+            t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
             var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
             for (int i = 0; i < maxRound; ++i)
                 thead.Add("R " + i);
@@ -162,18 +163,18 @@ namespace KeizerForClubs
                 str1.Add(pList1[index1].rating.ToString());
                 str1.Add(pList1[index1].Keizer_StartPts.ToString());
                 str1.Add(pList1[index1].Keizer_SumPts.ToString());
-                str1.Add(sqlintf.fGetPlayer_PartiePunkte(pList1[index1].id).ToString());
+                str1.Add(db.fGetPlayer_PartiePunkte(pList1[index1].id).ToString());
 
                 for (int index2 = 1; index2 <= maxRound; ++index2)
                 {
                     string sWhere = " WHERE (PID_W=" + pList1[index1].id.ToString() +
                         " OR    PID_B=" + pList1[index1].id.ToString() + ")  AND rnd=" + index2.ToString();
                     string str3;
-                    if (sqlintf.fGetPairingList(ref pList4, sWhere, "  ") > 0)
+                    if (db.fGetPairingList(ref pList4, sWhere, "  ") > 0)
                     {
-                        sqlintf.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList4[0].id_w, " ");
-                        sqlintf.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList4[0].id_b, " ");
-                        string str4 = sqlintf.fLocl_GetGameResultShort(pList4[0].result) + " ";
+                        db.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList4[0].id_w, " ");
+                        db.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList4[0].id_b, " ");
+                        string str4 = db.fLocl_GetGameResultShort(pList4[0].result) + " ";
                         if (pList4[0].result > cSqliteInterface.eResults.eWin_Black)
                         {
                             str3 = str4 + " - - p=" + pList4[0].pts_w.ToString();
@@ -200,8 +201,6 @@ namespace KeizerForClubs
                         str3 = "-";
                     str1.Add(str3);
                 }
-                // str2 = str2.Substring(0, str2.Length - 4);  // Hä??
-                // DumpLine(str2);
                 t.AddRow(str1);
             }
             return t;
@@ -210,17 +209,17 @@ namespace KeizerForClubs
         #endregion TabellenstandVoll
 
         #region Teilnehmer
-        public bool fReport_Teilnehmer(cSqliteInterface sqlintf)
+        public bool fReport_Teilnehmer()
         {
             try
             {
-                var table = fReportTeilnehmerTable(sqlintf);
-                var fileBase = GetTeilnehmerBasename(sqlintf);
-                if (sqlintf.fGetConfigBool("OPTION.Xml"))
+                var table = fReportTeilnehmerTable(db);
+                var fileBase = GetTeilnehmerBasename(db);
+                if (db.fGetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_player", "player", "nr name rating state".Split());
-                if (sqlintf.fGetConfigBool("OPTION.Txt"))
+                if (db.fGetConfigBool("OPTION.Txt"))
                     ExportAsTxt(table, fileBase, new int[] { 4, -25, 5, 25 });
-                if (sqlintf.fGetConfigBool("OPTION.Html"))
+                if (db.fGetConfigBool("OPTION.Html"))
                 {
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
@@ -228,7 +227,7 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
-                int num = (int)MessageBox.Show(ex.Message, sqlintf.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
+                int num = (int)MessageBox.Show(ex.Message, db.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
             return true;
@@ -236,8 +235,7 @@ namespace KeizerForClubs
 
         TableW2Headers fReportTeilnehmerTable(cSqliteInterface sqlintf)
         {
-            var t = new TableW2Headers();
-            t.Header1 = this.sTurnier;
+            var t = new TableW2Headers(sTurnier);
             t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
 
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
@@ -259,7 +257,7 @@ namespace KeizerForClubs
         #endregion Teilnehmer
 
         #region Debugging
-        public void DebugPairingsAndStandings(cSqliteInterface db, int runde)
+        public void DebugPairingsAndStandings(int runde)
         {
             using (StreamWriter swExportDump = new StreamWriter(dumpcalcFile, true))
             {
@@ -267,7 +265,7 @@ namespace KeizerForClubs
                 if (runde > 0)
                 {
                     swExportDump.WriteLine("Runde " + runde.ToString());
-                    var tpair = fReportPaarungenTable(runde, db);
+                    var tpair = fReportPaarungenTable(runde);
                     var sbp = ToStringBuilderAsCsv(tpair);
                     swExportDump.WriteLine(sbp.ToString());
                 }
@@ -276,7 +274,7 @@ namespace KeizerForClubs
 
                 swExportDump.WriteLine("");
                 swExportDump.WriteLine("Tabelle ");
-                var table = fReportTabellenstandVollTable(db);
+                var table = fReportTabellenstandVollTable();
                 var sb = ToStringBuilderAsCsv(table);
                 swExportDump.WriteLine(sb.ToString());
                 swExportDump.WriteLine("");
@@ -297,7 +295,5 @@ namespace KeizerForClubs
         string KfcShortVersion => $"{Version.Major}.{Version.Minor}";
         protected override string KfcFooter => "KeizerForClubs v" + KfcShortVersion;
         protected override string KfcFooterHtml => $"<tr><td colspan=\"2\">{KfcFooter}</td> <td colspan=\"2\">{DateHeader}</td></tr>";
-
-
     }
 }

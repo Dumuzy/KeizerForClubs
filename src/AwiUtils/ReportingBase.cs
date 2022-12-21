@@ -136,6 +136,7 @@ namespace AwiUtils
 
     public class TableW2Headers : ISimpleTable
     {
+        public TableW2Headers(string header1) => Header1 = header1;
         public string Header1, Header2;
         public void AddRow(Li<string> row) => rows.Add(row);
         public int Count => rows.Count;

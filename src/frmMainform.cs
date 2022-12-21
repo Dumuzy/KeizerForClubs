@@ -307,7 +307,7 @@ lower this number, the closer are Keizer system and Swiss system.
         private void MnuListenPairingClick(object sender, EventArgs e)
         {
             IncNumClicks(SQLiteIntf.fGetPlayerCount() / 2);
-            new cReportingUnit(sTurniername).fReport_Paarungen(Convert.ToInt16(this.numRoundSelect.Value), SQLiteIntf);
+            new cReportingUnit(sTurniername, SQLiteIntf).fReport_Paarungen(Convert.ToInt16(this.numRoundSelect.Value));
         }
 
         private void MnuListenStandingClick(object sender, EventArgs e)
@@ -316,10 +316,10 @@ lower this number, the closer are Keizer system and Swiss system.
             this.ranking.AllPlayersAllRoundsCalculate();
             //SQLiteIntf.EndeTransaktion();
             IncNumClicks(SQLiteIntf.fGetPlayerCount());
-            new cReportingUnit(this.sTurniername).fReport_Tabellenstand(this.SQLiteIntf);
+            new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_Tabellenstand();
         }
 
-        private void MnuListenParticipantsClick(object sender, EventArgs e) => new cReportingUnit(this.sTurniername).fReport_Teilnehmer(this.SQLiteIntf);
+        private void MnuListenParticipantsClick(object sender, EventArgs e) => new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_Teilnehmer();
 
         private void TbBonusValueChanged(object sender, EventArgs e)
         {
