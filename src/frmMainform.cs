@@ -9,7 +9,8 @@ namespace KeizerForClubs
 {
     public class frmMainform : Form
     {
-        private cSqliteInterface SQLiteIntf = new cSqliteInterface();
+        private readonly cSqliteInterface SQLiteIntf = new cSqliteInterface();
+        private readonly RankingCalculator ranking;
         private string sTurniername = "";
         private int iPairingRekursionCnt;
         private int iPairingPlayerCntAll;
@@ -29,6 +30,7 @@ namespace KeizerForClubs
         private ToolStripMenuItem mnuListenPairing;
         private NumericUpDown numRoundsGameRepeat;
         private ComboBox ddlRatioFirst2Last;
+        private ToolTip tooltip;
         private Label lblRoundsGameRepeat, lblOutputTo, lblRatioFirst2Last;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
@@ -51,7 +53,7 @@ namespace KeizerForClubs
         private OpenFileDialog dlgOpenTournament;
         private DataGridViewComboBoxColumn colPairingResult;
         private DataGridViewComboBoxColumn colPlayerState;
-        private TrackBar tbBonusExcused, tbBonusUnexcused, tbBonusHindered, tbBonusRetired;
+        internal TrackBar tbBonusExcused, tbBonusUnexcused, tbBonusHindered, tbBonusRetired;
         private Label lblBonusExcused, lblBonusUnexcused, lblBonusClubgame, lblBonusRetired;
         private TabPage tabSettings;
         private DataGridViewTextBoxColumn colPairingAddInfoB;
@@ -79,6 +81,7 @@ namespace KeizerForClubs
             Args = args;
             CopyCfgDocsExport();
             InitializeComponent();
+            ranking = new RankingCalculator(SQLiteIntf, this);
             donateButton1 = new DonateButton(btDonate1, ReadDonated(), () => numClicks, 50, () => true, 20);
             donateButton2 = new DonateButton(btDonate2, ReadDonated(), () => numClicks, 120, () => true, 20);
             IncNumClicks();
@@ -123,6 +126,16 @@ namespace KeizerForClubs
             ddlRatioFirst2Last.CreateControl();  // Without this CreateControl, the following SelectedIndex= crashes. God knows why. 
             if (idx != ddlRatioFirst2Last.SelectedIndex)
                 ddlRatioFirst2Last.SelectedIndex = idx;
+            var ttddl = @"In the Keizer-System, a win against the first-ranked player 
+gets more points than a win against the other players. This value 
+is the points you'd get for a win against the first ranked player 
+divided by the points you'd get against the last ranked player. The 
+lower this number, the closer are Keizer system and Swiss system. 
+3 is the default.";
+            this.tooltip.SetToolTip(this.ddlRatioFirst2Last, ttddl);
+            this.tooltip.SetToolTip(this.lblRatioFirst2Last, ttddl);
+            this.tooltip.AutomaticDelay = 2000;
+            this.tooltip.InitialDelay = 200;
             chkHtml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Html");
             chkXml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Xml");
             chkTxt.Checked = SQLiteIntf.fGetConfigBool("OPTION.Txt");
@@ -145,7 +158,8 @@ namespace KeizerForClubs
         {
             frmLangSelect frmLangSelect = new frmLangSelect(SQLiteIntf.cLangCode);
             int num1 = (int)frmLangSelect.ShowDialog();
-            SQLiteIntf.cLangCode = !frmLangSelect.radEnglisch.Checked ? (!frmLangSelect.radDeutsch.Checked ? "NL" : "DE") : "EN";
+            SQLiteIntf.cLangCode = !frmLangSelect.radEnglisch.Checked ?
+                (!frmLangSelect.radDeutsch.Checked ? "NL" : "DE") : "EN";
             SQLiteIntf.fSetConfigText("LANGCODE", SQLiteIntf.cLangCode);
         }
 
@@ -211,8 +225,6 @@ namespace KeizerForClubs
         void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.FAQ.%LNG%.%X%");
 
         void NumRoundSelectValueChanged(object sender, EventArgs e) => fLoadPairingList();
-
-        void CalcRankingToolStripMenuItemClick(object sender, EventArgs e) => fRanking_AllPlayersAllRoundsCalculate();
 
         void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
@@ -301,7 +313,7 @@ namespace KeizerForClubs
         private void MnuListenStandingClick(object sender, EventArgs e)
         {
             //SQLiteIntf.BeginnTransaktion();
-            this.fRanking_AllPlayersAllRoundsCalculate();
+            this.ranking.AllPlayersAllRoundsCalculate();
             //SQLiteIntf.EndeTransaktion();
             IncNumClicks(SQLiteIntf.fGetPlayerCount());
             new cReportingUnit(this.sTurniername).fReport_Tabellenstand(this.SQLiteIntf);
@@ -438,134 +450,6 @@ namespace KeizerForClubs
             }
         }
 
-        /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>
-        private void fRanking_AllPlayersAllRoundsCalculate()
-        {
-            cReportingUnit cReportingUnit = null; //  new cReportingUnit(sTurniername);
-            cReportingUnit?.DeleteDump();
-            int maxRound = SQLiteIntf.fGetMaxRound();
-
-            SQLiteIntf.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
-            this.fRanking_AllPlayersSetInitialStartPts(); // Keizer_StartPts in die DB setzen.
-            this.fRanking_AllPlayersSetKeizerSumPts();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
-            cReportingUnit?.DebugPairingsAndStandings(SQLiteIntf, 0);
-            // If nExtraRecursions is > 0, at the end of the calculation, that many
-            // extra rounds of calculation are appended. 
-            int nExtraRecursions = 0;  
-            for (int runde1 = 1; runde1 <= maxRound; ++runde1)
-            {
-                SQLiteIntf.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
-                for (int runde2 = 1; runde2 <= runde1; ++runde2)
-                    this.fRanking_OneRoundAllPairingsSetKeizerPts(runde2);
-                this.fRanking_AllPlayersSetKeizerSumPts();
-                this.fRanking_AllPlayersSetRankAndStartPts();
-                cReportingUnit?.DebugPairingsAndStandings(SQLiteIntf, runde1);
-                if (runde1 == maxRound && nExtraRecursions-- > 0)
-                    --runde1;
-            }
-        }
-
-        /// <summary> Gibt die Keizer-Start-Pts für den 1. Spieler zurück. </summary>
-        int FirstStartPts(int playerCount)
-        {
-            // ratioFirst2Last: Ein Sieg gegen den 1. in der Tabelle zählt ratioFirst2Last mal soviel wie gegen den letzten. 
-            // ratioFirst2Last = 3 ist das was üblicherweise beim Keizersystem empfohlen wird. 
-            // Kleinere Zahlen scheinen mir angemessener.
-            // Verwendet in fRanking_Init und fRankingCalcRanks.
-            var ratioFirst2Last = SQLiteIntf.fGetConfigFloat("OPTION.RatioFirst2Last", 3);
-            double firstStartPtsFaktor = ratioFirst2Last / (ratioFirst2Last - 1);
-            return Convert.ToInt32((playerCount - 1) * firstStartPtsFaktor);
-        }
-
-        /// <summary> Das ist die Funktion, die die anfänglichen Keizer-Punkte verteilt. </summary>
-        private void fRanking_AllPlayersSetInitialStartPts()
-        {
-            cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerCount = SQLiteIntf.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY rating desc ");
-            int firstStartPts = FirstStartPts(playerCount);
-            for (int index = 0; index < playerCount; ++index)
-            {
-                SQLiteIntf.fUpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, firstStartPts);
-                --firstStartPts;
-            }
-        }
-
-        /// <summary> Berechnet die Keizer-Punkt-Summe aller Spieler anhand der in der DB stehende Punkte 
-        /// für die Spiele und schreibt die Summen in die DB. </summary>
-        private void fRanking_AllPlayersSetKeizerSumPts()
-        {
-            cSqliteInterface.stPlayer[] players = new cSqliteInterface.stPlayer[100];
-            int playerCount = SQLiteIntf.fGetPlayerList(ref players, "", " ");
-            for (int index = 0; index < playerCount; ++index)
-                players[index].Keizer_SumPts = SQLiteIntf.fGetPlayer_PunktSumme(players[index].id);
-            for (int index = 0; index < playerCount; ++index)
-                SQLiteIntf.fUpdPlayer_KeizerSumPts(players[index].id, players[index].Keizer_SumPts);
-        }
-
-        /// <summary> For all players: calc his current rank and set the rank and the resulting 
-        /// Keizer_StartPts into the DB. </summary>
-        private void fRanking_AllPlayersSetRankAndStartPts()
-        {
-            cSqliteInterface.stPlayer[] players = new cSqliteInterface.stPlayer[100];
-            int playerCount = SQLiteIntf.fGetPlayerList(ref players, " WHERE state NOT IN (9) ",
-                " ORDER BY Keizer_SumPts desc, rating desc ");
-            int firstStartPts = FirstStartPts(playerCount);
-            for (int index = 0; index < playerCount; ++index)
-            {
-                SQLiteIntf.fUpdPlayer_SetRankAndStartPts(players[index].id, index + 1, firstStartPts);
-                --firstStartPts;
-            }
-        }
-
-        /// <summary> Setzt für eine Runde für alle Bretter die KeizerPts in die DB. </summary>
-        /// <returns>false, wenn keine Runden da sind, true sonst. </returns>
-        /// <remarks> Die Punkte sind bei Sieg gleich der momentanen Keizer_StartPts der Gegner. </remarks>
-        private bool fRanking_OneRoundAllPairingsSetKeizerPts(int runde)
-        {
-            cSqliteInterface.stPairing[] pList1 = new cSqliteInterface.stPairing[50];
-            cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
-            cSqliteInterface.stPlayer[] pList3 = new cSqliteInterface.stPlayer[1];
-            int pairingCnt = SQLiteIntf.fGetPairingList(ref pList1, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
-            if (pairingCnt == 0)
-                return false;
-            for (int index = 0; index < pairingCnt; ++index)
-            {
-                float erg_w = 0.0f;
-                float erg_s = 0.0f;
-                SQLiteIntf.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList1[index].id_w, " ");
-                SQLiteIntf.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList1[index].id_b, " ");
-                if (pList1[index].result == cSqliteInterface.eResults.eWin_White)
-                    erg_w = pList3[0].Keizer_StartPts;
-                else if (pList1[index].result == cSqliteInterface.eResults.eDraw)
-                {
-                    erg_w = pList3[0].Keizer_StartPts / 2f;
-                    erg_s = pList2[0].Keizer_StartPts / 2f;
-                }
-                else if (pList1[index].result == cSqliteInterface.eResults.eWin_Black)
-                    erg_s = pList2[0].Keizer_StartPts;
-                else if (pList1[index].result == cSqliteInterface.eResults.eExcused)
-                    erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)this.tbBonusExcused.Value / 100.0);
-                else if (pList1[index].result == cSqliteInterface.eResults.eUnexcused)
-                    erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)this.tbBonusUnexcused.Value / 100.0);
-                else if (pList1[index].result == cSqliteInterface.eResults.eHindered)
-                    erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)this.tbBonusHindered.Value / 100.0);
-                else if (pList1[index].result == cSqliteInterface.eResults.eFreeWin)
-                    erg_w = pList2[0].Keizer_StartPts / 2f;
-                if (pList2[0].state == cSqliteInterface.ePlayerState.eRetired)
-                {
-                    erg_s = (float)((double)pList3[0].Keizer_StartPts * (double)this.tbBonusRetired.Value / 100.0);
-                    erg_w = 0.0f;
-                }
-                if (pList3[0].state == cSqliteInterface.ePlayerState.eRetired)
-                {
-                    erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)this.tbBonusRetired.Value / 100.0);
-                    erg_s = 0.0f;
-                }
-                SQLiteIntf.fUpdPairingValues(runde, pList1[index].board, erg_w, erg_s);
-            }
-            return true;
-        }
-
         private bool fExecutePairing()
         {
             this.iPairingPlayerCntAvailable = SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList);
@@ -576,7 +460,7 @@ namespace KeizerForClubs
                     this.iPairingMinFreeCnt = this.pPairingPlayerList[index].FreeCnt;
             }
             SQLiteIntf.BeginnTransaktion();
-            this.fRanking_AllPlayersAllRoundsCalculate();
+            this.ranking.AllPlayersAllRoundsCalculate();
             this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
             var currRunde = SQLiteIntf.fGetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             this.iPairingRekursionCnt = 0;
@@ -820,6 +704,7 @@ namespace KeizerForClubs
             this.lblOutputTo = new Label();
             this.numRoundsGameRepeat = new NumericUpDown();
             this.ddlRatioFirst2Last = new ComboBox();
+            this.tooltip = new ToolTip();
             this.chkFreilosVerteilen = new CheckBox();
             this.chkHtml = new CheckBox();
             this.chkXml = new CheckBox();
@@ -1063,7 +948,7 @@ namespace KeizerForClubs
             this.lblRatioFirst2Last.Text = "# Rounds before paired again";
             this.ddlRatioFirst2Last.Location = new Point(570, 262);
             this.ddlRatioFirst2Last.Size = new Size(40, 21);
-            List<float> list = new List<float>(new float[] { 3, 2.5f, 2, 1.5f, 1.2f });
+            List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f });
             this.ddlRatioFirst2Last.DataSource = list;
 
             this.lblRoundsGameRepeat.Location = new Point(44, 264);
