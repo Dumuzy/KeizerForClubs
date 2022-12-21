@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.SQLite;
+using AwiUtils;
 
 namespace KeizerForClubs
 {
@@ -616,12 +617,15 @@ namespace KeizerForClubs
             var s = fLocl_GetGameResultText(result);
             if (s.StartsWith("-") || s.StartsWith("+"))
             {
-                s = s.Substring(3, s.Length - 4);
-                s = s.Substring(0, 4);
-                if (s == "ents" || s == "unen")
-                    s = "fehl";
-                if (s == "Frei")
-                    s = "frei";
+                if (s.Length >= 5)
+                {
+                    s = s.Substring(3, s.Length - 4);
+                    s = s.Truncate(4, null);
+                    if (s == "ents" || s == "unen")
+                        s = "fehl";
+                    if (s == "Frei")
+                        s = "frei";
+                }
             }
             return s;
         }
