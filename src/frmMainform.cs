@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Text;
 using System.Windows.Forms;
@@ -505,37 +506,67 @@ lower this number, the closer are Keizer system and Swiss system.
                 return true;
             for (int index1 = 0; index1 < this.iPairingPlayerCntAll; ++index1)
             {
-                if (this.pPairingPlayerList[index1].state == cSqliteInterface.ePlayerState.eAvailable)
+                ref cSqliteInterface.stPlayer player1 = ref this.pPairingPlayerList[index1];
+                if (player1.state == cSqliteInterface.ePlayerState.eAvailable)
                 {
-                    this.pPairingPlayerList[index1].state = cSqliteInterface.ePlayerState.ePaired;
+                    player1.state = cSqliteInterface.ePlayerState.ePaired;
                     for (int index2 = 0; index2 < this.iPairingPlayerCntAll; ++index2)
                     {
-                        if (index1 != index2 && this.pPairingPlayerList[index2].state ==
-                            cSqliteInterface.ePlayerState.eAvailable
-                            && !SQLiteIntf.fGetPairing_CheckVorhanden(minrunde, this.pPairingPlayerList[index1].id,
-                                    this.pPairingPlayerList[index2].id))
+                        ref cSqliteInterface.stPlayer player2 = ref this.pPairingPlayerList[index2];
+
+                        if (index1 != index2 && player2.state == cSqliteInterface.ePlayerState.eAvailable
+                            && SQLiteIntf.fCountPairingVorhandenSince(minrunde, player1.id, player2.id) == 0)
                         {
-                            this.pPairingPlayerList[index2].state = cSqliteInterface.ePlayerState.ePaired;
-                            if (SQLiteIntf.fGetPlayerFarbzaehlung(this.pPairingPlayerList[index1].id) >=
-                                SQLiteIntf.fGetPlayerFarbzaehlung(this.pPairingPlayerList[index2].id))
+                            player2.state = cSqliteInterface.ePlayerState.ePaired;
+                            int p1WeissPlus = SQLiteIntf.fGetPlayerWeissUeberschuss(player1.id);
+                            int p2WeissPlus = SQLiteIntf.fGetPlayerWeissUeberschuss(player2.id);
+                            if (p1WeissPlus > p2WeissPlus)
                             {
-                                this.pPairingList[brett].id_w = this.pPairingPlayerList[index2].id;
-                                this.pPairingList[brett].id_b = this.pPairingPlayerList[index1].id;
+                                this.pPairingList[brett].id_w = player2.id;
+                                this.pPairingList[brett].id_b = player1.id;
+                            }
+                            else if (p1WeissPlus < p2WeissPlus)
+                            {
+                                this.pPairingList[brett].id_w = player1.id;
+                                this.pPairingList[brett].id_b = player2.id;
                             }
                             else
-                            {
-                                this.pPairingList[brett].id_w = this.pPairingPlayerList[index1].id;
-                                this.pPairingList[brett].id_b = this.pPairingPlayerList[index2].id;
+                            {  // WeissPlus Gleichheit. 
+                                var nplayed = SQLiteIntf.fCountPairingVorhandenSince(0, player1.id, player2.id);
+                                if (nplayed % 2 == 0)
+                                {
+                                    // Falls die zwei noch nie oder eine grade Anzahl Male gegeneinander gspielt haben, 
+                                    // kriegt der weiter vorne in der Rangliste schwarz. 
+                                    this.pPairingList[brett].id_w = player2.id;
+                                    this.pPairingList[brett].id_b = player1.id;
+                                }
+                                else
+                                {
+                                    // Falls die zwei eine ungrade Anzahl Male gegeneinander gspielt haben, 
+                                    // werden die Farben vertauscht.
+                                    var cntPlayer1W = SQLiteIntf.fCountPairingVorhandenSinceOneWay(0, player1.id, player2.id);
+                                    var cntPlayer2W = nplayed - cntPlayer1W;
+                                    if (cntPlayer1W > cntPlayer2W)
+                                    {
+                                        this.pPairingList[brett].id_w = player2.id;
+                                        this.pPairingList[brett].id_b = player1.id;
+                                    }
+                                    else
+                                    {
+                                        this.pPairingList[brett].id_w = player1.id;
+                                        this.pPairingList[brett].id_b = player2.id;
+                                    }
+                                }
                             }
-                            Debug.WriteLine($"fPairingRekursion brett:{brett} paired:{pPairingPlayerList[index1].name} vs {pPairingPlayerList[index2].name}");
+                            Debug.WriteLine($"fPairingRekursion brett:{brett} paired:{player1.name} vs {player2.name}");
                             if (this.fPairingRekursion(brett + 1, currRunde))
                                 return true;
-                            this.pPairingPlayerList[index2].state = cSqliteInterface.ePlayerState.eAvailable;
+                            player2.state = cSqliteInterface.ePlayerState.eAvailable;
                             if (this.iPairingRekursionCnt > 100000)
                                 return false;
                         }
                     }
-                    this.pPairingPlayerList[index1].state = cSqliteInterface.ePlayerState.eAvailable;
+                    player1.state = cSqliteInterface.ePlayerState.eAvailable;
                 }
             }
             return false;

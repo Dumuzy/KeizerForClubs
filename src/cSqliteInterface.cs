@@ -10,7 +10,6 @@ namespace KeizerForClubs
         private SQLiteConnection SQLiteMyDB;
         private SQLiteTransaction SQLiteMyTrans;
         private SQLiteCommand sqlCommand;
-        private SQLiteCommand sqlCmdCheckVorhanden;
 
 
         public enum ePlayerState
@@ -75,16 +74,6 @@ namespace KeizerForClubs
         {
             SQLiteMyDB = new SQLiteConnection("");
             sqlCommand = new SQLiteCommand(SQLiteMyDB);
-            sqlCmdCheckVorhanden = new SQLiteCommand(SQLiteMyDB);
-            sqlCmdCheckVorhanden.CommandText =
-                " SELECT Rnd FROM Pairing " +
-                "  WHERE Rnd>=@pMinrunde  " +
-                " AND ( (PID_W=@pID_W AND PID_B=@pID_B ) OR " +
-                "       (PID_B=@pID_W AND PID_W=@pID_B ) " +
-                "     );";
-            sqlCmdCheckVorhanden.Parameters.Add("pMinrunde", DbType.Decimal);
-            sqlCmdCheckVorhanden.Parameters.Add("pID_W", DbType.Decimal);
-            sqlCmdCheckVorhanden.Parameters.Add("pID_B", DbType.Decimal);
         }
 
         public void BeginnTransaktion() => SQLiteMyTrans = SQLiteMyDB.BeginTransaction();
@@ -280,9 +269,8 @@ namespace KeizerForClubs
         }
 
         // Farbverteilung eines Spieler abfragen:
-        //  rc >0: rc mehr Weiß- als Schwarzpartien 
-        //  rc <0: rc mehr Schwarz- als Weißpartien 
-        public int fGetPlayerFarbzaehlung(int ID)
+        //  Gibt die Differenz aus Weiß- und Schwarzpartien des Spielers zurück. 
+        public int fGetPlayerWeissUeberschuss(int ID)
         {
             int playerFarbzaehlung = 0;
             string str = ID.ToString();
@@ -455,24 +443,33 @@ namespace KeizerForClubs
             return true;
         }
 
-        // Prüft, ob die Paarung IDW-IDS in den Runden 
-        //  seit Minrunde schon vorkam.
-        //  Umgekehrte Farben werden mitgeprüft.
-        // 
-        //  RC=TRUE: Paarung vorhanden.
-        public bool fGetPairing_CheckVorhanden(int minrunde, int idw, int ids)
+        // Gibt die Anzahl der Paarungen idw - idb seit minrunde zurück. 
+        // Umgedrehte Farben werden nicht berücksichtigt. 
+        public int fCountPairingVorhandenSinceOneWay(int minrunde, int idw, int ids)
         {
-            bool pairingCheckVorhanden = false;
+            SQLiteCommand sqlCmdCheckVorhanden = new SQLiteCommand(SQLiteMyDB);
+            sqlCmdCheckVorhanden.CommandText = " SELECT Count(1) FROM Pairing " +
+                    "  WHERE Rnd>=@pMinrunde AND (PID_W=@pID_W AND PID_B=@pID_B)  ;";
+            sqlCmdCheckVorhanden.Parameters.Add("pMinrunde", DbType.Decimal);
+            sqlCmdCheckVorhanden.Parameters.Add("pID_W", DbType.Decimal);
+            sqlCmdCheckVorhanden.Parameters.Add("pID_B", DbType.Decimal);
+
             sqlCmdCheckVorhanden.Parameters[0].Value = (object)minrunde;
             sqlCmdCheckVorhanden.Parameters[1].Value = (object)idw;
             sqlCmdCheckVorhanden.Parameters[2].Value = (object)ids;
             sqlCmdCheckVorhanden.Prepare();
-            using (SQLiteDataReader sqLiteDataReader = sqlCmdCheckVorhanden.ExecuteReader())
-            {
-                pairingCheckVorhanden = sqLiteDataReader.HasRows;
-                sqLiteDataReader.Close();
-            }
-            return pairingCheckVorhanden;
+
+            int n = Helper.ToInt(sqlCmdCheckVorhanden.ExecuteScalar());
+            return n;
+        }
+
+        // Gibt die Anzahl der Paarungen idw - idb seit minrunde zurück. 
+        // Umgedrehte Farben werden mitgezählt.
+        public int fCountPairingVorhandenSince(int minrunde, int idw, int ids)
+        {
+            int n = fCountPairingVorhandenSinceOneWay(minrunde, idw, ids);
+            n += fCountPairingVorhandenSinceOneWay(minrunde, ids, idw);
+            return n;
         }
 
         public int fGetPairingList(ref cSqliteInterface.stPairing[] pList, string sWhere, string sSortorder)
