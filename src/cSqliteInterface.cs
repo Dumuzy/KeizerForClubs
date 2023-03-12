@@ -43,7 +43,7 @@ namespace KeizerForClubs
         {
             public int id;
             public string name;
-            public int rating; 
+            public int rating;
             public int RatingWDelta;  // Original Rating plus delta, if FirstRoundRandom.
             public int rank;
             public ePlayerState state;
@@ -351,18 +351,32 @@ namespace KeizerForClubs
             return Convert.ToSingle(sqlCommand.ExecuteScalar());
         }
 
+        private bool HasColumn(string tableName, string colName)
+        {
+            bool ok = false;
+            sqlCommand.CommandText = $"pragma table_info('{tableName}')";
+            using (SQLiteDataReader reader = sqlCommand.ExecuteReader())
+                if (reader.HasRows)
+                    while (!ok && reader.Read())
+                    {
+                        var col = reader.GetString(1);
+                        if (col == colName)
+                            ok = true;
+                    }
+            return ok;
+        }
+
         private void fAddRatingWDeltaColIfNeeded()
         {
-            var dbvers = this.fGetConfigInt("INTERNAL.DBVersion", 0);
-            if (dbvers < 1)
+            bool hasCol = HasColumn("Player", "RatingWDelta");
+            if (!hasCol)
             {
                 try
                 {
                     sqlCommand.CommandText = "ALTER TABLE Player ADD COLUMN RatingWDelta INT NOT NULL DEFAULT '0'";
                     sqlCommand.ExecuteNonQuery();
-                    fSetConfigInt("INTERNAL.DBVersion", 1);
                 }
-                catch (Exception) 
+                catch (Exception)
                 {
                     // Might be the column already exists. 
                 }
