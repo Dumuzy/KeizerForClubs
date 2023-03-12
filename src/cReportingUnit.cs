@@ -149,7 +149,7 @@ namespace KeizerForClubs
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
             var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
             for (int i = 0; i < maxRound; ++i)
-                thead.Add("R " + i);
+                thead.Add("R " + (i + 1));
             t.AddRow(thead);
             for (int index1 = 0, numPlayer = 1; index1 < nPlayer; ++index1)
             {

@@ -1,5 +1,6 @@
 rem
-rem     This script packs together a Keizer_...zip package.
+rem     This script packs together a Keizer_...zip package. 
+rem     It uses the  executables from the bin\Release-directory. 
 rem     It takes the version number from KFC2.csproj. 
 rem     To work, this script needs   tclsh.exe and 7za.exe in PATH. 
 
