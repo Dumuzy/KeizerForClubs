@@ -16,7 +16,7 @@
             int maxRound = db.fGetMaxRound();
 
             db.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
-            this.AllPlayersSetInitialStartPts(); // Keizer_StartPts in die DB setzen.
+            this.AllPlayersSetInitialStartPts(maxRound + 1); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPts();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
             // If nExtraRecursions is > 0, at the end of the calculation, that many
@@ -48,10 +48,13 @@
         }
 
         /// <summary> Das ist die Funktion, die die anfänglichen Keizer-Punkte verteilt. </summary>
-        private void AllPlayersSetInitialStartPts()
+        /// <param name="currRunde"> Momentan auszulosende Runde, 1-basiert. </param>
+        private void AllPlayersSetInitialStartPts(int currRunde)
         {
+            var firstRoundRandom = currRunde != 1 ? 0 : db.fGetConfigInt("OPTION.FirstRoundRandom", 0) ;
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerCount = db.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", " ORDER BY rating desc ");
+            var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
+            int playerCount = db.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", $" ORDER BY {order} desc ");
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {

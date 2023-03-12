@@ -43,7 +43,8 @@ namespace KeizerForClubs
         {
             public int id;
             public string name;
-            public int rating;
+            public int rating; 
+            public int RatingWDelta;  // Original Rating plus delta, if FirstRoundRandom.
             public int rank;
             public ePlayerState state;
             public float Keizer_StartPts;
@@ -120,6 +121,7 @@ namespace KeizerForClubs
             sqlCommand.CommandText = " ATTACH 'cfg\\KeizerForClubs.config.s3db' AS config_db ";
             sqlCommand.ExecuteNonQuery();
             cLangCode = fGetConfigText("LANGCODE");
+            this.fAddRatingWDeltaColIfNeeded();
             return true;
         }
 
@@ -176,12 +178,14 @@ namespace KeizerForClubs
             return Convert.ToString(sqlCommand.ExecuteScalar());
         }
 
-        public int fGetConfigInt(string key)
+        public int fGetConfigInt(string key, int? defaultVal = null)
         {
             sqlCommand.CommandText = " SELECT CfgValue FROM config_db.ConfigTab  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Prepare();
-            return Convert.ToInt32(sqlCommand.ExecuteScalar());
+            var res = sqlCommand.ExecuteScalar();
+            int val = res == null ? defaultVal.Value : Convert.ToInt32(res);
+            return val;
         }
 
         public bool fGetConfigBool(string key) => fGetConfigInt(key) != 0;
@@ -214,6 +218,16 @@ namespace KeizerForClubs
             sqlCommand.Parameters.AddWithValue("pName", name);
             sqlCommand.Parameters.AddWithValue("pRtg", rtg);
             sqlCommand.Parameters.AddWithValue("pState", status);
+            sqlCommand.Parameters.AddWithValue("pID", id);
+            sqlCommand.Prepare();
+            sqlCommand.ExecuteNonQuery();
+            return true;
+        }
+
+        public bool fUpdPlayerRatingWDelta(int id, int rtgWDelta)
+        {
+            sqlCommand.CommandText = " UPDATE Player  SET RatingWDelta=@pRtg  WHERE ID=@pID ";
+            sqlCommand.Parameters.AddWithValue("pRtg", rtgWDelta);
             sqlCommand.Parameters.AddWithValue("pID", id);
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
@@ -335,6 +349,24 @@ namespace KeizerForClubs
             sqlCommand.Parameters.AddWithValue("pID", (object)ID);
             sqlCommand.Prepare();
             return Convert.ToSingle(sqlCommand.ExecuteScalar());
+        }
+
+        private void fAddRatingWDeltaColIfNeeded()
+        {
+            var dbvers = this.fGetConfigInt("INTERNAL.DBVersion", 0);
+            if (dbvers < 1)
+            {
+                try
+                {
+                    sqlCommand.CommandText = "ALTER TABLE Player ADD COLUMN RatingWDelta INT NOT NULL DEFAULT '0'";
+                    sqlCommand.ExecuteNonQuery();
+                    fSetConfigInt("INTERNAL.DBVersion", 1);
+                }
+                catch (Exception) 
+                {
+                    // Might be the column already exists. 
+                }
+            }
         }
 
         #endregion Player
@@ -511,7 +543,8 @@ namespace KeizerForClubs
             string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
                                 WHERE result in (4,5,6,7) GROUP BY pid_w) f on f.PID_W = p.id ";
             int playerCount = 0;
-            sqlCommand.CommandText = @" SELECT p.id, p.name, p.rating, p.state, p.Keizer_StartPts, p.Keizer_SumPts, p.rank, f.frei FROM Player p 
+            sqlCommand.CommandText = @" SELECT p.id, p.name, p.rating, p.state, p.Keizer_StartPts, p.Keizer_SumPts, 
+                                p.rank, f.frei, p.ratingWDelta FROM Player p 
                                 " + sFrei + sWhere + sSortorder;
             using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
             {
@@ -530,6 +563,7 @@ namespace KeizerForClubs
                             pList[playerCount].Keizer_SumPts = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
                             pList[playerCount].rank = sqLiteDataReader.IsDBNull(6) ? 0 : (int)sqLiteDataReader.GetInt16(6);
                             pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
+                            pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
 
                             ++playerCount;
                         }

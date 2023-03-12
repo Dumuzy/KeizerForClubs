@@ -30,9 +30,9 @@ namespace KeizerForClubs
         private ToolStripMenuItem mnuListenStanding;
         private ToolStripMenuItem mnuListenPairing;
         private NumericUpDown numRoundsGameRepeat;
-        private ComboBox ddlRatioFirst2Last;
+        private ComboBox ddlRatioFirst2Last, ddlFirstRoundRandom;
         private ToolTip tooltip;
-        private Label lblRoundsGameRepeat, lblOutputTo, lblRatioFirst2Last;
+        private Label lblRoundsGameRepeat, lblOutputTo, lblRatioFirst2Last, lblFirstRoundRandom;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
         private CheckBox chkFreilosVerteilen;
@@ -76,6 +76,7 @@ namespace KeizerForClubs
         private DonateButton donateButton1, donateButton2;
         private int numClicks;
         private readonly string[] Args;
+        private readonly Random random = new Random();
 
         public frmMainform(string[] args)
         {
@@ -122,6 +123,7 @@ namespace KeizerForClubs
             chkFreilosVerteilen.Checked = SQLiteIntf.fGetConfigBool("OPTION.DistBye");
             chkPairingOnlyPlayed.Checked = SQLiteIntf.fGetConfigBool("OPTION.ShowOnlyPlayed");
             numRoundsGameRepeat.Value = (Decimal)SQLiteIntf.fGetConfigInt("OPTION.GameRepeat");
+
             var ratio = SQLiteIntf.fGetConfigFloat("OPTION.RatioFirst2Last", 3);
             var idx = (ddlRatioFirst2Last.DataSource as List<float>).IndexOf(ratio);
             ddlRatioFirst2Last.CreateControl();  // Without this CreateControl, the following SelectedIndex= crashes. God knows why. 
@@ -137,6 +139,19 @@ lower this number, the closer are Keizer system and Swiss system.
             this.tooltip.SetToolTip(this.lblRatioFirst2Last, ttddl);
             this.tooltip.AutomaticDelay = 2000;
             this.tooltip.InitialDelay = 200;
+
+            var firstRoundRandom = SQLiteIntf.fGetConfigInt("OPTION.FirstRoundRandom", 0);
+            var idxf = (ddlFirstRoundRandom.DataSource as List<int>).IndexOf(firstRoundRandom);
+            ddlFirstRoundRandom.CreateControl();  // Without this CreateControl, the following SelectedIndex= crashes. God knows why. 
+            if (idxf != ddlFirstRoundRandom.SelectedIndex)
+                ddlFirstRoundRandom.SelectedIndex = idxf;
+            var ttddlf = @"In the Keizer-System, the first round would be each time the same with the 
+same players. When setting this value not to 0, the first round colours are random 
+and a random number between 0 and the value is added or subtracted from each players rating 
+for determining the first round pairings.";
+            this.tooltip.SetToolTip(this.ddlFirstRoundRandom, ttddlf);
+            this.tooltip.SetToolTip(this.lblFirstRoundRandom, ttddlf);
+
             chkHtml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Html");
             chkXml.Checked = SQLiteIntf.fGetConfigBool("OPTION.Xml");
             chkTxt.Checked = SQLiteIntf.fGetConfigBool("OPTION.Txt");
@@ -154,6 +169,7 @@ lower this number, the closer are Keizer system and Swiss system.
         private string ReadDBFileName() => inifile.ReadValue("A", "DBFile", "");
         private void SaveDBFileName(string filename) => inifile.WriteValue("A", "DBFile", filename);
         private string ReadDonated() => inifile.ReadValue("A", "Donated", "a");
+
 
         private void fSelectLanguage()
         {
@@ -298,6 +314,7 @@ lower this number, the closer are Keizer system and Swiss system.
                 SQLiteIntf.fSetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
                 SQLiteIntf.fSetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
                 SQLiteIntf.fSetConfigFloat("OPTION.RatioFirst2Last", Helper.ToSingle(ddlRatioFirst2Last.SelectedValue));
+                SQLiteIntf.fSetConfigInt("OPTION.FirstRoundRandom", Helper.ToInt(ddlFirstRoundRandom.SelectedValue));
                 SQLiteIntf.fSetConfigBool("OPTION.Html", this.chkHtml.Checked);
                 SQLiteIntf.fSetConfigBool("OPTION.Xml", this.chkXml.Checked);
                 SQLiteIntf.fSetConfigBool("OPTION.Txt", this.chkTxt.Checked);
@@ -412,6 +429,7 @@ lower this number, the closer are Keizer system and Swiss system.
             numRoundSelect.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
             lblRoundsGameRepeat.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "NumRundeWdh");
             lblRatioFirst2Last.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "First2Last");
+            lblFirstRoundRandom.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "FirstRoundRandom");
             lblOutputTo.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "OutputTo");
             btDonate1.Text = btDonate2.Text = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Donate");
         }
@@ -451,8 +469,25 @@ lower this number, the closer are Keizer system and Swiss system.
             }
         }
 
+        private void fSetFirstRoundRandomRating(int currRunde, int iPairingPlayerCntAvailable)
+        {
+            if (currRunde != 1)
+                return;
+            var firstRoundRandom = SQLiteIntf.fGetConfigInt("OPTION.FirstRoundRandom", 0);
+            for (int rwd = 0, index = 0; index < this.iPairingPlayerCntAvailable; ++index)
+            {
+                if (firstRoundRandom == 0)
+                     rwd = 0;
+                else
+                    rwd = random.Next(-firstRoundRandom, firstRoundRandom) + this.pPairingPlayerList[index].rating;
+                this.pPairingPlayerList[index].RatingWDelta = rwd;
+                SQLiteIntf.fUpdPlayerRatingWDelta(this.pPairingPlayerList[index].id, rwd);
+            }
+        }
+
         private bool fExecutePairing()
         {
+            var currRunde = SQLiteIntf.fGetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             this.iPairingPlayerCntAvailable = SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList);
             this.iPairingMinFreeCnt = 999;
             for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
@@ -460,10 +495,10 @@ lower this number, the closer are Keizer system and Swiss system.
                 if (this.pPairingPlayerList[index].FreeCnt < this.iPairingMinFreeCnt)
                     this.iPairingMinFreeCnt = this.pPairingPlayerList[index].FreeCnt;
             }
+            fSetFirstRoundRandomRating(currRunde, iPairingPlayerCntAvailable);
             SQLiteIntf.BeginnTransaktion();
             this.ranking.AllPlayersAllRoundsCalculate();
             this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
-            var currRunde = SQLiteIntf.fGetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             this.iPairingRekursionCnt = 0;
             if (this.fPairingRekursion(0, currRunde))
             {
@@ -521,24 +556,26 @@ lower this number, the closer are Keizer system and Swiss system.
                             int p1WeissPlus = SQLiteIntf.fGetPlayerWeissUeberschuss(player1.id);
                             int p2WeissPlus = SQLiteIntf.fGetPlayerWeissUeberschuss(player2.id);
                             if (p1WeissPlus > p2WeissPlus)
-                            {
-                                this.pPairingList[brett].id_w = player2.id;
-                                this.pPairingList[brett].id_b = player1.id;
-                            }
+                                fSetPairing2List(brett, player2, player1);
                             else if (p1WeissPlus < p2WeissPlus)
-                            {
-                                this.pPairingList[brett].id_w = player1.id;
-                                this.pPairingList[brett].id_b = player2.id;
-                            }
+                                fSetPairing2List(brett, player1, player2);
                             else
                             {  // WeissPlus Gleichheit. 
                                 var nplayed = SQLiteIntf.fCountPairingVorhandenSince(0, player1.id, player2.id);
+                                // Falls die zwei noch nie oder eine grade Anzahl Male gegeneinander gspielt haben, ...
                                 if (nplayed % 2 == 0)
                                 {
-                                    // Falls die zwei noch nie oder eine grade Anzahl Male gegeneinander gspielt haben, 
-                                    // kriegt der weiter vorne in der Rangliste schwarz. 
-                                    this.pPairingList[brett].id_w = player2.id;
-                                    this.pPairingList[brett].id_b = player1.id;
+                                    // falls erste Runde und FirstRoundRandom, wird die Farbe ausgelost, 
+                                    if (currRunde == 1 && SQLiteIntf.fGetConfigInt("OPTION.FirstRoundRandom") != 0)
+                                    {
+                                        if (random.NextSingle() > 0.5f)
+                                            fSetPairing2List(brett, player2, player1);
+                                        else
+                                            fSetPairing2List(brett, player1, player2);
+                                    }
+                                    else
+                                        // sonst kriegt der weiter vorne in der Rangliste schwarz. 
+                                        fSetPairing2List(brett, player2, player1);
                                 }
                                 else
                                 {
@@ -547,15 +584,9 @@ lower this number, the closer are Keizer system and Swiss system.
                                     var cntPlayer1W = SQLiteIntf.fCountPairingVorhandenSinceOneWay(0, player1.id, player2.id);
                                     var cntPlayer2W = nplayed - cntPlayer1W;
                                     if (cntPlayer1W > cntPlayer2W)
-                                    {
-                                        this.pPairingList[brett].id_w = player2.id;
-                                        this.pPairingList[brett].id_b = player1.id;
-                                    }
+                                        fSetPairing2List(brett, player2, player1);
                                     else
-                                    {
-                                        this.pPairingList[brett].id_w = player1.id;
-                                        this.pPairingList[brett].id_b = player2.id;
-                                    }
+                                        fSetPairing2List(brett, player1, player2);
                                 }
                             }
                             Debug.WriteLine($"fPairingRekursion brett:{brett} paired:{player1.name} vs {player2.name}");
@@ -570,6 +601,13 @@ lower this number, the closer are Keizer system and Swiss system.
                 }
             }
             return false;
+        }
+
+        private void fSetPairing2List(int brett, cSqliteInterface.stPlayer playerWhite,
+            cSqliteInterface.stPlayer playerBlack)
+        {
+            this.pPairingList[brett].id_w = playerWhite.id;
+            this.pPairingList[brett].id_b = playerBlack.id;
         }
 
         private bool fPairingInsertNoPlaying()
@@ -732,9 +770,11 @@ lower this number, the closer are Keizer system and Swiss system.
             this.lblBonus1Value = new Label();
             this.lblRoundsGameRepeat = new Label();
             this.lblRatioFirst2Last = new Label();
+            this.lblFirstRoundRandom = new Label();
             this.lblOutputTo = new Label();
             this.numRoundsGameRepeat = new NumericUpDown();
             this.ddlRatioFirst2Last = new ComboBox();
+            this.ddlFirstRoundRandom = new ComboBox();
             this.tooltip = new ToolTip();
             this.chkFreilosVerteilen = new CheckBox();
             this.chkHtml = new CheckBox();
@@ -928,8 +968,10 @@ lower this number, the closer are Keizer system and Swiss system.
             this.tabSettings.Controls.Add((Control)this.lblBonus1Value);
             this.tabSettings.Controls.Add((Control)this.lblRoundsGameRepeat);
             this.tabSettings.Controls.Add((Control)this.lblRatioFirst2Last);
+            this.tabSettings.Controls.Add((Control)this.lblFirstRoundRandom);
             this.tabSettings.Controls.Add((Control)this.numRoundsGameRepeat);
             this.tabSettings.Controls.Add((Control)this.ddlRatioFirst2Last);
+            this.tabSettings.Controls.Add((Control)this.ddlFirstRoundRandom);
             this.tabSettings.Controls.Add((Control)this.chkFreilosVerteilen);
             this.tabSettings.Controls.Add((Control)this.lblBonusClubgame);
             this.tabSettings.Controls.Add((Control)this.lblBonusUnexcused);
@@ -981,6 +1023,14 @@ lower this number, the closer are Keizer system and Swiss system.
             this.ddlRatioFirst2Last.Size = new Size(40, 21);
             List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f });
             this.ddlRatioFirst2Last.DataSource = list;
+
+            this.lblFirstRoundRandom.Location = new Point(370, 236);
+            this.lblFirstRoundRandom.Size = new Size(200, 23);
+            this.lblFirstRoundRandom.Text = "# First round random";
+            this.ddlFirstRoundRandom.Location = new Point(570, 236);
+            this.ddlFirstRoundRandom.Size = new Size(40, 21);
+            var li = new List<int>(new int[] { 0, 10, 50, 100, 150, 200, 300, 400, 500 });
+            this.ddlFirstRoundRandom.DataSource = li;
 
             this.lblRoundsGameRepeat.Location = new Point(44, 264);
             this.lblRoundsGameRepeat.Name = "lblRoundsGameRepeat";
