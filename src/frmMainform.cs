@@ -27,7 +27,7 @@ namespace KeizerForClubs
         private Label lblBonus3Value;
         private Label lblBonus4Value;
         private ToolStripMenuItem mnuListenParticipants;
-        private ToolStripMenuItem mnuListenStanding;
+        private ToolStripMenuItem mnuListenStanding, mnuListenStandingFull;
         private ToolStripMenuItem mnuListenPairing;
         private NumericUpDown numRoundsGameRepeat;
         private ComboBox ddlRatioFirst2Last, ddlFirstRoundRandom;
@@ -330,11 +330,14 @@ for determining the first round pairings.";
 
         private void MnuListenStandingClick(object sender, EventArgs e)
         {
-            //SQLiteIntf.BeginnTransaktion();
+            SQLiteIntf.BeginnTransaktion();
             this.ranking.AllPlayersAllRoundsCalculate();
-            //SQLiteIntf.EndeTransaktion();
+            SQLiteIntf.EndeTransaktion();
             IncNumClicks(SQLiteIntf.fGetPlayerCount());
-            new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_Tabellenstand();
+            if(sender == mnuListenStanding)
+                new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_Tabellenstand();
+            else if (sender == mnuListenStandingFull)
+                new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_TabellenstandVoll();
         }
 
         private void MnuListenParticipantsClick(object sender, EventArgs e) => new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_Teilnehmer();
@@ -411,6 +414,7 @@ for determining the first round pairings.";
             mnuPaarungDropLast.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Paarung.Drop");
             mnuListen.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen");
             mnuListenStanding.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Calc");
+            mnuListenStandingFull.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.CalcFull");
             mnuListenPairing.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Paarungen");
             mnuListenParticipants.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
             mnuHelp.Text = SQLiteIntf.fLocl_GetText("GUI_MENU", "Hilfe");
@@ -805,6 +809,7 @@ for determining the first round pairings.";
             this.mnuListen = new ToolStripMenuItem();
             this.mnuListenPairing = new ToolStripMenuItem();
             this.mnuListenStanding = new ToolStripMenuItem();
+            this.mnuListenStandingFull = new ToolStripMenuItem();
             this.mnuListenParticipants = new ToolStripMenuItem();
             this.mnuHelp = new ToolStripMenuItem();
             dlgOpenTournament = new OpenFileDialog();
@@ -1223,10 +1228,11 @@ for determining the first round pairings.";
             this.mnuPaarungDropLast.Size = new Size(183, 22);
             this.mnuPaarungDropLast.Text = "Drop last round";
             this.mnuPaarungDropLast.Click += new EventHandler(this.MnuPairingDropLastClick);
-            this.mnuListen.DropDownItems.AddRange(new ToolStripItem[3]
+            this.mnuListen.DropDownItems.AddRange(new ToolStripItem[]
             {
         (ToolStripItem) this.mnuListenPairing,
         (ToolStripItem) this.mnuListenStanding,
+        (ToolStripItem) this.mnuListenStandingFull,
         (ToolStripItem) this.mnuListenParticipants
             });
             this.mnuListen.Enabled = false;
@@ -1241,6 +1247,10 @@ for determining the first round pairings.";
             this.mnuListenStanding.Size = new Size(158, 22);
             this.mnuListenStanding.Text = "Standing";
             this.mnuListenStanding.Click += new EventHandler(this.MnuListenStandingClick);
+            this.mnuListenStandingFull.Name = "mnuListenStandingFull";
+            this.mnuListenStandingFull.Size = new Size(158, 22);
+            this.mnuListenStandingFull.Text = "Standing Full";
+            this.mnuListenStandingFull.Click += new EventHandler(this.MnuListenStandingClick);
             this.mnuListenParticipants.Name = "mnuListenParticipants";
             this.mnuListenParticipants.Size = new Size(158, 22);
             this.mnuListenParticipants.Text = "Participants";

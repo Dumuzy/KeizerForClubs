@@ -80,19 +80,12 @@ namespace KeizerForClubs
                 var table = fReportTabellenstandTable();
                 var fileBase = GetFileTabellenstandBasename();
 
-                var tableVoll = fReportTabellenstandVollTable();
-                var fileBaseVoll = GetFileTabellenstandExBasename();
-
                 if (db.fGetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
                 if (db.fGetConfigBool("OPTION.Csv"))
-                {
-                    ExportAsCsv(tableVoll, fileBaseVoll);
                     ExportAsCsv(table, fileBase);
-                }
                 if (db.fGetConfigBool("OPTION.Html"))
                 {
-                    ExportAsHtml(tableVoll, fileBaseVoll, true);
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
@@ -132,10 +125,33 @@ namespace KeizerForClubs
 
         #region TabellenstandVoll
 
+        public bool fReport_TabellenstandVoll()
+        {
+            try
+            {
+                var tableVoll = fReportTabellenstandVollTable();
+                var fileBaseVoll = GetFileTabellenstandExBasename();
+
+                if (db.fGetConfigBool("OPTION.Csv"))
+                    ExportAsCsv(tableVoll, fileBaseVoll);
+                if (db.fGetConfigBool("OPTION.Html"))
+                {
+                    var file = ExportAsHtml(tableVoll, fileBaseVoll, true);
+                    frmMainform.OpenWithDefaultApp(file);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, db.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
+                return false;
+            }
+            return true;
+        }
+
         private string GetFileTabellenstandExBasename() =>
             "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + db.fGetMaxRound();
 
-        public TableW2Headers fReportTabellenstandVollTable()
+        TableW2Headers fReportTabellenstandVollTable()
         {
             var t = new TableW2Headers(sTurnier);
             int maxRound = db.fGetMaxRound();
@@ -293,7 +309,7 @@ namespace KeizerForClubs
         Version Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         string KfcLongVersion => Version.ToString();
         string KfcShortVersion => $"{Version.Major}.{Version.Minor}";
-        protected override string KfcFooter => "KeizerForClubs v" + KfcShortVersion;
+        protected override string KfcFooter => "KeizerForClubs v" + KfcLongVersion;
         protected override string KfcFooterHtml => $"<tr><td colspan=\"2\">{KfcFooter}</td> <td colspan=\"2\">{DateHeader}</td></tr>";
     }
 }
