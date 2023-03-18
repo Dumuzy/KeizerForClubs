@@ -120,6 +120,7 @@ namespace KeizerForClubs
 
             sqlCommand.CommandText = " ATTACH 'cfg\\KeizerForClubs.config.s3db' AS config_db ";
             sqlCommand.ExecuteNonQuery();
+            fCreateConfigTab();
             cLangCode = fGetConfigText("LANGCODE");
             this.fAddRatingWDeltaColIfNeeded();
             return true;
@@ -128,7 +129,7 @@ namespace KeizerForClubs
         #region Config
         public int fSetConfigText(string key, string text)
         {
-            sqlCommand.CommandText = " UPDATE config_db.ConfigTab  SET CfgText= @pCfgTxt  WHERE CfgKey= @pKey ";
+            sqlCommand.CommandText = $" UPDATE {getTable(key)} SET CfgText= @pCfgTxt  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgTxt", text);
             sqlCommand.Prepare();
@@ -137,31 +138,34 @@ namespace KeizerForClubs
 
         public int fSetConfigFloat(string key, float wert)
         {
-            sqlCommand.CommandText = " UPDATE config_db.ConfigTab  SET CfgValue= @pCfgValue  WHERE CfgKey= @pKey ";
+            sqlCommand.CommandText = $" UPDATE {getTable(key)}  SET CfgValue= @pCfgValue  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgValue", wert);
             sqlCommand.Prepare();
             var res = sqlCommand.ExecuteNonQuery();
-            res = fInsertConfigNumberIfNeeded(res);
+            res = fInsertConfigNumberIfNeeded(key, res);
             return res;
         }
 
         public int fSetConfigInt(string key, int wert)
         {
-            sqlCommand.CommandText = " UPDATE config_db.ConfigTab  SET CfgValue= @pCfgValue  WHERE CfgKey= @pKey ";
+            sqlCommand.CommandText = $" UPDATE {getTable(key)} SET CfgValue= @pCfgValue  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgValue", wert);
             sqlCommand.Prepare();
             var res = sqlCommand.ExecuteNonQuery();
-            res = fInsertConfigNumberIfNeeded(res);
+            res = fInsertConfigNumberIfNeeded(key, res);
             return res;
         }
 
-        private int fInsertConfigNumberIfNeeded(int res)
+        private string getTable(string key) => key.StartsWith("INTERNAL.") ? "config_db.ConfigTab" : "ConfigTab";
+        
+
+        private int fInsertConfigNumberIfNeeded(string key, int res)
         {
             if (res == 0)
             {
-                sqlCommand.CommandText = " INSERT INTO config_db.ConfigTab (CfgKey, CfgValue) VALUES (@pKey, @pCfgValue)";
+                sqlCommand.CommandText = $" INSERT INTO {getTable(key)} (CfgKey, CfgValue) VALUES (@pKey, @pCfgValue)";
                 sqlCommand.Prepare();
                 res = sqlCommand.ExecuteNonQuery();
             }
@@ -172,7 +176,7 @@ namespace KeizerForClubs
 
         public string fGetConfigText(string key)
         {
-            sqlCommand.CommandText = " SELECT CfgText FROM config_db.ConfigTab  WHERE CfgKey= @pKey ";
+            sqlCommand.CommandText = $" SELECT CfgText FROM {getTable(key)}  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Prepare();
             return Convert.ToString(sqlCommand.ExecuteScalar());
@@ -180,7 +184,7 @@ namespace KeizerForClubs
 
         public int fGetConfigInt(string key, int? defaultVal = null)
         {
-            sqlCommand.CommandText = " SELECT CfgValue FROM config_db.ConfigTab  WHERE CfgKey= @pKey ";
+            sqlCommand.CommandText = $" SELECT CfgValue FROM {getTable(key)} WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Prepare();
             var res = sqlCommand.ExecuteScalar();
@@ -192,12 +196,27 @@ namespace KeizerForClubs
 
         public float fGetConfigFloat(string key, float defaultVal)
         {
-            sqlCommand.CommandText = " SELECT CfgValue FROM config_db.ConfigTab  WHERE CfgKey= @pKey ";
+            sqlCommand.CommandText = $" SELECT CfgValue FROM {getTable(key)} WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Prepare();
             var res = sqlCommand.ExecuteScalar();
             float val = res == null ? defaultVal : Convert.ToSingle(res);
             return val;
+        }
+
+        private void fCreateConfigTab()
+        {
+            sqlCommand.CommandText = @"CREATE TABLE IF NOT EXISTS ConfigTab (
+	                CfgKey VARCHAR(20) NOT NULL PRIMARY KEY,
+   	                CfgText VARCHAR(5), CfgValue FLOAT); 
+                    Select COUNT(1) from ConfigTab";
+            int n = Helper.ToInt(sqlCommand.ExecuteScalar());
+            if (n == 0)                              {
+                // The table is new and has to be filled. Copy initial values from config_db.
+                sqlCommand.CommandText = @" INSERT INTO ConfigTab SELECT * FROM config_db.ConfigTab 
+                        WHERE CfgKey NOT LIKE 'INTERNAL.%'";
+                sqlCommand.ExecuteNonQuery();
+            }
         }
         #endregion Config
 
