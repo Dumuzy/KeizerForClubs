@@ -116,11 +116,22 @@ namespace AwiUtils
         protected virtual string KfcFooterHtml { get; }
         protected string DateHeader => DateTime.Now.ToShortDateString();
 
+        private string GetCss()
+        {
+            if (css == null)
+                css = File.ReadAllText("export/keizer.css");
+            return css;
+        }
+        static string css = null;
+
+
         protected void AddHtmlHeader(StreamWriter sw, bool isEx = false)
         {
             var ex = isEx ? "ex" : "";
             sw.WriteLine($@"<!DOCTYPE html><html><head>
-                <link rel=""stylesheet"" href=""keizer.css""></head><body><div id=""{ex}wrapper"">");
+                <style>
+                {GetCss()}
+                </style></head><body><div id=""{ex}wrapper"">");
         }
 
         protected void AddHtmlFooter(StreamWriter sw) => sw.WriteLine(@"</div></body></html>");
