@@ -54,12 +54,17 @@
             var firstRoundRandom = currRunde != 1 ? 0 : db.fGetConfigInt("OPTION.FirstRoundRandom", 0);
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
-            int playerCount = db.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", $" ORDER BY {order} desc ");
+            int playerCount = db.fGetPlayerList(ref pList, " ", $" ORDER BY {order} desc ");
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
-                db.fUpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, firstStartPts);
-                --firstStartPts;
+                if (pList[index].state != cSqliteInterface.ePlayerState.eRetired)
+                {
+                    db.fUpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, firstStartPts);
+                    --firstStartPts;
+                }
+                else
+                    db.fUpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, 0);
             }
         }
 

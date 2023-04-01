@@ -163,7 +163,8 @@ namespace KeizerForClubs
 
             string strr = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
-            var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
+            // var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
+            var thead = new Li<string>("Platz Name Keizer-Sum GamePts".Split());
             for (int i = 0; i < maxRound; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
@@ -176,8 +177,8 @@ namespace KeizerForClubs
                     str1.Add("(ret)");
                 string name = pList1[index1].name;
                 str1.Add(name);
-                str1.Add(pList1[index1].rating.ToString());
-                str1.Add(pList1[index1].Keizer_StartPts.ToString());
+                // str1.Add(pList1[index1].rating.ToString());
+                // str1.Add(pList1[index1].Keizer_StartPts.ToString());
                 str1.Add(pList1[index1].Keizer_SumPts.ToString());
                 str1.Add(db.fGetPlayer_PartiePunkte(pList1[index1].id).ToString());
 
@@ -310,6 +311,6 @@ namespace KeizerForClubs
         string KfcLongVersion => Version.ToString();
         string KfcShortVersion => $"{Version.Major}.{Version.Minor}";
         protected override string KfcFooter => "KeizerForClubs v" + KfcLongVersion;
-        protected override string KfcFooterHtml => $"<tr><td colspan=\"2\">{KfcFooter}</td> <td colspan=\"2\">{DateHeader}</td></tr>";
+        protected override string KfcFooterHtml => $"<tr><td colspan=\"3\"><a href=\"https://github.com/Dumuzy/KeizerForClubs/releases\">{KfcFooter}</a></td> <td colspan=\"2\">{DateHeader}</td></tr>";
     }
 }
