@@ -117,21 +117,21 @@
                 else if (pList1[index].result == cSqliteInterface.eResults.eWin_Black)
                     erg_s = pList2[0].Keizer_StartPts;
                 else if (pList1[index].result == cSqliteInterface.eResults.eExcused)
-                    erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)form.tbBonusExcused.Value / 100.0);
+                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusExcused.Value / 100.0f;
                 else if (pList1[index].result == cSqliteInterface.eResults.eUnexcused)
-                    erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)form.tbBonusUnexcused.Value / 100.0);
+                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusUnexcused.Value / 100.0f;
                 else if (pList1[index].result == cSqliteInterface.eResults.eHindered)
-                    erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)form.tbBonusHindered.Value / 100.0);
+                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusClub.Value / 100.0f;
                 else if (pList1[index].result == cSqliteInterface.eResults.eFreeWin)
-                    erg_w = pList2[0].Keizer_StartPts / 2f;
+                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusFreilos.Value / 100.0f;
                 if (pList2[0].state == cSqliteInterface.ePlayerState.eRetired)
                 {
-                    erg_s = (float)((double)pList3[0].Keizer_StartPts * (double)form.tbBonusRetired.Value / 100.0);
+                    erg_s = pList3[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
                     erg_w = 0.0f;
                 }
                 if (pList3[0].state == cSqliteInterface.ePlayerState.eRetired)
                 {
-                    erg_w = (float)((double)pList2[0].Keizer_StartPts * (double)form.tbBonusRetired.Value / 100.0);
+                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
                     erg_s = 0.0f;
                 }
                 db.fUpdPairingValues(runde, pList1[index].board, erg_w, erg_s);

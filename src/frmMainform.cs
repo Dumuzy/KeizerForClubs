@@ -5,6 +5,11 @@ using System.Text;
 using System.Windows.Forms;
 using AwiUtils;
 using PuzzleKnocker;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Button = System.Windows.Forms.Button;
+using ComboBox = System.Windows.Forms.ComboBox;
+using ToolTip = System.Windows.Forms.ToolTip;
+using TrackBar = System.Windows.Forms.TrackBar;
 
 namespace KeizerForClubs
 {
@@ -22,10 +27,7 @@ namespace KeizerForClubs
         private IContainer components;
         private ToolStripMenuItem mnuHelpDocumentation;
         private ToolStripMenuItem mnuHelpFaq, mnuHelp, mnuHelpAbout;
-        private Label lblBonus1Value;
-        private Label lblBonus2Value;
-        private Label lblBonus3Value;
-        private Label lblBonus4Value;
+
         private ToolStripMenuItem mnuListenParticipants;
         private ToolStripMenuItem mnuListenStanding, mnuListenStandingFull;
         private ToolStripMenuItem mnuListenPairing;
@@ -54,8 +56,9 @@ namespace KeizerForClubs
         private OpenFileDialog dlgOpenTournament;
         private DataGridViewComboBoxColumn colPairingResult;
         private DataGridViewComboBoxColumn colPlayerState;
-        internal TrackBar tbBonusExcused, tbBonusUnexcused, tbBonusHindered, tbBonusRetired;
-        private Label lblBonusExcused, lblBonusUnexcused, lblBonusClubgame, lblBonusRetired;
+        private Label lblBonusClubValue, lblBonusExcusedValue, lblBonusUnexcusedValue, lblBonusRetiredValue, lblBonusFreilosValue;
+        internal TrackBar tbBonusClub, tbBonusExcused, tbBonusUnexcused,  tbBonusRetired, tbBonusFreilos;
+        private Label lblBonusClub, lblBonusExcused, lblBonusUnexcused, lblBonusRetired, lblBonusFreilos;
         private TabPage tabSettings;
         private DataGridViewTextBoxColumn colPairingAddInfoB;
         private DataGridViewTextBoxColumn colPairingNameBlack;
@@ -116,10 +119,13 @@ namespace KeizerForClubs
             mnuStartLanguage.Enabled = true;
             fLoadPlayerlist();
             fLoadPairingList();
-            tbBonusHindered.Value = SQLiteIntf.fGetConfigInt("BONUS.Clubgame");
+
+            tbBonusClub.Value = SQLiteIntf.fGetConfigInt("BONUS.Clubgame");
             tbBonusExcused.Value = SQLiteIntf.fGetConfigInt("BONUS.Excused");
             tbBonusUnexcused.Value = SQLiteIntf.fGetConfigInt("BONUS.Unexcused");
             tbBonusRetired.Value = SQLiteIntf.fGetConfigInt("BONUS.Retired");
+            tbBonusFreilos.Value = SQLiteIntf.fGetConfigInt("BONUS.Freilos", 50);
+
             chkFreilosVerteilen.Checked = SQLiteIntf.fGetConfigBool("OPTION.DistBye");
             chkPairingOnlyPlayed.Checked = SQLiteIntf.fGetConfigBool("OPTION.ShowOnlyPlayed");
             numRoundsGameRepeat.Value = (Decimal)SQLiteIntf.fGetConfigInt("OPTION.GameRepeat");
@@ -307,10 +313,12 @@ for determining the first round pairings.";
         {
             if (this.tabMainWindow.Enabled)
             {
-                SQLiteIntf.fSetConfigInt("BONUS.Clubgame", this.tbBonusHindered.Value);
+                SQLiteIntf.fSetConfigInt("BONUS.Clubgame", this.tbBonusClub.Value);
                 SQLiteIntf.fSetConfigInt("BONUS.Excused", this.tbBonusExcused.Value);
                 SQLiteIntf.fSetConfigInt("BONUS.Unexcused", this.tbBonusUnexcused.Value);
                 SQLiteIntf.fSetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
+                SQLiteIntf.fSetConfigInt("BONUS.Freilos", this.tbBonusFreilos.Value);
+
                 SQLiteIntf.fSetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
                 SQLiteIntf.fSetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
                 SQLiteIntf.fSetConfigFloat("OPTION.RatioFirst2Last", Helper.ToSingle(ddlRatioFirst2Last.SelectedValue));
@@ -344,10 +352,11 @@ for determining the first round pairings.";
 
         private void TbBonusValueChanged(object sender, EventArgs e)
         {
-            this.lblBonus1Value.Text = this.tbBonusHindered.Value.ToString();
-            this.lblBonus2Value.Text = this.tbBonusExcused.Value.ToString();
-            this.lblBonus3Value.Text = this.tbBonusUnexcused.Value.ToString();
-            this.lblBonus4Value.Text = this.tbBonusRetired.Value.ToString();
+            this.lblBonusClubValue.Text = this.tbBonusClub.Value.ToString();
+            this.lblBonusExcusedValue.Text = this.tbBonusExcused.Value.ToString();
+            this.lblBonusUnexcusedValue.Text = this.tbBonusUnexcused.Value.ToString();
+            this.lblBonusRetiredValue.Text = this.tbBonusRetired.Value.ToString();
+            this.lblBonusFreilosValue.Text = this.tbBonusFreilos.Value.ToString();
         }
 
         private void BtDonateClick(object sender, EventArgs e) => new frmAboutBox(true).ShowDialog();
@@ -423,10 +432,13 @@ for determining the first round pairings.";
             tabPlayer.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Spieler");
             tabPairings.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Paarungen");
             tabSettings.Text = SQLiteIntf.fLocl_GetText("GUI_TABS", "Einstellungen");
+
             lblBonusExcused.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus entschuldigt");
             lblBonusUnexcused.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus unentschuldigt");
-            lblBonusClubgame.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus verhindert");
+            lblBonusClub.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus verhindert");
             lblBonusRetired.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus Rueckzug");
+            lblBonusFreilos.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Bonus Freilos");
+
             chkPairingOnlyPlayed.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Nur gespielte");
             chkFreilosVerteilen.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "FreilosVerteilen");
             lblRunde.Text = SQLiteIntf.fLocl_GetText("GUI_LABEL", "Runde");
@@ -514,6 +526,7 @@ for determining the first round pairings.";
                 this.fLoadPairingList();
                 return true;
             }
+            SQLiteIntf.EndeTransaktion();
             int num = (int)MessageBox.Show("No success; adjust options or try manually", "Error");
             return false;
         }
@@ -768,10 +781,13 @@ for determining the first round pairings.";
             this.colPairingAddInfoB = new DataGridViewTextBoxColumn();
             this.colPairingResult = new DataGridViewComboBoxColumn();
             this.tabSettings = new TabPage();
-            this.lblBonus4Value = new Label();
-            this.lblBonus3Value = new Label();
-            this.lblBonus2Value = new Label();
-            this.lblBonus1Value = new Label();
+
+            InitializeBonus(1, "Clubgame", ref lblBonusClub, ref tbBonusClub, ref lblBonusClubValue);
+            InitializeBonus(2, "Excused", ref lblBonusExcused, ref tbBonusExcused, ref lblBonusExcusedValue);
+            InitializeBonus(3, "Unexcused", ref lblBonusUnexcused, ref tbBonusUnexcused, ref lblBonusUnexcusedValue );
+            InitializeBonus(4, "Retired", ref lblBonusRetired, ref tbBonusRetired, ref lblBonusRetiredValue);
+            InitializeBonus(5, "Freilos", ref lblBonusFreilos, ref tbBonusFreilos, ref lblBonusFreilosValue);
+
             this.lblRoundsGameRepeat = new Label();
             this.lblRatioFirst2Last = new Label();
             this.lblFirstRoundRandom = new Label();
@@ -785,16 +801,9 @@ for determining the first round pairings.";
             this.chkXml = new CheckBox();
             this.chkTxt = new CheckBox();
             this.chkCsv = new CheckBox();
-            this.lblBonusRetired = new Label();
-            this.tbBonusRetired = new TrackBar();
-            this.lblBonusClubgame = new Label();
-            this.lblBonusUnexcused = new Label();
-            this.lblBonusExcused = new Label();
+
             this.btDonate1 = new Button();
             this.btDonate2 = new Button();
-            this.tbBonusHindered = new TrackBar();
-            this.tbBonusUnexcused = new TrackBar();
-            this.tbBonusExcused = new TrackBar();
             this.mnuMainmenu = new MenuStrip();
             this.mnuTurnierstart = new ToolStripMenuItem();
             this.mnuStartStart = new ToolStripMenuItem();
@@ -825,10 +834,6 @@ for determining the first round pairings.";
             ((ISupportInitialize)this.grdPairings).BeginInit();
             this.tabSettings.SuspendLayout();
             this.numRoundsGameRepeat.BeginInit();
-            this.tbBonusRetired.BeginInit();
-            this.tbBonusHindered.BeginInit();
-            this.tbBonusUnexcused.BeginInit();
-            this.tbBonusExcused.BeginInit();
             this.mnuMainmenu.SuspendLayout();
             this.SuspendLayout();
             this.tabMainWindow.Alignment = TabAlignment.Bottom;
@@ -967,10 +972,7 @@ for determining the first round pairings.";
             this.colPairingResult.HeaderText = "Result";
             this.colPairingResult.Name = "colPairingResult";
             this.colPairingResult.Width = 140;
-            this.tabSettings.Controls.Add((Control)this.lblBonus4Value);
-            this.tabSettings.Controls.Add((Control)this.lblBonus3Value);
-            this.tabSettings.Controls.Add((Control)this.lblBonus2Value);
-            this.tabSettings.Controls.Add((Control)this.lblBonus1Value);
+
             this.tabSettings.Controls.Add((Control)this.lblRoundsGameRepeat);
             this.tabSettings.Controls.Add((Control)this.lblRatioFirst2Last);
             this.tabSettings.Controls.Add((Control)this.lblFirstRoundRandom);
@@ -978,15 +980,7 @@ for determining the first round pairings.";
             this.tabSettings.Controls.Add((Control)this.ddlRatioFirst2Last);
             this.tabSettings.Controls.Add((Control)this.ddlFirstRoundRandom);
             this.tabSettings.Controls.Add((Control)this.chkFreilosVerteilen);
-            this.tabSettings.Controls.Add((Control)this.lblBonusClubgame);
-            this.tabSettings.Controls.Add((Control)this.lblBonusUnexcused);
-            this.tabSettings.Controls.Add((Control)this.lblBonusExcused);
-            this.tabSettings.Controls.Add((Control)this.lblBonusRetired);
             this.tabSettings.Controls.Add((Control)this.btDonate1);
-            this.tabSettings.Controls.Add((Control)this.tbBonusHindered);
-            this.tabSettings.Controls.Add((Control)this.tbBonusUnexcused);
-            this.tabSettings.Controls.Add((Control)this.tbBonusExcused);
-            this.tabSettings.Controls.Add((Control)this.tbBonusRetired);
             this.tabSettings.Controls.Add(this.chkHtml);
             this.tabSettings.Controls.Add(this.chkXml);
             this.tabSettings.Controls.Add(this.chkTxt);
@@ -1000,26 +994,6 @@ for determining the first round pairings.";
             this.tabSettings.Text = "Settings";
             this.tabSettings.UseVisualStyleBackColor = true;
             this.tabSettings.Leave += TabSettingsLeave;
-            this.lblBonus4Value.Location = new Point(485, 181);
-            this.lblBonus4Value.Name = "lblBonus4Value";
-            this.lblBonus4Value.Size = new Size(100, 23);
-            this.lblBonus4Value.TabIndex = 14;
-            this.lblBonus4Value.Text = "...";
-            this.lblBonus3Value.Location = new Point(485, 131);
-            this.lblBonus3Value.Name = "lblBonus3Value";
-            this.lblBonus3Value.Size = new Size(100, 23);
-            this.lblBonus3Value.TabIndex = 13;
-            this.lblBonus3Value.Text = "...";
-            this.lblBonus2Value.Location = new Point(485, 86);
-            this.lblBonus2Value.Name = "lblBonus2Value";
-            this.lblBonus2Value.Size = new Size(100, 23);
-            this.lblBonus2Value.TabIndex = 12;
-            this.lblBonus2Value.Text = "...";
-            this.lblBonus1Value.Location = new Point(485, 30);
-            this.lblBonus1Value.Name = "lblBonus1Value";
-            this.lblBonus1Value.Size = new Size(100, 23);
-            this.lblBonus1Value.TabIndex = 11;
-            this.lblBonus1Value.Text = "...";
 
             this.lblRatioFirst2Last.Location = new Point(370, 264);
             this.lblRatioFirst2Last.Size = new Size(200, 23);
@@ -1104,70 +1078,12 @@ for determining the first round pairings.";
             this.lblOutputTo.Text = "# Rounds before paired again";
             this.lblOutputTo.TextAlign = ContentAlignment.MiddleLeft;
 
-            this.lblBonusRetired.Location = new Point(44, 181);
-            this.lblBonusRetired.Name = "lblBonusRetired";
-            this.lblBonusRetired.Size = new Size(149, 23);
-            this.lblBonusRetired.TabIndex = 7;
-            this.lblBonusRetired.Text = "Bonus against \"retired\"";
-            this.tbBonusRetired.LargeChange = 20;
-            this.tbBonusRetired.Location = new Point(246, 181);
-            this.tbBonusRetired.Maximum = 100;
-            this.tbBonusRetired.Name = "tbBonusRetired";
-            this.tbBonusRetired.Size = new Size(207, 45);
-            this.tbBonusRetired.SmallChange = 5;
-            this.tbBonusRetired.TabIndex = 6;
-            this.tbBonusRetired.TickFrequency = 5;
-            this.tbBonusRetired.Value = 75;
-            this.tbBonusRetired.ValueChanged += new EventHandler(this.TbBonusValueChanged);
-            this.lblBonusClubgame.Location = new Point(44, 30);
-            this.lblBonusClubgame.Name = "lblBonusClubgame";
-            this.lblBonusClubgame.Size = new Size(166, 23);
-            this.lblBonusClubgame.TabIndex = 5;
-            this.lblBonusClubgame.Text = "Bonus: hindered, club game";
-            this.lblBonusUnexcused.Location = new Point(43, 131);
-            this.lblBonusUnexcused.Name = "lblBonusUnexcused";
-            this.lblBonusUnexcused.Size = new Size(149, 23);
-            this.lblBonusUnexcused.TabIndex = 4;
-            this.lblBonusUnexcused.Text = "Bonus: missing unexcused";
-            this.lblBonusExcused.Location = new Point(43, 86);
-            this.lblBonusExcused.Name = "lblBonusExcused";
-            this.lblBonusExcused.Size = new Size(149, 23);
-            this.lblBonusExcused.TabIndex = 3;
-            this.lblBonusExcused.Text = "Bonus: missing excused";
             this.btDonate1.Location = new Point(43, 330);
-            this.btDonate1.Name = "lblBonusExcused";
+            this.btDonate1.Name = "lblDonate";
             this.btDonate1.Size = new Size(149, 23);
             this.btDonate1.TabIndex = 30;
             this.btDonate1.Click += new EventHandler(this.BtDonateClick);
-            this.tbBonusHindered.LargeChange = 20;
-            this.tbBonusHindered.Location = new Point(245, 30);
-            this.tbBonusHindered.Maximum = 100;
-            this.tbBonusHindered.Name = "tbBonusHindered";
-            this.tbBonusHindered.Size = new Size(208, 45);
-            this.tbBonusHindered.SmallChange = 5;
-            this.tbBonusHindered.TabIndex = 2;
-            this.tbBonusHindered.TickFrequency = 5;
-            this.tbBonusHindered.Value = 65;
-            this.tbBonusHindered.ValueChanged += new EventHandler(this.TbBonusValueChanged);
-            this.tbBonusUnexcused.LargeChange = 20;
-            this.tbBonusUnexcused.Location = new Point(245, 131);
-            this.tbBonusUnexcused.Maximum = 100;
-            this.tbBonusUnexcused.Name = "tbBonusUnexcused";
-            this.tbBonusUnexcused.Size = new Size(207, 45);
-            this.tbBonusUnexcused.SmallChange = 5;
-            this.tbBonusUnexcused.TabIndex = 1;
-            this.tbBonusUnexcused.TickFrequency = 5;
-            this.tbBonusUnexcused.ValueChanged += new EventHandler(this.TbBonusValueChanged);
-            this.tbBonusExcused.LargeChange = 20;
-            this.tbBonusExcused.Location = new Point(245, 80);
-            this.tbBonusExcused.Maximum = 100;
-            this.tbBonusExcused.Name = "tbBonusExcused";
-            this.tbBonusExcused.Size = new Size(207, 65);
-            this.tbBonusExcused.SmallChange = 5;
-            this.tbBonusExcused.TabIndex = 0;
-            this.tbBonusExcused.TickFrequency = 5;
-            this.tbBonusExcused.Value = 35;
-            this.tbBonusExcused.ValueChanged += new EventHandler(this.TbBonusValueChanged);
+
             this.mnuMainmenu.Items.AddRange(new ToolStripItem[4]
             {
         (ToolStripItem) this.mnuTurnierstart,
@@ -1300,10 +1216,6 @@ for determining the first round pairings.";
             this.tabSettings.ResumeLayout(false);
             this.tabSettings.PerformLayout();
             this.numRoundsGameRepeat.EndInit();
-            this.tbBonusRetired.EndInit();
-            this.tbBonusHindered.EndInit();
-            this.tbBonusUnexcused.EndInit();
-            this.tbBonusExcused.EndInit();
             this.mnuMainmenu.ResumeLayout(false);
             this.mnuMainmenu.PerformLayout();
             this.ResumeLayout(false);
@@ -1321,5 +1233,54 @@ for determining the first round pairings.";
                 MessageBox.Show(ex.Message, SQLiteIntf.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
             }
         }
+
+        private void InitializeBonus(int num, string name, ref Label lblText, ref TrackBar tb, ref Label lblValue)
+        {
+            var yloc = 15 + (num - 1) * 40;
+            InitializeBonusText(num, yloc, name, ref lblText);
+            InitializeBonusValue(num, yloc, name, ref lblValue);
+            InitializeBonusTrackbar(num, yloc, name, ref tb);
+        }
+
+        private void InitializeBonusTrackbar(int num, int yloc, string name, ref TrackBar tb)
+        {
+            tb = new TrackBar();
+            tb.BeginInit();
+            this.tabSettings.Controls.Add(tb);
+            tb.LargeChange = 20;
+            tb.Location = new Point(245, yloc);
+            tb.Maximum = 100;
+            tb.Name =$"tbBonus" + name;
+            tb.Size = new Size(208, 40);  // Seems this cannot be smaller than 40 in y-direction. 
+            tb.SmallChange = 5;
+            tb.TabIndex = num;
+            tb.TickFrequency = 5;
+            tb.ValueChanged += new EventHandler(this.TbBonusValueChanged);
+            tb.EndInit();
+        }
+
+        private void InitializeBonusText(int num, int yloc, string name, ref Label lblText)
+        {
+            lblText = new Label();
+            this.tabSettings.Controls.Add(lblText);
+            lblText.Location = new Point(43, yloc);
+            lblText.Name = "lblBonus" + name;
+            lblText.Size = new Size(149, 23);
+            lblText.TabIndex = 10 + num;
+            lblText.Text = "...";
+        }
+
+        private void InitializeBonusValue(int num, int yloc, string name,  ref Label lblValue)
+        {
+            lblValue = new Label();
+            this.tabSettings.Controls.Add(lblValue);
+
+            lblValue.Location = new Point(485, yloc);
+            lblValue.Name = $"lblBonus{name}Value";
+            lblValue.Size = new Size(100, 23);
+            lblValue.TabIndex = 10 + num;
+            lblValue.Text = "...";
+        }
+
     }
 }
