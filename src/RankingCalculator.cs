@@ -51,7 +51,7 @@
         /// <param name="currRunde"> Momentan auszulosende Runde, 1-basiert. </param>
         private void AllPlayersSetInitialStartPts(int currRunde)
         {
-            var firstRoundRandom = currRunde != 1 ? 0 : db.fGetConfigInt("OPTION.FirstRoundRandom", 0) ;
+            var firstRoundRandom = currRunde != 1 ? 0 : db.fGetConfigInt("OPTION.FirstRoundRandom", 0);
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
             int playerCount = db.fGetPlayerList(ref pList, " WHERE state NOT IN (9) ", $" ORDER BY {order} desc ");
@@ -126,13 +126,23 @@
                     erg_w = pList2[0].Keizer_StartPts * form.tbBonusFreilos.Value / 100.0f;
                 if (pList2[0].state == cSqliteInterface.ePlayerState.eRetired)
                 {
-                    erg_s = pList3[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
-                    erg_w = 0.0f;
+                    if (pList1[index].result == cSqliteInterface.eResults.eWin_Black)
+                        erg_s = pList3[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    else if (pList1[index].result == cSqliteInterface.eResults.eDraw)
+                        erg_s = 0.5f * pList3[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    else
+                        erg_s = 0;
+                    erg_w = 0;
                 }
                 if (pList3[0].state == cSqliteInterface.ePlayerState.eRetired)
                 {
-                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
-                    erg_s = 0.0f;
+                    if (pList1[index].result == cSqliteInterface.eResults.eWin_White)
+                        erg_w = pList2[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    else if (pList1[index].result == cSqliteInterface.eResults.eDraw)
+                        erg_w = 0.5f * pList2[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    else
+                        erg_w = 0;
+                    erg_s = 0;
                 }
                 db.fUpdPairingValues(runde, pList1[index].board, erg_w, erg_s);
             }
