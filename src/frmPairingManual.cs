@@ -120,7 +120,7 @@ namespace KeizerForClubs
       this.AutoScaleDimensions = new SizeF(6f, 13f);
       this.AutoScaleMode = AutoScaleMode.Font;
       this.CancelButton = (IButtonControl) this.btnCancel;
-      this.ClientSize = new Size(692, 267);
+      this.ClientSize = new Size(692, 317);
       this.ControlBox = false;
       this.Controls.Add((Control) this.btnCancel);
       this.Controls.Add((Control) this.btnOk);
