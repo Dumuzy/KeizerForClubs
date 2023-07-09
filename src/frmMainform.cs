@@ -2,6 +2,7 @@
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using AwiUtils;
 using PuzzleKnocker;
@@ -367,7 +368,8 @@ for determining the first round pairings.";
         {
             if (this.grdPlayers.Rows[e.RowIndex].Cells[1].Value == null)
                 return;
-            string str = this.grdPlayers.Rows[e.RowIndex].Cells[1].Value.ToString();
+            string str = this.grdPlayers.Rows[e.RowIndex].Cells[1].Value.ToString().Trim();
+            str = Regex.Replace(str, @"(\s\s+)", " ");
             if (str == null)
                 return;
             if (this.grdPlayers.Rows[e.RowIndex].Cells[0].Value == null)
