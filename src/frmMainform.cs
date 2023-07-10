@@ -58,7 +58,7 @@ namespace KeizerForClubs
         private DataGridViewComboBoxColumn colPairingResult;
         private DataGridViewComboBoxColumn colPlayerState;
         private Label lblBonusClubValue, lblBonusExcusedValue, lblBonusUnexcusedValue, lblBonusRetiredValue, lblBonusFreilosValue;
-        internal TrackBar tbBonusClub, tbBonusExcused, tbBonusUnexcused,  tbBonusRetired, tbBonusFreilos;
+        internal TrackBar tbBonusClub, tbBonusExcused, tbBonusUnexcused, tbBonusRetired, tbBonusFreilos;
         private Label lblBonusClub, lblBonusExcused, lblBonusUnexcused, lblBonusRetired, lblBonusFreilos;
         private TabPage tabSettings;
         private DataGridViewTextBoxColumn colPairingAddInfoB;
@@ -253,19 +253,23 @@ for determining the first round pairings.";
         void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
             IncNumClicks();
+            fDelDeletedPlayers();
             if (SQLiteIntf.fGetPairings_NoResult() == 0)
                 fExecutePairing();
             else
                 MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
+            fApplyPlayerStateTexte();
         }
 
         void MnuPairingManualClick(object sender, EventArgs e)
         {
             IncNumClicks();
+            fDelDeletedPlayers();
             if (SQLiteIntf.fGetPairings_NoResult() == 0)
                 fExecutePairingManual();
             else
                 MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
+            fApplyPlayerStateTexte();
         }
 
         void MnuPairingDropLastClick(object sender, EventArgs e)
@@ -282,6 +286,7 @@ for determining the first round pairings.";
                 this.numRoundSelect.Value = (Decimal)(maxRound - 1);
                 this.fLoadPairingList();
             }
+            fApplyPlayerStateTexte();
         }
 
         void MnuAboutBoxClick(object sender, EventArgs e) => fShowAboutBox();
@@ -307,6 +312,7 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             SaveSettings();
+            SQLiteIntf.fDelDeletedPlayers();
             e.Cancel = false;
         }
 
@@ -343,7 +349,7 @@ for determining the first round pairings.";
             this.ranking.AllPlayersAllRoundsCalculate();
             SQLiteIntf.EndeTransaktion();
             IncNumClicks(SQLiteIntf.fGetPlayerCount());
-            if(sender == mnuListenStanding)
+            if (sender == mnuListenStanding)
                 new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_Tabellenstand();
             else if (sender == mnuListenStandingFull)
                 new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_TabellenstandVoll();
@@ -364,32 +370,109 @@ for determining the first round pairings.";
 
         private void TabSettingsLeave(object sender, EventArgs e) => SaveSettings();
 
-        private void GrdPlayersCellEndEdit(object sender, DataGridViewCellEventArgs e)
+        private void TabPlayerLeave(object sender, EventArgs e) => fDelDeletedPlayers();
+
+        private void GrdPlayersCellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
-            if (this.grdPlayers.Rows[e.RowIndex].Cells[1].Value == null)
-                return;
-            string str = this.grdPlayers.Rows[e.RowIndex].Cells[1].Value.ToString().Trim();
-            str = Regex.Replace(str, @"(\s\s+)", " ");
-            if (str == null)
-                return;
-            if (this.grdPlayers.Rows[e.RowIndex].Cells[0].Value == null)
+            grdPlayers.Rows[e.RowIndex].ErrorText = "";
+            if (e.ColumnIndex == 1)  // Name
             {
-                if (this.grdPlayers.Rows[e.RowIndex].Cells[2].Value == null)
-                    this.grdPlayers.Rows[e.RowIndex].Cells[2].Value = (object)0;
-                if (this.grdPlayers.Rows[e.RowIndex].Cells[3].Value == null)
-                    this.grdPlayers.Rows[e.RowIndex].Cells[3].Value = (object)SQLiteIntf.fLocl_GetPlayerStateText(cSqliteInterface.ePlayerState.eAvailable);
-                if (SQLiteIntf.fCntPlayerNames(str) > 0)
+                if (IsInvalidName(e))
                 {
-                    int num = (int)MessageBox.Show(SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.NameDoppelt"), "No....", MessageBoxButtons.OK);
+                    e.Cancel = true;
+                    grdPlayers.Rows[e.RowIndex].ErrorText = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.NameZuKurz");
                 }
-                else
+                else if (IsDuplicateName(e))
                 {
-                    SQLiteIntf.fInsPlayerNew(str, (int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[2].Value));
-                    this.grdPlayers.Rows[e.RowIndex].Cells[0].Value = (object)SQLiteIntf.fGetPlayerID(str);
+                    e.Cancel = true;
+                    grdPlayers.Rows[e.RowIndex].ErrorText = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.NameDoppelt");
                 }
             }
+            else if (e.ColumnIndex == 2)  // Rating
+            {
+                if (IsInvalidRating(e))
+                {
+                    e.Cancel = true;
+                    grdPlayers.Rows[e.RowIndex].ErrorText = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Hinweis.InvalidRating");
+                }
+            }
+            if(e.Cancel)
+                MessageBox.Show(grdPlayers.Rows[e.RowIndex].ErrorText, this.Text, 
+                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        }
+
+        private bool IsInvalidRating(DataGridViewCellValidatingEventArgs e)
+        {
+            var newRating = e.FormattedValue.ToString();
+            newRating = newRating?.Trim() ?? "";
+            bool isInvalid = !Regex.IsMatch(newRating, @"^\d*$");
+            isInvalid |= Helper.ToInt(newRating) >= 30000;
+            return isInvalid;
+        }
+
+        private bool IsInvalidName(DataGridViewCellValidatingEventArgs e)
+        {
+            bool isInvalid = !grdPlayers.Rows[e.RowIndex].IsNewRow;
+            // Darf nicht Invalid in neuer Zeile sein, sonst kommt man aus dem
+            // neuen Namensfeld nie mehr raus, wenn man aus Versehn reingeklickt hat. 
+            if (isInvalid)
+            {
+                var newPlayerName = e.FormattedValue.ToString();
+                newPlayerName = Regex.Replace(newPlayerName?.Trim() ?? "", @"(\s+)", "");
+                isInvalid = newPlayerName.Length <= 1;
+            }
+            return isInvalid;
+        }
+
+        private bool IsDuplicateName(DataGridViewCellValidatingEventArgs e)
+        {
+            bool isDuplicate = false;
+            var newPlayerName = e.FormattedValue.ToString();
+            newPlayerName = Regex.Replace(newPlayerName?.Trim() ?? "", @"(\s\s+)", " ");
+            if (newPlayerName != "")
+            {
+                var row = this.grdPlayers.Rows[e.RowIndex];
+                int gridPlayerId = row.Cells[0].Value != null ? Convert.ToInt16(row.Cells[0].Value) : -1;
+                bool isNewPlayer = gridPlayerId == -1;
+                int nPlayersWithName = SQLiteIntf.fCntPlayerNames(newPlayerName);
+                isDuplicate = nPlayersWithName > 0 && isNewPlayer;
+                if (!isNewPlayer)
+                    if (newPlayerName != SQLiteIntf.fGetPlayerName(gridPlayerId))  // it's a name change.
+                        isDuplicate = nPlayersWithName > 0;
+            }
+            return isDuplicate;
+        }
+
+        private void GrdPlayersCellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            var row = this.grdPlayers.Rows[e.RowIndex];
+            if (row.Cells[1].Value == null)  // kein Name
+                return;
+            string newPlayerName = row.Cells[1].Value.ToString().Trim();
+            newPlayerName = Regex.Replace(newPlayerName, @"(\s\s+)", " ");
+            if (string.IsNullOrEmpty(newPlayerName))  // kein Name
+                return;
+            int gridPlayerId = row.Cells[0].Value != null ? Convert.ToInt16(row.Cells[0].Value) : -1;
+            bool isNewPlayer = gridPlayerId == -1;
+
+            if (isNewPlayer)
+            {
+                if (row.Cells[2].Value == null)
+                    row.Cells[2].Value = 0;
+                if (row.Cells[3].Value == null)
+                    row.Cells[3].Value = SQLiteIntf.fLocl_GetPlayerStateText(cSqliteInterface.ePlayerState.eAvailable);
+
+                SQLiteIntf.fInsPlayerNew(newPlayerName, Convert.ToInt16(row.Cells[2].Value));
+                row.Cells[0].Value = SQLiteIntf.fGetPlayerID(newPlayerName);
+                SQLiteIntf.fUpdPlayer(Helper.ToInt(row.Cells[0].Value), newPlayerName,
+                            Helper.ToInt(row.Cells[2].Value),
+                            SQLiteIntf.fLocl_GetPlayerState(row.Cells[3].Value.ToString()));
+            }
             else
-                SQLiteIntf.fUpdPlayer((int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[0].Value), this.grdPlayers.Rows[e.RowIndex].Cells[1].Value.ToString(), (int)Convert.ToInt16(this.grdPlayers.Rows[e.RowIndex].Cells[2].Value), SQLiteIntf.fLocl_GetPlayerState(this.grdPlayers.Rows[e.RowIndex].Cells[3].Value.ToString()));
+                SQLiteIntf.fUpdPlayer(gridPlayerId, newPlayerName,
+                    Helper.ToInt((row.Cells[2].Value?.ToString() ?? "").Trim()),
+                    SQLiteIntf.fLocl_GetPlayerState(row.Cells[3].Value.ToString()));
+            row.Cells[1].Value = newPlayerName;
         }
 
         private void GrdPairingsCellEndEdit(object sender, DataGridViewCellEventArgs e)
@@ -400,13 +483,22 @@ for determining the first round pairings.";
             SQLiteIntf.fUpdPairingResult((int)Convert.ToInt16(this.numRoundSelect.Value), int16_1, int16_2, gameResult);
         }
 
-        private void fApplyLanguageText()
+        private void fApplyPlayerStateTexte()
         {
+            int m = SQLiteIntf.fGetMaxRound();
+            string condition = m != 0 ? " AND key not in ('2', 'A') " : " AND key<>'2' ";
             string[] texte = new string[20];
+            int topicTexte1 = SQLiteIntf.fLocl_GetTopicTexte("PLAYERSTATE", condition, ref texte);
+
             colPlayerState.Items.Clear();
-            int topicTexte1 = SQLiteIntf.fLocl_GetTopicTexte("PLAYERSTATE", " AND key<>2 ", ref texte);
             for (int index = 0; index < topicTexte1; ++index)
                 colPlayerState.Items.Add((object)texte[index]);
+        }
+
+        private void fApplyLanguageText()
+        {
+            fApplyPlayerStateTexte();
+            string[] texte = new string[20];
             colPairingResult.Items.Clear();
             int topicTexte2 = SQLiteIntf.fLocl_GetTopicTexte("GAMERESULT", " ", ref texte);
             for (int index = 0; index < topicTexte2; ++index)
@@ -452,6 +544,13 @@ for determining the first round pairings.";
             btDonate1.Text = btDonate2.Text = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Donate");
         }
 
+        private void fDelDeletedPlayers()
+        {
+            int n = SQLiteIntf.fDelDeletedPlayers();
+            if (n > 0)
+                fLoadPlayerlist();
+        }
+
         private void fLoadPlayerlist()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
@@ -495,7 +594,7 @@ for determining the first round pairings.";
             for (int rwd = 0, index = 0; index < this.iPairingPlayerCntAvailable; ++index)
             {
                 if (firstRoundRandom == 0)
-                     rwd = 0;
+                    rwd = 0;
                 else
                     rwd = random.Next(-firstRoundRandom, firstRoundRandom) + this.pPairingPlayerList[index].rating;
                 this.pPairingPlayerList[index].RatingWDelta = rwd;
@@ -786,7 +885,7 @@ for determining the first round pairings.";
 
             InitializeBonus(1, "Clubgame", ref lblBonusClub, ref tbBonusClub, ref lblBonusClubValue);
             InitializeBonus(2, "Excused", ref lblBonusExcused, ref tbBonusExcused, ref lblBonusExcusedValue);
-            InitializeBonus(3, "Unexcused", ref lblBonusUnexcused, ref tbBonusUnexcused, ref lblBonusUnexcusedValue );
+            InitializeBonus(3, "Unexcused", ref lblBonusUnexcused, ref tbBonusUnexcused, ref lblBonusUnexcusedValue);
             InitializeBonus(4, "Retired", ref lblBonusRetired, ref tbBonusRetired, ref lblBonusRetiredValue);
             InitializeBonus(5, "Freilos", ref lblBonusFreilos, ref tbBonusFreilos, ref lblBonusFreilosValue);
 
@@ -860,6 +959,8 @@ for determining the first round pairings.";
             this.tabPlayer.TabIndex = 0;
             this.tabPlayer.Text = "Player";
             this.tabPlayer.UseVisualStyleBackColor = true;
+            this.tabPlayer.Leave += TabPlayerLeave;
+
             this.grdPlayers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.grdPlayers.Columns.AddRange((DataGridViewColumn)this.colPlayerID, (DataGridViewColumn)this.colPlayerName, (DataGridViewColumn)this.colRating, (DataGridViewColumn)this.colPlayerState);
             this.grdPlayers.Dock = DockStyle.Fill;
@@ -869,6 +970,7 @@ for determining the first round pairings.";
             this.grdPlayers.TabIndex = 0;
             this.grdPlayers.CellEndEdit += new DataGridViewCellEventHandler(this.GrdPlayersCellEndEdit);
             this.grdPlayers.DataError += new DataGridViewDataErrorEventHandler(this.GrdPlayersDataError);
+            this.grdPlayers.CellValidating += new DataGridViewCellValidatingEventHandler(this.GrdPlayersCellValidating);
             this.colPlayerID.HeaderText = "ID";
             this.colPlayerID.Name = "colPlayerID";
             this.colPlayerID.ReadOnly = true;
@@ -972,7 +1074,7 @@ for determining the first round pairings.";
             this.colPairingAddInfoB.Name = "colPairingAddInfoB";
             this.colPairingAddInfoB.ReadOnly = true;
             this.colPairingAddInfoB.Width = 50;
-            this.colPairingAddInfoB.Visible = false; 
+            this.colPairingAddInfoB.Visible = false;
             this.colPairingResult.HeaderText = "Result";
             this.colPairingResult.Name = "colPairingResult";
             this.colPairingResult.Width = 140;
@@ -1254,7 +1356,7 @@ for determining the first round pairings.";
             tb.LargeChange = 20;
             tb.Location = new Point(245, yloc);
             tb.Maximum = 100;
-            tb.Name =$"tbBonus" + name;
+            tb.Name = $"tbBonus" + name;
             tb.Size = new Size(208, 40);  // Seems this cannot be smaller than 40 in y-direction. 
             tb.SmallChange = 5;
             tb.TabIndex = num;
@@ -1274,7 +1376,7 @@ for determining the first round pairings.";
             lblText.Text = "...";
         }
 
-        private void InitializeBonusValue(int num, int yloc, string name,  ref Label lblValue)
+        private void InitializeBonusValue(int num, int yloc, string name, ref Label lblValue)
         {
             lblValue = new Label();
             this.tabSettings.Controls.Add(lblValue);

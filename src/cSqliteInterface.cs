@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.SQLite;
+using System.Drawing.Drawing2D;
 using AwiUtils;
 
 namespace KeizerForClubs
@@ -21,6 +22,7 @@ namespace KeizerForClubs
             eUnexcused = 7,
             eFreilos = 8,
             eRetired = 9,
+            eDeleted = 10,
             eErrUndefined = -1
         };
 
@@ -159,7 +161,7 @@ namespace KeizerForClubs
         }
 
         private string getTable(string key) => key.StartsWith("INTERNAL.") ? "config_db.ConfigTab" : "ConfigTab";
-        
+
 
         private int fInsertConfigNumberIfNeeded(string key, int res)
         {
@@ -211,7 +213,8 @@ namespace KeizerForClubs
    	                CfgText VARCHAR(5), CfgValue FLOAT); 
                     Select COUNT(1) from ConfigTab";
             int n = Helper.ToInt(sqlCommand.ExecuteScalar());
-            if (n == 0)                              {
+            if (n == 0)
+            {
                 // The table is new and has to be filled. Copy initial values from config_db.
                 sqlCommand.CommandText = @" INSERT INTO ConfigTab SELECT * FROM config_db.ConfigTab 
                         WHERE CfgKey NOT LIKE 'INTERNAL.%'";
@@ -329,11 +332,13 @@ namespace KeizerForClubs
             return sqlCommand.ExecuteScalar().ToString();
         }
 
+        /// <summary> Gibt die PlayerId des Spielers mit dem Namen zurück oder -1, falls keiner gefunden. </summary>
         public int fGetPlayerID(string sName)
         {
             sqlCommand.CommandText = " Select ID from player  where name=:pName ";
-            sqlCommand.Parameters.AddWithValue("pName", (object)sName);
-            return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
+            sqlCommand.Parameters.AddWithValue("pName", sName);
+            var res = sqlCommand.ExecuteScalar();
+            return Convert.ToInt16(res);
         }
 
         public int fCntPlayerNames(string sName)
@@ -402,6 +407,24 @@ namespace KeizerForClubs
             }
         }
 
+        /// <summary> In der Player-Liste kann man Player auf status "deleted" setzen. Diese Fkt. 
+        /// löscht alle Player mit dem Status "deleted" aus der Player-Liste. </summary>
+        /// <returns>Anzahl gelöschter Spieler. </returns>
+        public int fDelDeletedPlayers()
+        {
+            int nDeleted = 0;
+            if (fGetMaxRound() == 0)
+            {
+                sqlCommand.CommandText = " SELECT COUNT(1) from player where state = " + (int)ePlayerState.eDeleted;
+                nDeleted = Helper.ToInt(sqlCommand.ExecuteScalar());
+                if (nDeleted > 0)
+                {
+                    sqlCommand.CommandText = " DELETE from player where state = " + (int)ePlayerState.eDeleted;
+                    sqlCommand.ExecuteScalar();
+                }
+            }
+            return nDeleted;
+        }
         #endregion Player
 
         #region Pairing
@@ -422,17 +445,17 @@ namespace KeizerForClubs
             return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
         }
 
+        /// <summary> Gibt die Anzahl der Runden zurück, die bisher gelost sind. Egal ob schon gespielt oder nicht. </summary>
         public int fGetMaxRound()
         {
+            int m = 0;
             sqlCommand.CommandText = " Select Max(rnd) from pairing ";
             try
             {
-                return Convert.ToInt16(sqlCommand.ExecuteScalar());
+                m = Convert.ToInt16(sqlCommand.ExecuteScalar());
             }
-            catch (Exception)
-            {
-                return 0;
-            }
+            catch (Exception) { }
+            return m;
         }
 
         public bool fInsPairingNew(int runde, int brett, int idw, int ids)
@@ -663,10 +686,16 @@ namespace KeizerForClubs
         public int fLocl_GetPlayerState(string state)
         {
             string key = fLocl_FindKey("PLAYERSTATE", state);
-            return !(key == "") ? Convert.ToInt32(key) : -1;
+            return !(key == "") ? Convert.ToInt32(key, 16) : -1;
         }
 
-        public string fLocl_GetPlayerStateText(cSqliteInterface.ePlayerState state) => fLocl_GetText("PLAYERSTATE", ((int)state).ToString());
+        public string fLocl_GetPlayerStateText(cSqliteInterface.ePlayerState state)
+        {
+            // In der fLocl_GetText("PLAYERSTATE", ..) Fkt steht der Playerstate eDeleted als "A".
+            // Deshalb das ToString("X", das macht Hex. Also 10 -> A
+            var sState = ((int)state).ToString("X");
+            return fLocl_GetText("PLAYERSTATE", sState);
+        }
 
         public cSqliteInterface.eResults fLocl_GetGameResult(string result)
         {
