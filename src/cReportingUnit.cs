@@ -206,13 +206,15 @@ namespace KeizerForClubs
                                 string str5 = str4 + "w ";
                                 str3 = (pList3[0].state != cSqliteInterface.ePlayerState.eRetired ?
                                     str5 + " " + pList3[0].name + " " :
-                                    str5 + " (ret) ") + "p=" + pList4[0].pts_w.ToString() + " ";
+                                    str5 + " " + pList3[0].name + "(ret) ") + 
+                                    "p=" + pList4[0].pts_w.ToString() + " ";
                             }
                             else
                             {
                                 string str6 = str4 + "b ";
                                 str3 = (pList2[0].state != cSqliteInterface.ePlayerState.eRetired ?
-                                    str6 + " " + pList2[0].name + " " : str6 + " (ret) ") +
+                                    str6 + " " + pList2[0].name + " " : 
+                                    str6 + " " + pList2[0].name + "(ret) ") +
                                     "p=" + pList4[0].pts_b.ToString() + " ";
                             }
                         }
