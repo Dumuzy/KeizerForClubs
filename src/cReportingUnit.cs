@@ -107,6 +107,9 @@ namespace KeizerForClubs
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
             int playerList = db.fGetPlayerList(ref pList, "", " ORDER BY Keizer_SumPts desc ");
+            var lih = new Li<string>(new string[] { "", db.fLocl_GetText("GUI_TEXT", "Name"), 
+                db.fLocl_GetText("GUI_TEXT", "Keizer-Punkte"), db.fLocl_GetText("GUI_TEXT", "Spiel-Punkte") });
+            t.AddRow(lih);
             for (int index = 0, num1 = 1; index < playerList; ++index)
             {
                 if (pList[index].state != cSqliteInterface.ePlayerState.eRetired)
@@ -164,7 +167,7 @@ namespace KeizerForClubs
             string strr = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
             // var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
-            var thead = new Li<string>("Platz Name Keizer-Sum GamePts".Split());
+            var thead = new Li<string>("Platz Name Keizer-&#8721; GamePts".Split());
             for (int i = 0; i < maxRound; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
