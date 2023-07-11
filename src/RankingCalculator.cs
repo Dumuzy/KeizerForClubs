@@ -100,56 +100,54 @@
         /// <remarks> Die Punkte sind bei Sieg gleich der momentanen Keizer_StartPts der Gegner. </remarks>
         private bool OneRoundAllPairingsSetKeizerPts(int runde)
         {
-            cSqliteInterface.stPairing[] pList1 = new cSqliteInterface.stPairing[50];
-            cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
-            cSqliteInterface.stPlayer[] pList3 = new cSqliteInterface.stPlayer[1];
-            int pairingCnt = db.fGetPairingList(ref pList1, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
-            if (pairingCnt == 0)
+            var pairings = db.fGetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+            if (pairings.Count == 0)
                 return false;
-            for (int index = 0; index < pairingCnt; ++index)
+            for (int index = 0; index < pairings.Count; ++index)
             {
-                float erg_w = 0.0f;
-                float erg_s = 0.0f;
-                db.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList1[index].id_w, " ");
-                db.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList1[index].id_b, " ");
-                if (pList1[index].result == cSqliteInterface.eResults.eWin_White)
-                    erg_w = pList3[0].Keizer_StartPts;
-                else if (pList1[index].result == cSqliteInterface.eResults.eDraw)
+                var pair = pairings[index];
+                float erg_w = 0.0f, erg_s = 0.0f;
+                var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ");
+                var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ");
+
+                if (pair.result == cSqliteInterface.eResults.eWin_White)
+                    erg_w = pBlack.Keizer_StartPts;
+                else if (pair.result == cSqliteInterface.eResults.eDraw)
                 {
-                    erg_w = pList3[0].Keizer_StartPts / 2f;
-                    erg_s = pList2[0].Keizer_StartPts / 2f;
+                    erg_w = pBlack.Keizer_StartPts / 2f;
+                    erg_s = pWhite.Keizer_StartPts / 2f;
                 }
-                else if (pList1[index].result == cSqliteInterface.eResults.eWin_Black)
-                    erg_s = pList2[0].Keizer_StartPts;
-                else if (pList1[index].result == cSqliteInterface.eResults.eExcused)
-                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusExcused.Value / 100.0f;
-                else if (pList1[index].result == cSqliteInterface.eResults.eUnexcused)
-                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusUnexcused.Value / 100.0f;
-                else if (pList1[index].result == cSqliteInterface.eResults.eHindered)
-                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusClub.Value / 100.0f;
-                else if (pList1[index].result == cSqliteInterface.eResults.eFreeWin)
-                    erg_w = pList2[0].Keizer_StartPts * form.tbBonusFreilos.Value / 100.0f;
-                if (pList2[0].state == cSqliteInterface.ePlayerState.eRetired)
+                else if (pair.result == cSqliteInterface.eResults.eWin_Black)
+                    erg_s = pWhite.Keizer_StartPts;
+                else if (pair.result == cSqliteInterface.eResults.eExcused)
+                    erg_w = pWhite.Keizer_StartPts * form.tbBonusExcused.Value / 100.0f;
+                else if (pair.result == cSqliteInterface.eResults.eUnexcused)
+                    erg_w = pWhite.Keizer_StartPts * form.tbBonusUnexcused.Value / 100.0f;
+                else if (pair.result == cSqliteInterface.eResults.eHindered)
+                    erg_w = pWhite.Keizer_StartPts * form.tbBonusClub.Value / 100.0f;
+                else if (pair.result == cSqliteInterface.eResults.eFreeWin)
+                    erg_w = pWhite.Keizer_StartPts * form.tbBonusFreilos.Value / 100.0f;
+                if (pWhite.state == cSqliteInterface.ePlayerState.eRetired)
                 {
-                    if (pList1[index].result == cSqliteInterface.eResults.eWin_Black)
-                        erg_s = pList3[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
-                    else if (pList1[index].result == cSqliteInterface.eResults.eDraw)
-                        erg_s = 0.5f * pList3[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    if (pair.result == cSqliteInterface.eResults.eWin_Black)
+                        erg_s = pBlack.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    else if (pair.result == cSqliteInterface.eResults.eDraw)
+                        erg_s = 0.5f * pBlack.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
                     else
                         erg_s = 0;
                     erg_w = 0;
                 }
-                if (pList3[0].state == cSqliteInterface.ePlayerState.eRetired)
+                if (pBlack.state == cSqliteInterface.ePlayerState.eRetired)
                 {
-                    if (pList1[index].result == cSqliteInterface.eResults.eWin_White)
-                        erg_w = pList2[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
-                    else if (pList1[index].result == cSqliteInterface.eResults.eDraw)
-                        erg_w = 0.5f * pList2[0].Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    if (pair.result == cSqliteInterface.eResults.eWin_White)
+                        erg_w = pWhite.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    else if (pair.result == cSqliteInterface.eResults.eDraw)
+                        erg_w = 0.5f * pWhite.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
                     else
                         erg_w = 0;
                     erg_s = 0;
                 }
-                db.fUpdPairingValues(runde, pList1[index].board, erg_w, erg_s);
+                db.fUpdPairingValues(runde, pair.board, erg_w, erg_s);
             }
             return true;
         }

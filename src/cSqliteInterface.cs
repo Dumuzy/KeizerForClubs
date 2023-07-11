@@ -15,6 +15,7 @@ namespace KeizerForClubs
 
         public enum ePlayerState
         {
+            eUnknown = 0,
             eAvailable = 1,
             ePaired = 2,
             eHindered = 5,
@@ -589,6 +590,14 @@ namespace KeizerForClubs
             }
             return pairingList;
         }
+
+        public Li<cSqliteInterface.stPairing> fGetPairingLi(string sWhere, string sSortorder)
+        {
+            cSqliteInterface.stPairing[] pList1 = new cSqliteInterface.stPairing[100];
+            var n = fGetPairingList(ref pList1, sWhere, sSortorder);
+            var li = new Li<cSqliteInterface.stPairing>(pList1.Take(n));
+            return li;
+        }
         #endregion Pairing
 
         #region Playerlist
@@ -631,6 +640,13 @@ namespace KeizerForClubs
             return playerCount;
         }
 
+        public Li<stPlayer> fGetPlayerLi(string sWhere, string sSortorder)
+        {
+            cSqliteInterface.stPlayer[] arr = new stPlayer[100];
+            int playerCount = fGetPlayerList(ref arr, sWhere, sSortorder);
+            return new Li<stPlayer>(arr.Take(playerCount));
+        }
+
         public int fGetPlayerList_Available(ref stPlayer[] pList)
         {
             string sWhere = " WHERE state IN (1) ";
@@ -649,6 +665,15 @@ namespace KeizerForClubs
             sqlCommand.CommandText = @" SELECT Count(1) FROM Player p ";
             int playerCount = Convert.ToInt32(sqlCommand.ExecuteScalar());
             return playerCount;
+        }
+
+        /// <summary> Returns the first player that matches the query. New empty player wiht state 
+        /// unknown and id -1, if none found. </summary>
+        public stPlayer fGetPlayer(string sWhere, string sSortorder)
+        {
+            var arr = new stPlayer[1];
+            int n = fGetPlayerList(ref arr, sWhere, sSortorder);
+            return n == 0 ? new stPlayer { id = -1 } : arr[0];
         }
         #endregion Playerlist
 

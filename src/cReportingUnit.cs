@@ -106,19 +106,20 @@ namespace KeizerForClubs
             string str2 = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = db.fGetPlayerList(ref pList, "", " ORDER BY Keizer_SumPts desc ");
+            var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc ");
             var lih = new Li<string>(new string[] { "", db.fLocl_GetText("GUI_TEXT", "Name"), 
                 db.fLocl_GetText("GUI_TEXT", "Keizer-Punkte"), db.fLocl_GetText("GUI_TEXT", "Spiel-Punkte") });
             t.AddRow(lih);
-            for (int index = 0, num1 = 1; index < playerList; ++index)
+            for (int index = 0, num1 = 1; index < players.Count; ++index)
             {
-                if (pList[index].state != cSqliteInterface.ePlayerState.eRetired)
+                var player = players[index];
+                if (player.state != cSqliteInterface.ePlayerState.eRetired)
                 {
                     var li = new Li<string>();
                     li.Add(num1++.ToString() + ".");
-                    li.Add(pList[index].name);
-                    li.Add(pList[index].Keizer_SumPts.ToString());
-                    li.Add(db.fGetPlayer_PartiePunkte(pList[index].id).ToString());
+                    li.Add(player.name);
+                    li.Add(player.Keizer_SumPts.ToString());
+                    li.Add(db.fGetPlayer_PartiePunkte(player.id).ToString());
                     t.AddRow(li);
                 }
             }
@@ -158,11 +159,8 @@ namespace KeizerForClubs
         {
             var t = new TableW2Headers(sTurnier);
             int maxRound = db.fGetMaxRound();
-            cSqliteInterface.stPlayer[] pList1 = new cSqliteInterface.stPlayer[100];
-            cSqliteInterface.stPlayer[] pList2 = new cSqliteInterface.stPlayer[1];
-            cSqliteInterface.stPlayer[] pList3 = new cSqliteInterface.stPlayer[1];
             cSqliteInterface.stPairing[] pList4 = new cSqliteInterface.stPairing[1];
-            int nPlayer = db.fGetPlayerList(ref pList1, "", " ORDER BY Keizer_SumPts desc, Rating desc ");
+            var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ");
 
             string strr = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
@@ -171,51 +169,53 @@ namespace KeizerForClubs
             for (int i = 0; i < maxRound; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
-            for (int index1 = 0, numPlayer = 1; index1 < nPlayer; ++index1)
+            for (int index1 = 0, numPlayer = 1; index1 < players.Count; ++index1)
             {
+                var player = players[index1];
                 var str1 = new Li<string>();
-                if (pList1[index1].state != cSqliteInterface.ePlayerState.eRetired)
+                if (player.state != cSqliteInterface.ePlayerState.eRetired)
                     str1.Add(numPlayer++.ToString("00"));
                 else
                     str1.Add("(ret)");
-                string name = pList1[index1].name;
+                string name = player.name;
                 str1.Add(name);
-                // str1.Add(pList1[index1].rating.ToString());
-                // str1.Add(pList1[index1].Keizer_StartPts.ToString());
-                str1.Add(pList1[index1].Keizer_SumPts.ToString());
-                str1.Add(db.fGetPlayer_PartiePunkte(pList1[index1].id).ToString());
+                // str1.Add(player.rating.ToString());
+                // str1.Add(player.Keizer_StartPts.ToString());
+                str1.Add(player.Keizer_SumPts.ToString());
+                str1.Add(db.fGetPlayer_PartiePunkte(player.id).ToString());
 
                 for (int index2 = 1; index2 <= maxRound; ++index2)
                 {
-                    string sWhere = " WHERE (PID_W=" + pList1[index1].id.ToString() +
-                        " OR    PID_B=" + pList1[index1].id.ToString() + ")  AND rnd=" + index2.ToString();
+                    string sWhere = " WHERE (PID_W=" + player.id.ToString() +
+                        " OR    PID_B=" + player.id.ToString() + ")  AND rnd=" + index2.ToString();
                     string str3;
                     if (db.fGetPairingList(ref pList4, sWhere, "  ") > 0)
                     {
-                        db.fGetPlayerList(ref pList2, " WHERE ID=" + (object)pList4[0].id_w, " ");
-                        db.fGetPlayerList(ref pList3, " WHERE ID=" + (object)pList4[0].id_b, " ");
-                        string str4 = db.fLocl_GetGameResultShort(pList4[0].result) + " ";
-                        if (pList4[0].result > cSqliteInterface.eResults.eWin_Black)
+                        var pair = pList4[0];
+                        var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ");
+                        var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ");
+                        string str4 = db.fLocl_GetGameResultShort(pair.result) + " ";
+                        if (pair.result > cSqliteInterface.eResults.eWin_Black)
                         {
-                            str3 = str4 + " - - p=" + pList4[0].pts_w.ToString();
+                            str3 = str4 + " - - p=" + pair.pts_w.ToString();
                         }
                         else
                         {
-                            if (pList1[index1].id == pList4[0].id_w)
+                            if (player.id == pair.id_w)
                             {
                                 string str5 = str4 + "w ";
-                                str3 = (pList3[0].state != cSqliteInterface.ePlayerState.eRetired ?
-                                    str5 + " " + pList3[0].name + " " :
-                                    str5 + " " + pList3[0].name + " (r) ") + 
-                                    "p=" + pList4[0].pts_w.ToString() + " ";
+                                str3 = (pBlack.state != cSqliteInterface.ePlayerState.eRetired ?
+                                    str5 + " " + pBlack.name + " " :
+                                    str5 + " " + pBlack.name + " (r) ") + 
+                                    "p=" + pair.pts_w.ToString() + " ";
                             }
                             else
                             {
                                 string str6 = str4 + "b ";
-                                str3 = (pList2[0].state != cSqliteInterface.ePlayerState.eRetired ?
-                                    str6 + " " + pList2[0].name + " " : 
-                                    str6 + " " + pList2[0].name + " (r) ") +
-                                    "p=" + pList4[0].pts_b.ToString() + " ";
+                                str3 = (pWhite.state != cSqliteInterface.ePlayerState.eRetired ?
+                                    str6 + " " + pWhite.name + " " : 
+                                    str6 + " " + pWhite.name + " (r) ") +
+                                    "p=" + pair.pts_b.ToString() + " ";
                             }
                         }
                     }
@@ -260,15 +260,15 @@ namespace KeizerForClubs
             var t = new TableW2Headers(sTurnier);
             t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
 
-            cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = sqlintf.fGetPlayerList(ref pList, "", " ORDER BY ID ");
-            for (int index = 0; index < playerList; ++index)
+            var players = sqlintf.fGetPlayerLi("", " ORDER BY ID ");
+            for (int index = 0; index < players.Count; ++index)
             {
+                var player = players[index];
                 var row = new Li<string>();
                 row.Add((index + 1).ToString() + ".");
-                row.Add(pList[index].name);
-                row.Add(pList[index].rating.ToString());
-                row.Add(sqlintf.fLocl_GetPlayerStateText(pList[index].state));
+                row.Add(player.name);
+                row.Add(player.rating.ToString());
+                row.Add(sqlintf.fLocl_GetPlayerStateText(player.state));
                 t.AddRow(row);
             }
             return t;
