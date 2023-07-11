@@ -206,7 +206,7 @@ namespace KeizerForClubs
                                 string str5 = str4 + "w ";
                                 str3 = (pList3[0].state != cSqliteInterface.ePlayerState.eRetired ?
                                     str5 + " " + pList3[0].name + " " :
-                                    str5 + " " + pList3[0].name + "(ret) ") + 
+                                    str5 + " " + pList3[0].name + " (r) ") + 
                                     "p=" + pList4[0].pts_w.ToString() + " ";
                             }
                             else
@@ -214,7 +214,7 @@ namespace KeizerForClubs
                                 string str6 = str4 + "b ";
                                 str3 = (pList2[0].state != cSqliteInterface.ePlayerState.eRetired ?
                                     str6 + " " + pList2[0].name + " " : 
-                                    str6 + " " + pList2[0].name + "(ret) ") +
+                                    str6 + " " + pList2[0].name + " (r) ") +
                                     "p=" + pList4[0].pts_b.ToString() + " ";
                             }
                         }
