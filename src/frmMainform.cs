@@ -109,6 +109,8 @@ namespace KeizerForClubs
             else
                 SQLiteIntf.fOpenTournament(fileName);
             sTurniername = Path.GetFileName(fileName);
+            dlgOpenTournament.FileName = sTurniername;
+            dlgOpenTournament.InitialDirectory = Path.GetDirectoryName(fileName);
             sTurniername = sTurniername.Replace(".s3db", "");
             Text = "KeizerForClubs " + sTurniername;
             if (SQLiteIntf.cLangCode == "")
