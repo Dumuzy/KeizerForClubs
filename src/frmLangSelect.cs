@@ -9,9 +9,7 @@ namespace KeizerForClubs
     {
         private IContainer components;
         private Button btnOK;
-        public RadioButton radHollaendisch;
-        public RadioButton radDeutsch;
-        public RadioButton radEnglisch;
+        public RadioButton radHollaendisch, radFranz, radDeutsch, radEnglisch;
         private readonly string currLang;
 
 
@@ -35,6 +33,7 @@ namespace KeizerForClubs
             this.radEnglisch = new RadioButton();
             this.radDeutsch = new RadioButton();
             this.radHollaendisch = new RadioButton();
+            this.radFranz = new RadioButton();
             this.btnOK = new Button();
             this.SuspendLayout();
             this.radEnglisch.Location = new Point(44, 20);
@@ -56,6 +55,13 @@ namespace KeizerForClubs
             this.radHollaendisch.TabIndex = 2;
             this.radHollaendisch.Text = "Nederlands";
             this.radHollaendisch.UseVisualStyleBackColor = true;
+            this.radFranz.Location = new Point(44, 125);
+            this.radFranz.Name = "radFranz";
+            this.radFranz.Size = new Size(104, 24);
+            this.radFranz.TabIndex = 3;
+            this.radFranz.Text = "Français";
+            this.radFranz.UseVisualStyleBackColor = true;
+
             this.btnOK.Location = new Point(191, 55);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new Size(75, 23);
@@ -70,6 +76,7 @@ namespace KeizerForClubs
             this.ControlBox = false;
             this.Controls.Add((Control)this.btnOK);
             this.Controls.Add((Control)this.radHollaendisch);
+            this.Controls.Add((Control)this.radFranz);
             this.Controls.Add((Control)this.radDeutsch);
             this.Controls.Add((Control)this.radEnglisch);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -79,6 +86,8 @@ namespace KeizerForClubs
             this.StartPosition = FormStartPosition.CenterParent;
             if (currLang == "NL")
                 radHollaendisch.Checked = true;
+            else if (currLang == "FR")
+                radFranz.Checked = true;
             else if (currLang == "EN")
                 radEnglisch.Checked = true;
             else if (currLang == "DE")

@@ -26,6 +26,7 @@ namespace KeizerForClubs
                 AddLink2Label(linkLabel1, "Github", "https://github.com/Dumuzy/KeizerForClubs");
                 AddLink2Label(linkLabel1, "Dumuzy@Github", "https://github.com/Dumuzy");
                 AddLink2Label(linkLabel1, "Alakaluf@Lichess", "https://lichess.org/@/Alakaluf");
+                AddLink2Label(linkLabel1, "pascalg@Lichess", "https://lichess.org/@/pascalg");
             }
 
             linkLabel2.Text = TrimTextForLinkLabel(@"If you like this software and want to support its maintainenance ... 
@@ -52,7 +53,8 @@ I am   keizer@atlantis44.de   at Paypal.");
             if (!isDonate)
                 t = @"Originally written by T. Schlapp. He's got a whole website dedicated to the Keizer system, 
 including a nice example tournament. Improved and put to Github by me. Contact me:
-Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports.";
+Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports. Many thanks to pascalg@Lichess for testing 
+and translation.";
             else
                 t = @"
 

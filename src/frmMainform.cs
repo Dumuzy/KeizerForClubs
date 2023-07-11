@@ -184,8 +184,9 @@ for determining the first round pairings.";
         {
             frmLangSelect frmLangSelect = new frmLangSelect(SQLiteIntf.cLangCode);
             int num1 = (int)frmLangSelect.ShowDialog();
-            SQLiteIntf.cLangCode = !frmLangSelect.radEnglisch.Checked ?
-                (!frmLangSelect.radDeutsch.Checked ? "NL" : "DE") : "EN";
+            SQLiteIntf.cLangCode = frmLangSelect.radEnglisch.Checked ? "EN" :
+                frmLangSelect.radDeutsch.Checked ? "DE" : 
+                frmLangSelect.radHollaendisch.Checked ? "NL" : "FR";
             SQLiteIntf.fSetConfigText("LANGCODE", SQLiteIntf.cLangCode);
         }
 
