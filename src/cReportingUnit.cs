@@ -118,7 +118,7 @@ namespace KeizerForClubs
                     var li = new Li<string>();
                     li.Add(num1++.ToString() + ".");
                     li.Add(player.name);
-                    li.Add(player.Keizer_SumPts.ToString());
+                    li.Add(player.Keizer_SumPts.ToString("0.00"));
                     li.Add(db.fGetPlayer_PartiePunkte(player.id).ToString());
                     t.AddRow(li);
                 }
@@ -181,7 +181,7 @@ namespace KeizerForClubs
                 str1.Add(name);
                 // str1.Add(player.rating.ToString());
                 // str1.Add(player.Keizer_StartPts.ToString());
-                str1.Add(player.Keizer_SumPts.ToString());
+                str1.Add(player.Keizer_SumPts.ToString("0.00"));
                 str1.Add(db.fGetPlayer_PartiePunkte(player.id).ToString());
 
                 for (int index2 = 1; index2 <= maxRound; ++index2)
