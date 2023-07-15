@@ -1122,7 +1122,7 @@ for determining the first round pairings.";
 
             this.lblRoundsGameRepeat.Location = new Point(44, 264);
             this.lblRoundsGameRepeat.Name = "lblRoundsGameRepeat";
-            this.lblRoundsGameRepeat.Size = new Size(166, 23);
+            this.lblRoundsGameRepeat.Size = new Size(200, 23);
             this.lblRoundsGameRepeat.TabIndex = 10;
             this.lblRoundsGameRepeat.Text = "# Rounds before paired again";
             this.numRoundsGameRepeat.Location = new Point(246, 262);
@@ -1183,7 +1183,7 @@ for determining the first round pairings.";
 
             this.lblOutputTo.Location = new Point(44, yOutput);
             this.lblOutputTo.Name = "lblOutputTo";
-            this.lblOutputTo.Size = new Size(100, 23);
+            this.lblOutputTo.Size = new Size(200, 23);
             this.lblOutputTo.Text = "# Rounds before paired again";
             this.lblOutputTo.TextAlign = ContentAlignment.MiddleLeft;
 

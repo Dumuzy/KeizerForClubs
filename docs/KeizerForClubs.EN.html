@@ -1,0 +1,177 @@
+<p><br /></p>
+<h2 id="keizerforclubs">KeizerForClubs</h2>
+<p><br /></p>
+<h3 id="general">General</h3>
+<p>The KeizerForClubs software allows to manage e.g. chess tournaments
+using the Keizer system with up to 100 players. <br /></p>
+<h3 id="how-is-a-tournament-conducted">How is a tournament
+conducted?</h3>
+<p>The essential steps in brief:</p>
+<ul>
+<li>Open the program, select <em>Start…</em> from the menu. Each
+tournament is stored in a small database: open an existing file to
+continue a tournament, choose a new file name to start a new one.</li>
+<li>For a new tournament enter the names of all participating players
+(if possible with rating, but it will work without also).</li>
+<li>You can also enter players who are not present at the first round,
+but will come later to running tournaments or add new players in later
+rounds.</li>
+<li>Before drawing the first or next round: set the status of all
+players (present, excused etc.).</li>
+<li>Now create the next round: it can be done by the program or
+manually.</li>
+<li>If necessary, create lists: ranking, pairings, current participants
+list …</li>
+<li>Exit the program until the next round.</li>
+</ul>
+<p><br /></p>
+<h3 id="short-description-of-the-gui">Short description of the GUI</h3>
+<p>The program is quite self-explanatory, just a few lines…</p>
+<ul>
+<li>In the beginning with <em>Start…</em> a tournament shall be created.
+Later you can switch to another tournament with <em>Start…</em></li>
+<li>Then at the bottom the three tabs can be selected: <em>Players</em>,
+<em>Pairings</em>, <em>Settings</em>.</li>
+<li>In order to add participants, just write the name and rating into
+the table. Choose the status in the last column by clicking the <em>down
+arrow</em> and choose from the list. ID is assigned automatically.</li>
+<li>To draw a new round, select one of the menu items in the
+<em>Pairing</em> menu. The instructions for manual pairing are listed
+below.</li>
+<li>The pairings menu is active only when the tab pairings is
+selected.</li>
+<li>You can display all rounds played so far using the arrow up/down
+buttons beside the round number.</li>
+<li>Set game results by selecting from the list (again by clicking the
+<em>down arrow</em>).</li>
+<li>Results can be corrected anytime (when e.g. <em>1-0</em> entered
+instead of <em>0-1</em>; not required for retired participants).</li>
+<li>The Lists menu is for exporting rankings etc.</li>
+</ul>
+<p><br /></p>
+<h3 id="instructions-for-the-window-manual-pairing">Instructions for the
+window <em>Manual pairing</em></h3>
+<p>The menu item opens a new window, listing the names of all available
+players (status <em>present</em>, has to be set before) on the left and
+<em>free boards</em> on the right.</p>
+<ul>
+<li>Click a name on he left and an empty space on the right: the player
+is set to this <em>board</em>.</li>
+<li>Click on a board with a name: the player returns to the left.</li>
+<li>Click OK to accept entries - they will be checked before
+accepted.</li>
+<li>If the number of players was odd, the list on the left may contain
+one name who will get the bye. On the right any <em>board</em> has to
+have 2 players (or 0).</li>
+</ul>
+<p><br /></p>
+<h3 id="description-of-some-specific-scenarios">Description of some
+specific scenarios</h3>
+<h4 id="no-pc-in-the-playing-hall">No PC in the playing hall?</h4>
+<p>Then the tournament director determines the pairings for that round
+using the current ranking. Rules are described below. Later the results
+of the round can be entered using <em>manual pairing</em>.</p>
+<h4 id="new-players-entering-the-tournament">New players entering the
+tournament</h4>
+<p>Just add the name to the list: the player is immediately taken into
+account for pairing and ranking.</p>
+<h4 id="players-leaving-the-tournament">Players leaving the
+tournament</h4>
+<p>Set the status of the player to <em>retired</em>. The player will no
+longer be taken into account for paring and ranking, his counterparts of
+already played games get a bonus for their games. The status can be
+changed back to active anytime.</p>
+<p>If a player cancels before the first round, you can set his state to
+<em>deleted</em>, then he’ll be deleted completely.</p>
+<h4 id="rules-for-pairing">Rules for pairing</h4>
+<ul>
+<li>Pairing is done using the players who have shown up.</li>
+<li>Go top-down trough the ranking: the highest ranked plays against the
+2nd ranked, 3rd - 4th and so on.</li>
+<li>The ranking is sorted by Keizer points in descending order; for the
+first round the rating is used.</li>
+<li>Colour distribution is <em>fair</em> - the one with less white games
+gets white.</li>
+<li>If both equally often had white and the players already had played
+aginst each other, the colours of their last game are reversed.
+Otherwise white is given to the lower ranked.</li>
+<li>Unlike in the Swiss system three times consecutively the same colour
+might happen.</li>
+<li>If an odd number of players show up: the lowest-ranked player gets a
+bye.</li>
+<li>Options:
+<ul>
+<li>The bye can go to the second lowest ranked player instead (etc.)
+when double-byes shall be avoided. Also, a player who has missed a game
+won’t get a bye before all other players have gotten a bye or missed a
+game.</li>
+<li>Pairings may be repeated after n rounds.</li>
+</ul></li>
+</ul>
+<p><br /></p>
+<h3 id="evaluation-parameters">Evaluation parameters</h3>
+<p>In the Keizer system one can also get points when not playing. The
+credit varies according to the reason for absence. For the calculation
+it is assumed that you play against yourself using a percentage factor.
+100% corresponds to a victory, 50% a draw and 0% to a loss.</p>
+<p>The percentage values can be chosen on the settings tab. By default,
+the following values are set:</p>
+<ul>
+<li>70% for absence due to <em>club commitments</em></li>
+<li>35% for excused absence</li>
+<li>35% for unexcused absence</li>
+<li>75% for games against withdrawn players.</li>
+<li>50% for bye</li>
+</ul>
+<p><br /></p>
+<h3 id="explanation-of-options">Explanation of options</h3>
+<h4 id="rounds-before-pairings-repeat"># rounds before pairings
+repeat</h4>
+<p>This is the minimum number of rounds before two players may compete
+against each other again.</p>
+<ul>
+<li>0 means two players may be paired against each other again in the
+very next round.</li>
+<li>99 (or any other high number) ensures two players will meet only
+once in a tournament.</li>
+<li>If a tournament has 7 rounds and this number is set to 2, it could
+be that some pairings take place 3 times in the tournament, namely in
+the 1st, 4th and 7th round.</li>
+</ul>
+<h4 id="allocate-byes-even">Allocate bye’s even</h4>
+<p>When this option is not set, the bye is always given to the lowest
+ranked player when an odd number of players show up for a round.</p>
+<h4 id="first-round-random">First round random</h4>
+<p>In the Keizer system, the first round would be each time the same
+with the same players. That may be annoying for small clubs. When
+setting this value not to 0, the first round colours are random and a
+random number between 0 and the value is added or subtracted from each
+players rating for determining the first round pairings.</p>
+<h4 id="ratio-win-against-first-to-last">Ratio win against first to
+last</h4>
+<p>In the Keizer system, a win against the first-ranked player gets more
+points than a win against the other players.</p>
+<p>This value is the points you’d get for a win against the first ranked
+player divided by the points you’d get against the last ranked player.
+The lower this number, the closer are Keizer system and Swiss system. 3
+is the default. The higher the number, the more the better players stay
+separated from the others. I recommend lower values for tournaments with
+less than 20 players.</p>
+<p><br /></p>
+<h3 id="acknowledgements">Acknowledgements</h3>
+<ul>
+<li>The program originally was developed with SharpDevelop, now I’m
+using Microsoft Visual Studio Community 2022.</li>
+<li>The database is <a href="https://www.SQLite.org">SQLite</a>.</li>
+<li>The software is hosted on <a
+href="https://github.com/Dumuzy/KeizerForClubs/releases">Github</a>.</li>
+</ul>
+<p>Special thanks to</p>
+<ul>
+<li>Thomas Schlapp for the original development of this software.</li>
+<li>Jürgen Kehr for tests and other valuable information.</li>
+<li>Pascal Golay for tests and translation to french.</li>
+</ul>
+<h3 id="license">License</h3>
+<p>The program is available for free. It comes without any warranty or
+guarantee, use at own risk. See also the License.txt.</p>

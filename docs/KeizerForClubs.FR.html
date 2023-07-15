@@ -1,0 +1,220 @@
+<p><br /></p>
+<h2 id="keizerforclubs">KeizerForClubs</h2>
+<p><br /></p>
+<h3 id="général">Général</h3>
+<p>Le logiciel KeizerForClubs permet de gérer des tournois d’échecs
+utilisant le système Keizer jusqu’à 100 joueurs. <br /></p>
+<h3 id="comment-se-déroule-un-tournoi">Comment se déroule un
+tournoi?</h3>
+<p>Les étapes essentielles en bref:</p>
+<ul>
+<li>Ouvrez le programme, sélectionnez <em>Start…</em> dans le menu.
+Chaque tournoi est enregistré dans une petite base de données: ouvrez un
+fichier existant pour continuer un tournoi, choisissez un nouveau nom de
+fichier pour en commencer un nouveau.</li>
+<li>Pour un nouveau tournoi, entrez les noms de tous les joueurs
+participants (si possible avec un classement élo, mais cela fonctionnera
+aussi sans).</li>
+<li>Vous pouvez également inscrire des joueurs qui ne seront pas
+présents lors de la première ronde, mais qui joueront lors de rondes
+ultérieures du tournoi. Vous pouvez aussi ajouter de nouveaux joueurs en
+tout temps lors des rondes suivantes.</li>
+<li>Avant d’apparier la première ronde ou la ronde suivante: définissez
+le statut de tous les joueurs (présents, excusés, etc.).</li>
+<li>À présent, appariez la prochaine ronde: cela peut réalisé
+automatiquement par le programme ou manuellement.</li>
+<li>Si nécessaire, créez des fichiers des listes: classement,
+appariements, liste actuelle des joueurs, etc.</li>
+<li>Quitter le programme jusqu’à la prochaine ronde.</li>
+</ul>
+<p><br /></p>
+<h3 id="brève-description-de-linterface-graphique">Brève description de
+l’interface graphique</h3>
+<p>L’interface du programme est assez explicite, quelques lignes
+d’explication suffisent…</p>
+<ul>
+<li>Pour commencer, un tournoi doit être créé avec <em>Start…</em>.
+Après, vous pourrez passer à un autre tournoi avec <em>Start…</em>.</li>
+<li>Les trois onglets en bas de l’interface peuvent ensuite être
+sélectionnés (<em>Joueurs</em>, <em>Appariements</em>,
+<em>Paramètres</em>).</li>
+<li>Pour ajouter des joueurs, il suffit d’inscrire leur nom et leur
+classement élo dans le tableau. Choisissez le statut dans la dernière
+colonne en cliquant sur <em>la flèche vers le bas</em> et sélectionnez
+une option dans la liste. L’ID est attribué automatiquement.</li>
+<li>Pour apparier une nouvelle ronde, sélectionnez l’une des
+possibilités du menu <em>Appariements</em>. Les explications concernant
+l’appariement manuel se trouvent plus bas.</li>
+<li>Le menu pour les appariements n’est actif que lorsque l’onglet des
+appariements est sélectionné.</li>
+<li>Vous pouvez afficher et naviguer dans toutes les rondes jouées
+jusqu’à présent en utilisant les boutons fléchés haut/bas qui se
+trouvent à côté du numéro de la ronde.</li>
+<li>Inscrivez les résultats des parties en les sélectionnant dans la
+liste (à nouveau en cliquant sur <em>la flèche vers le bas</em>).</li>
+<li>Les résultats peuvent être corrigés à n’importe quel moment
+(lorsque, par exemple, <em>1-0</em> est saisi au lieu de <em>0-1</em>.
+Cela n’est nécessaire pour les joueurs qui se sont retirés du
+tournoi).</li>
+<li>Le menu <em>Listes</em> permet d’exporter des fichiers du
+classement, des appariements, etc.</li>
+</ul>
+<p><br /></p>
+<h3 id="explications-pour-la-fenêtre-appariements-manuels">Explications
+pour la fenêtre <em>Appariements manuels</em></h3>
+<p>L’option du menu ouvre une nouvelle fenêtre avec, à gauche, la liste
+des noms de tous les joueurs disponibles (c’est-à-dire des joueurs dont
+le statut a été défini sur “Présent” auparavant) et, à droite, un
+<em>tableau vide</em>.</p>
+<ul>
+<li>Cliquez sur un nom de joueur dans la liste de gauche puis sur une
+cellule vide du tableau à droite: le nom du joueur s’inscrit dans cette
+<em>cellule</em>.</li>
+<li>Cliquez dans une cellule contenant déjà le nom d’un joueur: le nom
+du joueur est renvoyé dans la liste de gauche et la cellule redevient
+vide.</li>
+<li>Cliquez sur le bouton “OK” pour enregistrer les appariements. Ils
+seront vérifiés avant d’être acceptés.</li>
+<li>Si le nombre de joueurs est impair, la liste des noms des joueurs à
+gauche doit contenir à la fin seulement le nom du joueur qui doit
+obtenir le bye. <em>Chaque ligne</em> du tableau de droite dont contenir
+les noms de deux joueurs (ou d’aucun joueur).</li>
+</ul>
+<p><br /></p>
+<h3 id="description-de-quelques-scénarios-particuliers">Description de
+quelques scénarios particuliers</h3>
+<h4 id="pas-dordinateur-dans-la-salle-de-jeu">Pas d’ordinateur dans la
+salle de jeu?</h4>
+<p>Dans ce cas, le directeur du tournoi déterminera les appariements
+pour la ronde en utilisant le classement actuel du tournoi. Les règles
+pour les appariements sont expliquées plus bas. Ensuite, les résultats
+de la ronde pourront être entrés dans le logiciel en utilisant
+<em>l’appariement manuel</em>.</p>
+<h4 id="nouveaux-joueurs-entrant-dans-un-tournoi-en-cours">Nouveaux
+joueurs entrant dans un tournoi en cours</h4>
+<p>Il suffit juste d’ajouter leurs noms dans la liste des joueurs: ces
+nouveaux joueurs seront immédiatement pris en compte pour les
+appariements des rondes suivantes et dans le classement du tournoi.</p>
+<h4 id="joueurs-qui-se-retirent-du-tournoi">Joueurs qui se retirent du
+tournoi</h4>
+<p>Mettez le statut de ces joueurs sur <em>Retiré</em>.</p>
+<p>Ces joueurs ne seront plus pris en compte pour les appariements et le
+classement du tournoi. Les adversaires de ces joueurs retirés reçoivent
+un bonus pour leurs parties jouées contre eux.</p>
+<p>Le statut des joueurs retirés peut être remis à actif (présent) à
+n’importe quel moment.</p>
+<p>Si un joueur renonce à participer au tournoi avant le début de la
+première ronde, vous pouvez mettre son statut sur <em>Effacer</em> et il
+sera alors complètement supprimé de la liste des joueurs.</p>
+<h4 id="règles-pour-les-appariements">Règles pour les appariements</h4>
+<ul>
+<li>L’appariement d’une ronde se fait en fonction des joueurs
+présents.</li>
+<li>Parcourez le classement du tournoi du premier au dernier: le premier
+classé affronte le 2e, le 3e affronte le 4e et ainsi de suite.</li>
+<li>Le classement du tournoi est établi par ordre décroissant des points
+Keizer. Pour la première ronde, ce sont les points de classement élo des
+joueurs qui sont utilisés.</li>
+<li>La distribution des couleurs doit être <em>équitable</em>: le joueur
+qui a jusqu’ici joué avec le moins de fois avec les Blancs joue avec les
+Blancs.</li>
+<li>Si les deux joueurs ont eu un même nombre de fois les Blancs et
+qu’ils ont déjà joué l’un contre l’autre lors d’une ronde précédente,
+alors les couleurs sont inversées par rapport à cette partie précédente,
+sinon les Blancs sont attribués au joueur le moins bien classé dans le
+tournoi.</li>
+<li>Contrairement au système suisse, la même couleur peut être attribuée
+à un joueur trois fois de suite.</li>
+<li>Si un nombre impair de joueurs est présent, le joueur le moins bien
+classé reçoit un bye.</li>
+<li>Options:
+<ul>
+<li>Le bye peut être attribué à l’avant-dernier joueur le moins bien
+classé, etc. afin d’éviter qu’un même joueur reçoive deux fois le bye.
+En outre, un joueur qui a manqué une ronde ne recevra pas de bye avant
+que tous les autres joueurs aient reçu un bye ou manqué une ronde.</li>
+<li>Les mêmes appariements peuvent être répétés après n rondes.</li>
+</ul></li>
+</ul>
+<p><br /></p>
+<h3 id="les-paramètres">Les paramètres</h3>
+<p>Dans le système Keizer, il est également possible d’obtenir des
+points lorsqu’on ne joue pas. Le nombre de points varie en fonction de
+la raison de l’absence. Pour le calcul, on considère que vous jouez
+contre vous-même en utilisant un coefficient en pourcentage. 100%
+correspondent à une victoire, 50% à un match nul et 0% à une
+défaite.</p>
+<p>Les valeurs en pourcentage peuvent être choisies dans l’onglet des
+paramètres. Par défaut, les valeurs suivantes sont définies:</p>
+<ul>
+<li>70% en cas d’absence en raison <em>d’un engagement pour le
+club</em>.</li>
+<li>35% pour une absence excusée.</li>
+<li>35% pour une absence non excusée.</li>
+<li>75% pour les parties contre des joueurs qui se sont retirés.</li>
+<li>50% pour un bye.</li>
+</ul>
+<p><br /></p>
+<h3 id="explication-des-options">Explication des options</h3>
+<h4 id="rondes-avant-répét.-appariement"># rondes avant répét.
+appariement</h4>
+<p>Il s’agit du nombre minimum de rondes avant que deux joueurs puissent
+s’affronter à nouveau.</p>
+<ul>
+<li>0 signifie que deux joueurs peuvent être de nouveau appariés
+ensemble lors de la ronde suivante.</li>
+<li>99 (ou tout autre nombre élevé) garantit que deux joueurs ne se
+rencontreront qu’une seule fois durant tout le tournoi.</li>
+<li>Si un tournoi comporte 7 rondes et que ce nombre est fixé à 2, il se
+peut que certains mêmes appariements se répètent trois fois dans le
+tournoi, à savoir aux 1re, 4e et 7e rondes.</li>
+</ul>
+<h4 id="distribuer-le-bye-équitablement">Distribuer le bye
+équitablement</h4>
+<p>Si cette option n’est pas activée, le bye est toujours attribué au
+joueur le moins bien classé du tournoi lorsqu’un nombre impair de
+joueurs se présente à une ronde.</p>
+<h4 id="degré-daléatoire-pour-la-première-ronde">Degré d’aléatoire pour
+la première ronde</h4>
+<p>Dans le système Keizer, l’appariement de la première ronde est à
+chaque fois identique avec les mêmes joueurs au départ. Cela peut être
+gênant pour des tournois dans des petits clubs où ce sont toujours les
+mêmes joueurs qui jouent les tournois. Lorsque cette valeur est réglée
+sur un nombre différent de 0, l’attribution des couleurs lors de la
+première ronde devient aléatoire et un nombre aléatoire compris entre 0
+et la valeur est ajouté ou soustrait du classement élo de chaque joueur
+pour déterminer les appariements de la première ronde.</p>
+<h4 id="ratio-du-gain-entre-1er-et-dernier">Ratio du gain entre 1er et
+dernier</h4>
+<p>Dans le système Keizer, une victoire contre le joueur classé premier
+du tournoi rapporte plus de points qu’une victoire contre les autres
+joueurs.</p>
+<p>Cette valeur correspond aux points que vous obtiendriez pour une
+victoire contre le joueur le mieux classé du tournoi, divisés par les
+points que vous obtiendriez contre le joueur le moins bien classé du
+tournoi. Plus ce chiffre est petit, plus le système Keizer et le système
+suisse sont proches. 3 est la valeur par défaut. Plus le chiffre est
+élevé, plus les joueurs les mieux classés du tournoi se distinguent des
+autres. Je recommande des valeurs plus basses pour les tournois de moins
+de 20 joueurs.</p>
+<p><br /></p>
+<h3 id="remerciements">Remerciements</h3>
+<ul>
+<li>Le programme a été développé à l’origine avec SharpDevelop, mais
+j’utilise à présent Microsoft Visual Studio Community 2022.</li>
+<li>La base de données est <a
+href="https://www.SQLite.org">SQLite</a>.</li>
+<li>Le logiciel est hébergé sur <a
+href="https://github.com/Dumuzy/KeizerForClubs/releases">Github</a>.</li>
+</ul>
+<p>Remerciements particuliers à</p>
+<ul>
+<li>Thomas Schlapp pour le développement initial de ce logiciel.</li>
+<li>Jürgen Kehr pour ses tests et ses autres précieuses
+informations.</li>
+<li>Pascal Golay pour ses tests et la traduction en français.</li>
+</ul>
+<h3 id="licence">Licence</h3>
+<p>Le programme est mis à disposition gratuitement. Il est fourni sans
+aucune garantie; l’utilisation se fait à ses propres risques et périls.
+Cf. aussi le fichier License.txt.</p>
