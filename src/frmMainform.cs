@@ -509,6 +509,7 @@ for determining the first round pairings.";
             colPlayerState.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Status");
             colRating.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Rating");
             colPlayerName.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Sp.Name");
+            colPairgBoard.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Brett");
             colPairingNameWhite.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Weiss");
             colPairingWhiteAddinfo.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.WeissAdd");
             colPairingNameBlack.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Schwarz");
@@ -1223,7 +1224,7 @@ for determining the first round pairings.";
             this.mnuStartLanguage.Enabled = false;
             this.mnuStartLanguage.Name = "mnuStartLanguage";
             this.mnuStartLanguage.Size = new Size(218, 22);
-            this.mnuStartLanguage.Text = "Language, Sprache, Spraak...";
+            this.mnuStartLanguage.Text = "Language, Sprache, Spraak, Langue...";
             this.mnuStartLanguage.Click += new EventHandler(this.MnuStartLanguageClick);
             this.mnuPaarungen.DropDownItems.AddRange(new ToolStripItem[5]
             {

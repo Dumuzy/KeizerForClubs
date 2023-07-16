@@ -53,6 +53,8 @@ namespace KeizerForClubs
         {
             var t = new TableW2Headers(sTurnier);
             t.Header2 = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
+            t.AddRow("Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis".Split().
+                    Select(s => db.fLocl_GetText("GUI_COLS", s)).ToLi());
 
             cSqliteInterface.stPairing[] pList = new cSqliteInterface.stPairing[50];
             int pairingList = db.fGetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
