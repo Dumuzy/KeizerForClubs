@@ -257,6 +257,7 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             fDelDeletedPlayers();
+            new cReportingUnit(sTurniername, SQLiteIntf).WriteCurrentTablesToDb();
             if (SQLiteIntf.fGetPairings_NoResult() == 0)
                 fExecutePairing();
             else
@@ -268,6 +269,7 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             fDelDeletedPlayers();
+            new cReportingUnit(sTurniername, SQLiteIntf).WriteCurrentTablesToDb();
             if (SQLiteIntf.fGetPairings_NoResult() == 0)
                 fExecutePairingManual();
             else
@@ -286,6 +288,7 @@ for determining the first round pairings.";
             else
             {
                 SQLiteIntf.fDelPairings(maxRound);
+                SQLiteIntf.fDelCurrentTables(maxRound);
                 this.numRoundSelect.Value = (Decimal)(maxRound - 1);
                 this.fLoadPairingList();
             }
@@ -343,7 +346,7 @@ for determining the first round pairings.";
         private void MnuListenPairingClick(object sender, EventArgs e)
         {
             IncNumClicks(SQLiteIntf.fGetPlayerCount() / 2);
-            new cReportingUnit(sTurniername, SQLiteIntf).fReport_Paarungen(Convert.ToInt16(this.numRoundSelect.Value));
+            new cReportingUnit(sTurniername, SQLiteIntf).fReport_Paarungen(Helper.ToInt(numRoundSelect.Value));
         }
 
         private void MnuListenStandingClick(object sender, EventArgs e)
@@ -353,12 +356,13 @@ for determining the first round pairings.";
             SQLiteIntf.EndeTransaktion();
             IncNumClicks(SQLiteIntf.fGetPlayerCount());
             if (sender == mnuListenStanding)
-                new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_Tabellenstand();
+                new cReportingUnit(sTurniername, SQLiteIntf).fReport_Tabellenstand(Helper.ToInt(numRoundSelect.Value));
             else if (sender == mnuListenStandingFull)
-                new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_TabellenstandVoll();
+                new cReportingUnit(sTurniername, SQLiteIntf).fReport_TabellenstandVoll(Helper.ToInt(numRoundSelect.Value));
         }
 
-        private void MnuListenParticipantsClick(object sender, EventArgs e) => new cReportingUnit(this.sTurniername, this.SQLiteIntf).fReport_Teilnehmer();
+        private void MnuListenParticipantsClick(object sender, EventArgs e) => 
+            new cReportingUnit(sTurniername, SQLiteIntf).fReport_Teilnehmer(Helper.ToInt(numRoundSelect.Value));
 
         private void TbBonusValueChanged(object sender, EventArgs e)
         {

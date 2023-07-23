@@ -42,6 +42,11 @@ namespace KeizerForClubs
             eErrUndefined = -1
         };
 
+        public enum eTableType
+        {
+            None = 0, Stand, Kreuz, Spieler
+        }
+
         public struct stPlayer
         {
             public int id;
@@ -769,6 +774,67 @@ namespace KeizerForClubs
             return topicTexte;
         }
         #endregion Localization
+
+        #region Tabelle
+        const string tableSplitter = "§";
+
+        public void WriteTableWHeaders2Db(eTableType tt, int runde, TableW2Headers table)
+        {
+            var tn = TabWHName(tt, runde);
+            var sql = new Li<string>();
+            sql.Add($@" DROP TABLE IF EXISTS {tn};");
+            sql.Add($"CREATE TABLE {tn} (id INTEGER PRIMARY KEY, line TEXT NOT NULL);");
+            sql.Add($"INSERT into {tn} (line) VALUES('{table.Header1}');");
+            sql.Add($"INSERT into {tn} (line) VALUES('{table.Header2}');");
+            sql.Add($"INSERT into {tn} (line) VALUES('{string.Join(tableSplitter, table.Footer)}');");
+            for (int i = 0; i < table.Count; ++i)
+            {
+                var line = string.Join(tableSplitter, table[i]);
+                sql.Add($"INSERT into {tn} (line) VALUES('{line}');");
+            }
+            sqlCommand.CommandText = string.Join("\n", sql);
+            sqlCommand.ExecuteNonQuery();
+        }
+
+        public TableW2Headers ReadTableWHeadersFromDb(eTableType tt, int runde)
+        {
+            var tn = TabWHName(tt, runde);
+            var table = new TableW2Headers("");
+            sqlCommand.CommandText = $"SELECT line FROM {tn} ORDER BY id;";
+            using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
+                if (sqLiteDataReader.HasRows)
+                {
+                    int i = 0;
+                    while (sqLiteDataReader.Read())
+                    {
+                        var text = sqLiteDataReader.IsDBNull(0) ? "" : sqLiteDataReader.GetString(0);
+                        if (i == 0)
+                            table.Header1 = text;
+                        else if (i == 1)
+                            table.Header2 = text;
+                        else if (i == 2)
+                            table.Footer = text.Split(tableSplitter).ToLi();
+                        else
+                            table.AddRow(text.Split(tableSplitter).ToLi());
+                        ++i;
+                    }
+                }
+            return table;
+        }
+
+        string TabWHName(eTableType tt, int runde) => "t" + tt.ToString() + "_" + runde;
+
+        public void fDelCurrentTables(int runde)
+        {
+            var tns = new string[] { TabWHName(eTableType.Stand, runde), TabWHName(eTableType.Kreuz, runde), 
+                TabWHName(eTableType.Spieler, runde + 1) };
+            sqlCommand.CommandText = $@"
+                DROP TABLE IF EXISTS {tns[0]};
+                DROP TABLE IF EXISTS {tns[1]};
+                DROP TABLE IF EXISTS {tns[2]};";
+            sqlCommand.ExecuteNonQuery();
+        }
+        #endregion Tabelle
 
     }
 }

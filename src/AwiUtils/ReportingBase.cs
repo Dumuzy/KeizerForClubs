@@ -33,7 +33,8 @@ namespace AwiUtils
                     swExport.WriteLine(line);
                 }
                 swExport.WriteLine("");
-                swExport.WriteLine(KfcFooter + "   " + DateHeader);
+                var f = KfcFooter.Replace("Footer0", t.Footer[0]).Replace("Footer1", t.Footer[1]);
+                swExport.WriteLine(f);
             }
             return fileName;
         }
@@ -57,6 +58,8 @@ namespace AwiUtils
                 var s = string.Join(';', t[i]);
                 sb.AppendLine(s);
             }
+            var f = KfcFooter.Replace("Footer0", t.Footer[0]).Replace("Footer1", t.Footer[1]);
+            sb.AppendLine(f);
             return sb;
         }
 
@@ -77,7 +80,8 @@ namespace AwiUtils
                         swExport.Write("<td>" + c + "</td>");
                     swExport.WriteLine("</tr>");
                 }
-                swExport.WriteLine(KfcFooterHtml);
+                var f = KfcFooterHtml.Replace("Footer0", t.Footer[0]).Replace("Footer1", t.Footer[1]);
+                swExport.WriteLine(f);
                 swExport.WriteLine("</table>");
                 AddHtmlFooter(swExport);
             }
@@ -104,7 +108,8 @@ namespace AwiUtils
                     swExport.WriteLine($"</{rowName}>");
                 }
                 swExport.WriteLine("<footer>");
-                swExport.WriteLine(KfcFooter + " " + DateTime.Now.ToShortDateString());
+                var f = KfcFooter.Replace("Footer0", t.Footer[0]).Replace("Footer1", t.Footer[1]);
+                swExport.WriteLine(f);
                 swExport.WriteLine("</footer>");
                 swExport.WriteLine("</export>");
                 swExport.WriteLine($"</{toplevelName}>");
@@ -149,6 +154,7 @@ namespace AwiUtils
     {
         public TableW2Headers(string header1) => Header1 = header1;
         public string Header1, Header2;
+        public Li<string> Footer;
         public void AddRow(Li<string> row) => rows.Add(row);
         public int Count => rows.Count;
         public Li<string> this[int i] { get { return rows[i]; } }

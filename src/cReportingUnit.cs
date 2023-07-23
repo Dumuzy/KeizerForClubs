@@ -1,11 +1,13 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Reflection.Metadata.Ecma335;
 using System.Windows.Forms;
 using AwiUtils;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Net.WebRequestMethods;
+using static KeizerForClubs.cSqliteInterface;
 
 namespace KeizerForClubs
 {
@@ -67,20 +69,22 @@ namespace KeizerForClubs
                 r.Add(db.fLocl_GetGameResultText(pList[index].result));
                 t.AddRow(r);
             }
+            t.Footer = TableFooter;
             return t;
         }
         #endregion Paarungen 
 
         #region Tabellenstand
-        private string GetFileTabellenstandBasename() =>
-            "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "-" + db.fGetMaxRound();
+        private string GetFileTabellenstandBasename(int runde) =>
+            "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "-" + runde;
 
-        public bool fReport_Tabellenstand()
+        public bool fReport_Tabellenstand(int runde)
         {
             try
             {
-                var table = fReportTabellenstandTable();
-                var fileBase = GetFileTabellenstandBasename();
+                TableW2Headers table = runde != db.fGetMaxRound() ? 
+                    db.ReadTableWHeadersFromDb(eTableType.Stand, runde) : fReportTabellenstandTable();
+                var fileBase = GetFileTabellenstandBasename(runde);
 
                 if (db.fGetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
@@ -109,7 +113,7 @@ namespace KeizerForClubs
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
             var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc ");
-            var lih = new Li<string>(new string[] { "", db.fLocl_GetText("GUI_TEXT", "Name"), 
+            var lih = new Li<string>(new string[] { "", db.fLocl_GetText("GUI_TEXT", "Name"),
                 db.fLocl_GetText("GUI_TEXT", "Keizer-Punkte"), db.fLocl_GetText("GUI_TEXT", "Spiel-Punkte") });
             t.AddRow(lih);
             for (int index = 0, num1 = 1; index < players.Count; ++index)
@@ -125,18 +129,21 @@ namespace KeizerForClubs
                     t.AddRow(li);
                 }
             }
+            t.Footer = TableFooter;
             return t;
         }
         #endregion Tabellenstand
 
         #region TabellenstandVoll
 
-        public bool fReport_TabellenstandVoll()
+        public bool fReport_TabellenstandVoll(int runde)
         {
             try
             {
-                var tableVoll = fReportTabellenstandVollTable();
-                var fileBaseVoll = GetFileTabellenstandExBasename();
+                TableW2Headers tableVoll = runde != db.fGetMaxRound() ?
+                        db.ReadTableWHeadersFromDb(eTableType.Kreuz, runde) : fReportTabellenstandVollTable();
+
+                var fileBaseVoll = GetFileTabellenstandExBasename(runde);
 
                 if (db.fGetConfigBool("OPTION.Csv"))
                     ExportAsCsv(tableVoll, fileBaseVoll);
@@ -154,8 +161,8 @@ namespace KeizerForClubs
             return true;
         }
 
-        private string GetFileTabellenstandExBasename() =>
-            "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + db.fGetMaxRound();
+        private string GetFileTabellenstandExBasename(int runde) =>
+            "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + runde;
 
         TableW2Headers fReportTabellenstandVollTable()
         {
@@ -208,14 +215,14 @@ namespace KeizerForClubs
                                 string str5 = str4 + "w ";
                                 str3 = (pBlack.state != cSqliteInterface.ePlayerState.eRetired ?
                                     str5 + " " + pBlack.name + " " :
-                                    str5 + " " + pBlack.name + " (r) ") + 
+                                    str5 + " " + pBlack.name + " (r) ") +
                                     "p=" + pair.pts_w.ToString() + " ";
                             }
                             else
                             {
                                 string str6 = str4 + "b ";
                                 str3 = (pWhite.state != cSqliteInterface.ePlayerState.eRetired ?
-                                    str6 + " " + pWhite.name + " " : 
+                                    str6 + " " + pWhite.name + " " :
                                     str6 + " " + pWhite.name + " (r) ") +
                                     "p=" + pair.pts_b.ToString() + " ";
                             }
@@ -227,18 +234,21 @@ namespace KeizerForClubs
                 }
                 t.AddRow(str1);
             }
+            t.Footer = TableFooter;
             return t;
         }
 
         #endregion TabellenstandVoll
 
         #region Teilnehmer
-        public bool fReport_Teilnehmer()
+        public bool fReport_Teilnehmer(int runde)
         {
             try
             {
-                var table = fReportTeilnehmerTable(db);
-                var fileBase = GetTeilnehmerBasename(db);
+                TableW2Headers table = runde != db.fGetMaxRound() ?
+                    db.ReadTableWHeadersFromDb(eTableType.Spieler, runde) : fReportTeilnehmerTable(db);
+
+                var fileBase = GetTeilnehmerBasename(db, runde);
                 if (db.fGetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_player", "player", "nr name rating state".Split());
                 if (db.fGetConfigBool("OPTION.Txt"))
@@ -260,7 +270,8 @@ namespace KeizerForClubs
         TableW2Headers fReportTeilnehmerTable(cSqliteInterface sqlintf)
         {
             var t = new TableW2Headers(sTurnier);
-            t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
+            t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
+                db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound(); 
 
             var players = sqlintf.fGetPlayerLi("", " ORDER BY ID ");
             for (int index = 0; index < players.Count; ++index)
@@ -273,12 +284,26 @@ namespace KeizerForClubs
                 row.Add(sqlintf.fLocl_GetPlayerStateText(player.state));
                 t.AddRow(row);
             }
+            t.Footer = TableFooter;
             return t;
         }
 
-        private string GetTeilnehmerBasename(cSqliteInterface sqlintf) => "export\\" + this.sTurnier + "_" +
-                sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + sqlintf.fGetMaxRound();
+        private string GetTeilnehmerBasename(cSqliteInterface sqlintf, int runde) => "export\\" + this.sTurnier + "_" +
+                sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + runde;
         #endregion Teilnehmer
+
+        #region Misc
+        public void WriteCurrentTablesToDb()
+        {
+            int maxRound = db.fGetMaxRound();
+            if (maxRound > 0)
+            {
+                db.WriteTableWHeaders2Db(eTableType.Stand, maxRound, fReportTabellenstandTable());
+                db.WriteTableWHeaders2Db(eTableType.Kreuz, maxRound, fReportTabellenstandVollTable());
+            }
+            db.WriteTableWHeaders2Db(eTableType.Spieler, maxRound + 1, fReportTeilnehmerTable(db));
+        }
+        #endregion Misc
 
         #region Debugging
         public void DebugPairingsAndStandings(int runde)
@@ -317,7 +342,9 @@ namespace KeizerForClubs
         Version Version => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
         string KfcLongVersion => Version.ToString();
         string KfcShortVersion => $"{Version.Major}.{Version.Minor}";
-        protected override string KfcFooter => "KeizerForClubs v" + KfcLongVersion;
-        protected override string KfcFooterHtml => $"<tr><td colspan=\"3\"><a href=\"https://github.com/Dumuzy/KeizerForClubs/releases\">{KfcFooter}</a></td> <td colspan=\"2\">{DateHeader}</td></tr>";
+        protected override string KfcFooter => "Footer0 Footer1";
+        protected override string KfcFooterHtml => "<tr><td colspan=\"3\"><a href=\"https://github.com/Dumuzy/KeizerForClubs/releases\">Footer0</a></td> <td colspan=\"2\">Footer1</td></tr>";
+
+        Li<string> TableFooter => new string[] { "KeizerForClubs v" + KfcLongVersion, DateHeader }.ToLi();
     }
 }
