@@ -608,7 +608,7 @@ namespace KeizerForClubs
         #region Playerlist
         // Spielerliste abfragen. 
         // Auch Tabellenstand möglich über SortOrder   
-        public int fGetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder)
+        public int fGetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder, int runde)
         {
             string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
                                 WHERE result in (4,5,6,7) GROUP BY pid_w) f on f.PID_W = p.id ";
@@ -628,12 +628,33 @@ namespace KeizerForClubs
                             pList[playerCount].name = sqLiteDataReader.IsDBNull(1) ? "" : sqLiteDataReader.GetString(1);
                             pList[playerCount].rating = sqLiteDataReader.IsDBNull(2) ? 0 : (int)sqLiteDataReader.GetInt16(2);
                             int num = sqLiteDataReader.IsDBNull(3) ? 0 : sqLiteDataReader.GetInt32(3);
-                            pList[playerCount].state = (cSqliteInterface.ePlayerState)num;
+                            pList[playerCount].state = (ePlayerState)num;
                             pList[playerCount].Keizer_StartPts = sqLiteDataReader.IsDBNull(4) ? 0.0f : sqLiteDataReader.GetFloat(4);
                             pList[playerCount].Keizer_SumPts = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
                             pList[playerCount].rank = sqLiteDataReader.IsDBNull(6) ? 0 : (int)sqLiteDataReader.GetInt16(6);
                             pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
                             pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
+
+                            if (pList[playerCount].state == ePlayerState.eRetired)
+                            {
+                                /// OOOOHHHHH ELEND, des ist ein echtes Problem. 
+                                var pid = pList[playerCount].id;
+                                // Special check needed. This player is only then retired for the
+                                // current round, if he is not in the pairings table. 
+                                var sql = $@"SELECT Result from Pairing WHERE Rnd={runde} AND 
+                                              (PID_W={pid} or PID_B={pid})";
+                                var c = new SQLiteCommand(sql, SQLiteMyDB);
+                                var obj = c.ExecuteScalar();
+                                if (obj != null )
+                                {
+                                    var re = Helper.ToInt(obj);
+                                    // The player has played in the round. 
+                                    if (re.IsContainedIn<int>(new int[] { 5, 6, 7 }.ToLi()))
+                                        pList[playerCount].state = (ePlayerState)re;
+                                    else
+                                        pList[playerCount].state = ePlayerState.eAvailable;
+                                }
+                            }
 
                             ++playerCount;
                         }
@@ -645,24 +666,24 @@ namespace KeizerForClubs
             return playerCount;
         }
 
-        public Li<stPlayer> fGetPlayerLi(string sWhere, string sSortorder)
+        public Li<stPlayer> fGetPlayerLi(string sWhere, string sSortorder, int runde)
         {
             cSqliteInterface.stPlayer[] arr = new stPlayer[100];
-            int playerCount = fGetPlayerList(ref arr, sWhere, sSortorder);
+            int playerCount = fGetPlayerList(ref arr, sWhere, sSortorder, runde);
             return new Li<stPlayer>(arr.Take(playerCount));
         }
 
-        public int fGetPlayerList_Available(ref stPlayer[] pList)
+        public int fGetPlayerList_Available(ref stPlayer[] pList, int runde)
         {
             string sWhere = " WHERE state IN (1) ";
             string sSortorder = " ORDER BY ID ";
-            return fGetPlayerList(ref pList, sWhere, sSortorder);
+            return fGetPlayerList(ref pList, sWhere, sSortorder, runde);
         }
 
-        public int fGetPlayerList_NotDropped(ref stPlayer[] pList, string sOrder)
+        public int fGetPlayerList_NotDropped(ref stPlayer[] pList, string sOrder, int runde)
         {
             string sWhere = " WHERE state NOT IN (9) ";
-            return fGetPlayerList(ref pList, sWhere, sOrder);
+            return fGetPlayerList(ref pList, sWhere, sOrder, runde);
         }
 
         public int fGetPlayerCount()
@@ -674,10 +695,10 @@ namespace KeizerForClubs
 
         /// <summary> Returns the first player that matches the query. New empty player wiht state 
         /// unknown and id -1, if none found. </summary>
-        public stPlayer fGetPlayer(string sWhere, string sSortorder)
+        public stPlayer fGetPlayer(string sWhere, string sSortorder, int runde)
         {
             var arr = new stPlayer[1];
-            int n = fGetPlayerList(ref arr, sWhere, sSortorder);
+            int n = fGetPlayerList(ref arr, sWhere, sSortorder, runde);
             return n == 0 ? new stPlayer { id = -1 } : arr[0];
         }
         #endregion Playerlist

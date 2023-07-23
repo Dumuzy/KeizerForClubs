@@ -16,7 +16,7 @@
             int maxRound = db.fGetMaxRound();
 
             db.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
-            this.AllPlayersSetInitialStartPts(maxRound + 1); // Keizer_StartPts in die DB setzen.
+            this.AllPlayersSetInitialStartPts(maxRound); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPts();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
             // If nExtraRecursions is > 0, at the end of the calculation, that many
@@ -54,7 +54,7 @@
             var firstRoundRandom = currRunde != 1 ? 0 : db.fGetConfigInt("OPTION.FirstRoundRandom", 0);
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
-            int playerCount = db.fGetPlayerList(ref pList, " ", $" ORDER BY {order} desc ");
+            int playerCount = db.fGetPlayerList(ref pList, " ", $" ORDER BY {order} desc ", currRunde);
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
@@ -73,7 +73,7 @@
         private void AllPlayersSetKeizerSumPts()
         {
             cSqliteInterface.stPlayer[] players = new cSqliteInterface.stPlayer[100];
-            int playerCount = db.fGetPlayerList(ref players, "", " ");
+            int playerCount = db.fGetPlayerList(ref players, "", " ", db.fGetMaxRound());
             for (int index = 0; index < playerCount; ++index)
                 players[index].Keizer_SumPts = db.fGetPlayer_PunktSumme(players[index].id);
             for (int index = 0; index < playerCount; ++index)
@@ -85,11 +85,13 @@
         private void AllPlayersSetRankAndStartPts()
         {
             cSqliteInterface.stPlayer[] players = new cSqliteInterface.stPlayer[100];
-            int playerCount = db.fGetPlayerList(ref players, " WHERE state NOT IN (9) ",
-                " ORDER BY Keizer_SumPts desc, rating desc ");
+            int playerCount = db.fGetPlayerList(ref players, " ",
+                " ORDER BY Keizer_SumPts desc, rating desc ", db.fGetMaxRound());
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
+                if (players[index].state == cSqliteInterface.ePlayerState.eRetired)
+                    continue;
                 db.fUpdPlayer_SetRankAndStartPts(players[index].id, index + 1, firstStartPts);
                 --firstStartPts;
             }
@@ -107,8 +109,8 @@
             {
                 var pair = pairings[index];
                 float erg_w = 0.0f, erg_s = 0.0f;
-                var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ");
-                var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ");
+                var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
+                var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
 
                 if (pair.result == cSqliteInterface.eResults.eWin_White)
                     erg_w = pBlack.Keizer_StartPts;

@@ -109,10 +109,11 @@ namespace KeizerForClubs
         TableW2Headers fReportTabellenstandTable()
         {
             var t = new TableW2Headers(sTurnier);
-            string str2 = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
+            var runde = db.fGetMaxRound();
+            string str2 = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc ");
+            var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc ", runde);
             var lih = new Li<string>(new string[] { "", db.fLocl_GetText("GUI_TEXT", "Name"),
                 db.fLocl_GetText("GUI_TEXT", "Keizer-Punkte"), db.fLocl_GetText("GUI_TEXT", "Spiel-Punkte") });
             t.AddRow(lih);
@@ -167,15 +168,15 @@ namespace KeizerForClubs
         TableW2Headers fReportTabellenstandVollTable()
         {
             var t = new TableW2Headers(sTurnier);
-            int maxRound = db.fGetMaxRound();
+            int runde = db.fGetMaxRound();
             cSqliteInterface.stPairing[] pList4 = new cSqliteInterface.stPairing[1];
-            var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ");
+            var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", runde);
 
             string strr = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
             // var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
             var thead = new Li<string>("Platz Name Keizer-&#8721; GamePts".Split());
-            for (int i = 0; i < maxRound; ++i)
+            for (int i = 0; i < runde; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
             for (int index1 = 0, numPlayer = 1; index1 < players.Count; ++index1)
@@ -193,7 +194,7 @@ namespace KeizerForClubs
                 str1.Add(player.Keizer_SumPts.ToString("0.00"));
                 str1.Add(db.fGetPlayer_PartiePunkte(player.id).ToString());
 
-                for (int index2 = 1; index2 <= maxRound; ++index2)
+                for (int index2 = 1; index2 <= runde; ++index2)
                 {
                     string sWhere = " WHERE (PID_W=" + player.id.ToString() +
                         " OR    PID_B=" + player.id.ToString() + ")  AND rnd=" + index2.ToString();
@@ -201,8 +202,8 @@ namespace KeizerForClubs
                     if (db.fGetPairingList(ref pList4, sWhere, "  ") > 0)
                     {
                         var pair = pList4[0];
-                        var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ");
-                        var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ");
+                        var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
+                        var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
                         string str4 = db.fLocl_GetGameResultShort(pair.result) + " ";
                         if (pair.result > cSqliteInterface.eResults.eWin_Black)
                         {
@@ -269,11 +270,12 @@ namespace KeizerForClubs
 
         TableW2Headers fReportTeilnehmerTable(cSqliteInterface sqlintf)
         {
+            var runde = db.fGetMaxRound();
             var t = new TableW2Headers(sTurnier);
             t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
-                db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound(); 
+                db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde; 
 
-            var players = sqlintf.fGetPlayerLi("", " ORDER BY ID ");
+            var players = sqlintf.fGetPlayerLi("", " ORDER BY ID ", runde);
             for (int index = 0; index < players.Count; ++index)
             {
                 var player = players[index];

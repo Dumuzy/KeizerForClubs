@@ -562,7 +562,8 @@ for determining the first round pairings.";
         private void fLoadPlayerlist()
         {
             cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
-            int playerList = SQLiteIntf.fGetPlayerList(ref pList, "", " ORDER BY ID ");
+            int playerList = SQLiteIntf.fGetPlayerList(ref pList, "", " ORDER BY ID ", 
+                SQLiteIntf.fGetMaxRound() + 1);
             this.grdPlayers.Rows.Clear();
             for (int index = 0; index < playerList; ++index)
             {
@@ -613,7 +614,7 @@ for determining the first round pairings.";
         private bool fExecutePairing()
         {
             var currRunde = SQLiteIntf.fGetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
-            this.iPairingPlayerCntAvailable = SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList);
+            this.iPairingPlayerCntAvailable = SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList, currRunde);
             this.iPairingMinFreeCnt = 999;
             for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
             {
@@ -623,7 +624,7 @@ for determining the first round pairings.";
             fSetFirstRoundRandomRating(currRunde, iPairingPlayerCntAvailable);
             SQLiteIntf.BeginnTransaktion();
             this.ranking.AllPlayersAllRoundsCalculate();
-            this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
+            this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             this.iPairingRekursionCnt = 0;
             if (this.fPairingRekursion(0, currRunde))
             {
@@ -768,11 +769,12 @@ for determining the first round pairings.";
 
         private bool fExecutePairingManual()
         {
+            var currRunde = SQLiteIntf.fGetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             frmPairingManual frmPairingManual = new frmPairingManual();
             frmPairingManual.btnCancel.Text = SQLiteIntf.fLocl_GetText("GUI_TEXT", "Abbruch");
             frmPairingManual.colWhite.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Weiss");
             frmPairingManual.colBlack.HeaderText = SQLiteIntf.fLocl_GetText("GUI_COLS", "Pa.Schwarz");
-            this.iPairingPlayerCntAvailable = SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList);
+            this.iPairingPlayerCntAvailable = SQLiteIntf.fGetPlayerList_Available(ref this.pPairingPlayerList, currRunde);
             for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
             {
                 if (this.pPairingPlayerList[index].state == cSqliteInterface.ePlayerState.eAvailable)
@@ -780,7 +782,7 @@ for determining the first round pairings.";
             }
             for (int index = 0; index < frmPairingManual.lstNames.Items.Count; index += 2)
                 frmPairingManual.grdPaarungen.Rows.Add();
-            this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ");
+            this.iPairingPlayerCntAll = SQLiteIntf.fGetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             if (frmPairingManual.ShowDialog() == DialogResult.OK)
             {
                 int runde = SQLiteIntf.fGetMaxRound() + 1;
