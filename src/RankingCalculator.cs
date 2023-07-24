@@ -11,7 +11,7 @@
         /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>
         internal void AllPlayersAllRoundsCalculate()
         {
-            cReportingUnit cReportingUnit = null; //  new cReportingUnit(sTurniername, db);
+            ReportingUnit cReportingUnit = null; //  new cReportingUnit(sTurniername, db);
             cReportingUnit?.DeleteDump();
             int maxRound = db.fGetMaxRound();
 
@@ -84,15 +84,13 @@
         /// Keizer_StartPts into the DB. </summary>
         private void AllPlayersSetRankAndStartPts()
         {
-            SqliteInterface.stPlayer[] players = new SqliteInterface.stPlayer[100];
-            int playerCount = db.fGetPlayerList(ref players, " ",
-                " ORDER BY Keizer_SumPts desc, rating desc ", db.fGetMaxRound());
-            int firstStartPts = FirstStartPts(playerCount);
-            for (int index = 0; index < playerCount; ++index)
+            var players = db.fGetPlayerLi(" ", " ORDER BY Keizer_SumPts desc, rating desc ", db.fGetMaxRound());
+            int firstStartPts = FirstStartPts(players.Count);
+            for (int i = 0; i < players.Count; ++i)
             {
-                if (players[index].state == SqliteInterface.ePlayerState.eRetired)
+                if (players[i].state == SqliteInterface.ePlayerState.eRetired)
                     continue;
-                db.fUpdPlayer_SetRankAndStartPts(players[index].id, index + 1, firstStartPts);
+                db.fUpdPlayer_SetRankAndStartPts(players[i].id, i + 1, firstStartPts);
                 --firstStartPts;
             }
         }

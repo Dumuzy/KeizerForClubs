@@ -13,12 +13,12 @@ namespace KeizerForClubs
 {
 
 
-    public class cReportingUnit : ReportingBase
+    public class ReportingUnit : ReportingBase
     {
         string sTurnier = "";
         SqliteInterface db;
 
-        public cReportingUnit(string sTurniername, SqliteInterface db)
+        public ReportingUnit(string sTurniername, SqliteInterface db)
         {
             this.sTurnier = sTurniername;
             this.db = db;

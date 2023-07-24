@@ -606,8 +606,11 @@ namespace KeizerForClubs
         #endregion Pairing
 
         #region Playerlist
-        // Spielerliste abfragen. 
-        // Auch Tabellenstand möglich über SortOrder   
+        /// <summary> Spielerliste aus der DB abfragen.  Auch Tabellenstand möglich über SortOrder.
+        /// Aber Achtung. Spieler-State ist in RUnde N durch die Pairing-Tabelle definiert, wenn Runde n
+        /// schon gelost ist. 
+        /// </summary>
+        /// <returns>Number of players.</returns>
         public int fGetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder, int runde)
         {
             string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
@@ -666,6 +669,9 @@ namespace KeizerForClubs
             return playerCount;
         }
 
+        /// <summary> Spielerliste aus der DB abfragen.  Auch Tabellenstand möglich über SortOrder.
+        /// Aber Achtung. Spieler-State ist in RUnde N durch die Pairing-Tabelle definiert, wenn Runde n
+        /// schon gelost ist.  </summary>
         public Li<stPlayer> fGetPlayerLi(string sWhere, string sSortorder, int runde)
         {
             SqliteInterface.stPlayer[] arr = new stPlayer[100];

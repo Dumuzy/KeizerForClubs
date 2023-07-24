@@ -116,12 +116,12 @@ namespace KeizerForClubs
             Text = "KeizerForClubs " + sTurniername;
             if (db.cLangCode == "")
                 fSelectLanguage();
-            fApplyLanguageText();
+            ApplyLanguageText();
             tabMainWindow.Enabled = true;
             mnuListen.Enabled = true;
             mnuHelp.Enabled = true;
             mnuStartLanguage.Enabled = true;
-            fLoadPlayerlist();
+            LoadPlayerlist();
             fLoadPairingList();
 
             tbBonusClub.Value = db.fGetConfigInt("BONUS.Clubgame");
@@ -257,25 +257,25 @@ for determining the first round pairings.";
         void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
             IncNumClicks();
-            fDelDeletedPlayers();
-            new cReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
+            DelDeletedPlayers();
+            new ReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
             if (db.fGetPairings_NoResult() == 0)
                 fExecutePairing();
             else
                 MessageBox.Show(db.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
-            fApplyPlayerStateTexte();
+            ApplyPlayerStateTexte();
         }
 
         void MnuPairingManualClick(object sender, EventArgs e)
         {
             IncNumClicks();
-            fDelDeletedPlayers();
-            new cReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
+            DelDeletedPlayers();
+            new ReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
             if (db.fGetPairings_NoResult() == 0)
                 fExecutePairingManual();
             else
                 MessageBox.Show(db.fLocl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
-            fApplyPlayerStateTexte();
+            ApplyPlayerStateTexte();
         }
 
         void MnuPairingDropLastClick(object sender, EventArgs e)
@@ -293,7 +293,7 @@ for determining the first round pairings.";
                 this.numRoundSelect.Value = (Decimal)(maxRound - 1);
                 this.fLoadPairingList();
             }
-            fApplyPlayerStateTexte();
+            ApplyPlayerStateTexte();
         }
 
         void MnuAboutBoxClick(object sender, EventArgs e) => fShowAboutBox();
@@ -301,8 +301,8 @@ for determining the first round pairings.";
         void MnuStartLanguageClick(object sender, EventArgs e)
         {
             this.fSelectLanguage();
-            this.fApplyLanguageText();
-            this.fLoadPlayerlist();
+            this.ApplyLanguageText();
+            this.LoadPlayerlist();
             this.fLoadPairingList();
         }
 
@@ -350,7 +350,7 @@ for determining the first round pairings.";
         {
             RecalcIfNeeded();
             IncNumClicks(db.fGetPlayerCount());
-            var ru = new cReportingUnit(sTurniername, db);
+            var ru = new ReportingUnit(sTurniername, db);
             ru.fReport_Paarungen(SelectedRound);
             ru.fReport_Tabellenstand(SelectedRound);
             ru.fReport_TabellenstandVoll(SelectedRound);
@@ -369,7 +369,7 @@ for determining the first round pairings.";
         private void MnuListenPairingClick(object sender, EventArgs e)
         {
             IncNumClicks(db.fGetPlayerCount() / 2);
-            new cReportingUnit(sTurniername, db).fReport_Paarungen(SelectedRound);
+            new ReportingUnit(sTurniername, db).fReport_Paarungen(SelectedRound);
         }
 
         private void MnuListenStandingClick(object sender, EventArgs e)
@@ -377,13 +377,13 @@ for determining the first round pairings.";
             RecalcIfNeeded();
             IncNumClicks(db.fGetPlayerCount());
             if (sender == mnuListenStanding)
-                new cReportingUnit(sTurniername, db).fReport_Tabellenstand(SelectedRound);
+                new ReportingUnit(sTurniername, db).fReport_Tabellenstand(SelectedRound);
             else if (sender == mnuListenStandingFull)
-                new cReportingUnit(sTurniername, db).fReport_TabellenstandVoll(SelectedRound);
+                new ReportingUnit(sTurniername, db).fReport_TabellenstandVoll(SelectedRound);
         }
 
         private void MnuListenParticipantsClick(object sender, EventArgs e) => 
-            new cReportingUnit(sTurniername, db).fReport_Teilnehmer(SelectedRound);
+            new ReportingUnit(sTurniername, db).fReport_Teilnehmer(SelectedRound);
 
         private void TbBonusValueChanged(object sender, EventArgs e)
         {
@@ -398,7 +398,7 @@ for determining the first round pairings.";
 
         private void TabSettingsLeave(object sender, EventArgs e) => SaveSettings();
 
-        private void TabPlayerLeave(object sender, EventArgs e) => fDelDeletedPlayers();
+        private void TabPlayerLeave(object sender, EventArgs e) => DelDeletedPlayers();
 
         private void GrdPlayersCellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
@@ -513,7 +513,7 @@ for determining the first round pairings.";
             db.fUpdPairingResult((int)Convert.ToInt16(this.numRoundSelect.Value), int16_1, int16_2, gameResult);
         }
 
-        private void fApplyPlayerStateTexte()
+        private void ApplyPlayerStateTexte()
         {
             int m = db.fGetMaxRound();
             string condition = m != 0 ? " AND key not in ('2', 'A') " : " AND key<>'2' ";
@@ -525,9 +525,9 @@ for determining the first round pairings.";
                 colPlayerState.Items.Add((object)texte[index]);
         }
 
-        private void fApplyLanguageText()
+        private void ApplyLanguageText()
         {
-            fApplyPlayerStateTexte();
+            ApplyPlayerStateTexte();
             string[] texte = new string[20];
             colPairingResult.Items.Clear();
             int topicTexte2 = db.fLocl_GetTopicTexte("GAMERESULT", " ", ref texte);
@@ -576,26 +576,25 @@ for determining the first round pairings.";
             btDonate1.Text = btDonate2.Text = db.fLocl_GetText("GUI_TEXT", "Donate");
         }
 
-        private void fDelDeletedPlayers()
+        private void DelDeletedPlayers()
         {
             int n = db.fDelDeletedPlayers();
             if (n > 0)
-                fLoadPlayerlist();
+                LoadPlayerlist();
         }
 
-        private void fLoadPlayerlist()
+        /// <summary> Erzeugt die Spielerliste auf dem Spieler-Tab.</summary>
+        private void LoadPlayerlist()
         {
-            SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
-            int playerList = db.fGetPlayerList(ref pList, "", " ORDER BY ID ", 
-                db.fGetMaxRound() + 1);
+            var players = db.fGetPlayerLi( "", " ORDER BY ID ", db.fGetMaxRound() + 1);
             this.grdPlayers.Rows.Clear();
-            for (int index = 0; index < playerList; ++index)
+            for (int i = 0; i < players.Count; ++i)
             {
-                this.grdPlayers.Rows.Add();
-                this.grdPlayers.Rows[index].Cells[0].Value = (object)pList[index].id;
-                this.grdPlayers.Rows[index].Cells[1].Value = (object)pList[index].name;
-                this.grdPlayers.Rows[index].Cells[2].Value = (object)pList[index].rating.ToString();
-                this.grdPlayers.Rows[index].Cells[3].Value = (object)db.fLocl_GetPlayerStateText(pList[index].state);
+                grdPlayers.Rows.Add();
+                grdPlayers.Rows[i].Cells[0].Value = players[i].id;
+                grdPlayers.Rows[i].Cells[1].Value = players[i].name;
+                grdPlayers.Rows[i].Cells[2].Value = players[i].rating.ToString();
+                grdPlayers.Rows[i].Cells[3].Value = db.fLocl_GetPlayerStateText(players[i].state);
             }
         }
 
