@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using AwiUtils;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Net.WebRequestMethods;
-using static KeizerForClubs.cSqliteInterface;
+using static KeizerForClubs.SqliteInterface;
 
 namespace KeizerForClubs
 {
@@ -16,9 +16,9 @@ namespace KeizerForClubs
     public class cReportingUnit : ReportingBase
     {
         string sTurnier = "";
-        cSqliteInterface db;
+        SqliteInterface db;
 
-        public cReportingUnit(string sTurniername, cSqliteInterface db)
+        public cReportingUnit(string sTurniername, SqliteInterface db)
         {
             this.sTurnier = sTurniername;
             this.db = db;
@@ -58,7 +58,7 @@ namespace KeizerForClubs
             t.AddRow("Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis".Split().
                     Select(s => db.fLocl_GetText("GUI_COLS", s)).ToLi());
 
-            cSqliteInterface.stPairing[] pList = new cSqliteInterface.stPairing[50];
+            SqliteInterface.stPairing[] pList = new SqliteInterface.stPairing[50];
             int pairingList = db.fGetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
             for (int index = 0; index < pairingList; ++index)
             {
@@ -112,7 +112,7 @@ namespace KeizerForClubs
             var runde = db.fGetMaxRound();
             string str2 = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
             t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
-            cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
+            SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
             var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc ", runde);
             var lih = new Li<string>(new string[] { "", db.fLocl_GetText("GUI_TEXT", "Name"),
                 db.fLocl_GetText("GUI_TEXT", "Keizer-Punkte"), db.fLocl_GetText("GUI_TEXT", "Spiel-Punkte") });
@@ -120,7 +120,7 @@ namespace KeizerForClubs
             for (int index = 0, num1 = 1; index < players.Count; ++index)
             {
                 var player = players[index];
-                if (player.state != cSqliteInterface.ePlayerState.eRetired)
+                if (player.state != SqliteInterface.ePlayerState.eRetired)
                 {
                     var li = new Li<string>();
                     li.Add(num1++.ToString() + ".");
@@ -169,7 +169,7 @@ namespace KeizerForClubs
         {
             var t = new TableW2Headers(sTurnier);
             int runde = db.fGetMaxRound();
-            cSqliteInterface.stPairing[] pList4 = new cSqliteInterface.stPairing[1];
+            SqliteInterface.stPairing[] pList4 = new SqliteInterface.stPairing[1];
             var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", runde);
 
             string strr = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
@@ -183,7 +183,7 @@ namespace KeizerForClubs
             {
                 var player = players[index1];
                 var str1 = new Li<string>();
-                if (player.state != cSqliteInterface.ePlayerState.eRetired)
+                if (player.state != SqliteInterface.ePlayerState.eRetired)
                     str1.Add(numPlayer++.ToString("00"));
                 else
                     str1.Add("(ret)");
@@ -205,7 +205,7 @@ namespace KeizerForClubs
                         var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
                         var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
                         string str4 = db.fLocl_GetGameResultShort(pair.result) + " ";
-                        if (pair.result > cSqliteInterface.eResults.eWin_Black)
+                        if (pair.result > SqliteInterface.eResults.eWin_Black)
                         {
                             str3 = str4 + " - - p=" + pair.pts_w.ToString();
                         }
@@ -214,7 +214,7 @@ namespace KeizerForClubs
                             if (player.id == pair.id_w)
                             {
                                 string str5 = str4 + "w ";
-                                str3 = (pBlack.state != cSqliteInterface.ePlayerState.eRetired ?
+                                str3 = (pBlack.state != SqliteInterface.ePlayerState.eRetired ?
                                     str5 + " " + pBlack.name + " " :
                                     str5 + " " + pBlack.name + " (r) ") +
                                     "p=" + pair.pts_w.ToString() + " ";
@@ -222,7 +222,7 @@ namespace KeizerForClubs
                             else
                             {
                                 string str6 = str4 + "b ";
-                                str3 = (pWhite.state != cSqliteInterface.ePlayerState.eRetired ?
+                                str3 = (pWhite.state != SqliteInterface.ePlayerState.eRetired ?
                                     str6 + " " + pWhite.name + " " :
                                     str6 + " " + pWhite.name + " (r) ") +
                                     "p=" + pair.pts_b.ToString() + " ";
@@ -268,7 +268,7 @@ namespace KeizerForClubs
             return true;
         }
 
-        TableW2Headers fReportTeilnehmerTable(cSqliteInterface sqlintf)
+        TableW2Headers fReportTeilnehmerTable(SqliteInterface sqlintf)
         {
             var runde = db.fGetMaxRound();
             var t = new TableW2Headers(sTurnier);
@@ -290,7 +290,7 @@ namespace KeizerForClubs
             return t;
         }
 
-        private string GetTeilnehmerBasename(cSqliteInterface sqlintf, int runde) => "export\\" + this.sTurnier + "_" +
+        private string GetTeilnehmerBasename(SqliteInterface sqlintf, int runde) => "export\\" + this.sTurnier + "_" +
                 sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + runde;
         #endregion Teilnehmer
 

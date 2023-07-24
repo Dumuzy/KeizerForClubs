@@ -5,7 +5,7 @@ using AwiUtils;
 
 namespace KeizerForClubs
 {
-    public class cSqliteInterface
+    public class SqliteInterface
     {
         public string cLangCode = "";
         private SQLiteConnection SQLiteMyDB;
@@ -79,7 +79,7 @@ namespace KeizerForClubs
             }
         };
 
-        public cSqliteInterface()
+        public SqliteInterface()
         {
             SQLiteMyDB = new SQLiteConnection("");
             sqlCommand = new SQLiteCommand(SQLiteMyDB);
@@ -317,7 +317,7 @@ namespace KeizerForClubs
             int playerFarbzaehlung = 0;
             string str = ID.ToString();
             string sWhere = " where ((PID_W=" + str + " and PID_B>=0) or PID_B=" + str + ") ";
-            cSqliteInterface.stPairing[] pList = new cSqliteInterface.stPairing[50];
+            SqliteInterface.stPairing[] pList = new SqliteInterface.stPairing[50];
             int cnt = fGetPairingList(ref pList, sWhere, "");
             for (int index = 0; index < cnt; ++index)
             {
@@ -478,15 +478,15 @@ namespace KeizerForClubs
         }
 
         // Ergebnis einer Paarung eintragen
-        public bool fUpdPairingResult(int runde, int idw, int ids, cSqliteInterface.eResults erg)
+        public bool fUpdPairingResult(int runde, int idw, int ids, SqliteInterface.eResults erg)
         {
             // Ergebnis gültig? 
             // "Normal" oder "Spezialergebnis" je nach richtiger oder Pseudo-Paarung
             if (ids > 0)
             {
-                if (erg != cSqliteInterface.eResults.eWin_White &&
-                    erg != cSqliteInterface.eResults.eWin_Black &&
-                    erg != cSqliteInterface.eResults.eDraw)
+                if (erg != SqliteInterface.eResults.eWin_White &&
+                    erg != SqliteInterface.eResults.eWin_Black &&
+                    erg != SqliteInterface.eResults.eDraw)
                     return false;
             }
             else
@@ -566,7 +566,7 @@ namespace KeizerForClubs
             return n;
         }
 
-        public int fGetPairingList(ref cSqliteInterface.stPairing[] pList, string sWhere, string sSortorder)
+        public int fGetPairingList(ref SqliteInterface.stPairing[] pList, string sWhere, string sSortorder)
         {
             int pairingList = 0;
             sqlCommand.CommandText = " SELECT Rnd, board, pid_w, pid_b, result, pts_w, pts_b  FROM Pairing " + sWhere + sSortorder;
@@ -583,7 +583,7 @@ namespace KeizerForClubs
                             pList[pairingList].id_w = sqLiteDataReader.IsDBNull(2) ? 0 : (int)sqLiteDataReader.GetInt16(2);
                             pList[pairingList].id_b = sqLiteDataReader.IsDBNull(3) ? 0 : (int)sqLiteDataReader.GetInt16(3);
                             int num = sqLiteDataReader.IsDBNull(4) ? 0 : sqLiteDataReader.GetInt32(4);
-                            pList[pairingList].result = (cSqliteInterface.eResults)num;
+                            pList[pairingList].result = (SqliteInterface.eResults)num;
                             pList[pairingList].pts_w = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
                             pList[pairingList].pts_b = sqLiteDataReader.IsDBNull(6) ? 0.0f : sqLiteDataReader.GetFloat(6);
                             ++pairingList;
@@ -596,11 +596,11 @@ namespace KeizerForClubs
             return pairingList;
         }
 
-        public Li<cSqliteInterface.stPairing> fGetPairingLi(string sWhere, string sSortorder)
+        public Li<SqliteInterface.stPairing> fGetPairingLi(string sWhere, string sSortorder)
         {
-            cSqliteInterface.stPairing[] pList1 = new cSqliteInterface.stPairing[100];
+            SqliteInterface.stPairing[] pList1 = new SqliteInterface.stPairing[100];
             var n = fGetPairingList(ref pList1, sWhere, sSortorder);
-            var li = new Li<cSqliteInterface.stPairing>(pList1.Take(n));
+            var li = new Li<SqliteInterface.stPairing>(pList1.Take(n));
             return li;
         }
         #endregion Pairing
@@ -668,7 +668,7 @@ namespace KeizerForClubs
 
         public Li<stPlayer> fGetPlayerLi(string sWhere, string sSortorder, int runde)
         {
-            cSqliteInterface.stPlayer[] arr = new stPlayer[100];
+            SqliteInterface.stPlayer[] arr = new stPlayer[100];
             int playerCount = fGetPlayerList(ref arr, sWhere, sSortorder, runde);
             return new Li<stPlayer>(arr.Take(playerCount));
         }
@@ -740,7 +740,7 @@ namespace KeizerForClubs
             return !(key == "") ? Convert.ToInt32(key, 16) : -1;
         }
 
-        public string fLocl_GetPlayerStateText(cSqliteInterface.ePlayerState state)
+        public string fLocl_GetPlayerStateText(SqliteInterface.ePlayerState state)
         {
             // In der fLocl_GetText("PLAYERSTATE", ..) Fkt steht der Playerstate eDeleted als "A".
             // Deshalb das ToString("X", das macht Hex. Also 10 -> A
@@ -748,15 +748,15 @@ namespace KeizerForClubs
             return fLocl_GetText("PLAYERSTATE", sState);
         }
 
-        public cSqliteInterface.eResults fLocl_GetGameResult(string result)
+        public SqliteInterface.eResults fLocl_GetGameResult(string result)
         {
             string key = fLocl_FindKey("GAMERESULT", result);
-            return !(key == "") ? (cSqliteInterface.eResults)Convert.ToInt32(key) : cSqliteInterface.eResults.eErrUndefined;
+            return !(key == "") ? (SqliteInterface.eResults)Convert.ToInt32(key) : SqliteInterface.eResults.eErrUndefined;
         }
 
-        public string fLocl_GetGameResultText(cSqliteInterface.eResults result) => fLocl_GetText("GAMERESULT", ((int)result).ToString());
+        public string fLocl_GetGameResultText(SqliteInterface.eResults result) => fLocl_GetText("GAMERESULT", ((int)result).ToString());
 
-        public string fLocl_GetGameResultShort(cSqliteInterface.eResults result)
+        public string fLocl_GetGameResultShort(SqliteInterface.eResults result)
         {
             var s = fLocl_GetGameResultText(result);
             if (s.StartsWith("-") || s.StartsWith("+"))

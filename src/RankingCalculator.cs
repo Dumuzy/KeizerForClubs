@@ -2,7 +2,7 @@
 {
     internal class RankingCalculator
     {
-        public RankingCalculator(cSqliteInterface db, frmMainform mainform)
+        public RankingCalculator(SqliteInterface db, frmMainform mainform)
         {
             this.db = db;
             this.form = mainform;
@@ -52,13 +52,13 @@
         private void AllPlayersSetInitialStartPts(int currRunde)
         {
             var firstRoundRandom = currRunde != 1 ? 0 : db.fGetConfigInt("OPTION.FirstRoundRandom", 0);
-            cSqliteInterface.stPlayer[] pList = new cSqliteInterface.stPlayer[100];
+            SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
             int playerCount = db.fGetPlayerList(ref pList, " ", $" ORDER BY {order} desc ", currRunde);
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
-                if (pList[index].state != cSqliteInterface.ePlayerState.eRetired)
+                if (pList[index].state != SqliteInterface.ePlayerState.eRetired)
                 {
                     db.fUpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, firstStartPts);
                     --firstStartPts;
@@ -72,7 +72,7 @@
         /// für die Spiele und schreibt die Summen in die DB. </summary>
         private void AllPlayersSetKeizerSumPts()
         {
-            cSqliteInterface.stPlayer[] players = new cSqliteInterface.stPlayer[100];
+            SqliteInterface.stPlayer[] players = new SqliteInterface.stPlayer[100];
             int playerCount = db.fGetPlayerList(ref players, "", " ", db.fGetMaxRound());
             for (int index = 0; index < playerCount; ++index)
                 players[index].Keizer_SumPts = db.fGetPlayer_PunktSumme(players[index].id);
@@ -84,13 +84,13 @@
         /// Keizer_StartPts into the DB. </summary>
         private void AllPlayersSetRankAndStartPts()
         {
-            cSqliteInterface.stPlayer[] players = new cSqliteInterface.stPlayer[100];
+            SqliteInterface.stPlayer[] players = new SqliteInterface.stPlayer[100];
             int playerCount = db.fGetPlayerList(ref players, " ",
                 " ORDER BY Keizer_SumPts desc, rating desc ", db.fGetMaxRound());
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
-                if (players[index].state == cSqliteInterface.ePlayerState.eRetired)
+                if (players[index].state == SqliteInterface.ePlayerState.eRetired)
                     continue;
                 db.fUpdPlayer_SetRankAndStartPts(players[index].id, index + 1, firstStartPts);
                 --firstStartPts;
@@ -112,38 +112,38 @@
                 var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
                 var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
 
-                if (pair.result == cSqliteInterface.eResults.eWin_White)
+                if (pair.result == SqliteInterface.eResults.eWin_White)
                     erg_w = pBlack.Keizer_StartPts;
-                else if (pair.result == cSqliteInterface.eResults.eDraw)
+                else if (pair.result == SqliteInterface.eResults.eDraw)
                 {
                     erg_w = pBlack.Keizer_StartPts / 2f;
                     erg_s = pWhite.Keizer_StartPts / 2f;
                 }
-                else if (pair.result == cSqliteInterface.eResults.eWin_Black)
+                else if (pair.result == SqliteInterface.eResults.eWin_Black)
                     erg_s = pWhite.Keizer_StartPts;
-                else if (pair.result == cSqliteInterface.eResults.eExcused)
+                else if (pair.result == SqliteInterface.eResults.eExcused)
                     erg_w = pWhite.Keizer_StartPts * form.tbBonusExcused.Value / 100.0f;
-                else if (pair.result == cSqliteInterface.eResults.eUnexcused)
+                else if (pair.result == SqliteInterface.eResults.eUnexcused)
                     erg_w = pWhite.Keizer_StartPts * form.tbBonusUnexcused.Value / 100.0f;
-                else if (pair.result == cSqliteInterface.eResults.eHindered)
+                else if (pair.result == SqliteInterface.eResults.eHindered)
                     erg_w = pWhite.Keizer_StartPts * form.tbBonusClub.Value / 100.0f;
-                else if (pair.result == cSqliteInterface.eResults.eFreeWin)
+                else if (pair.result == SqliteInterface.eResults.eFreeWin)
                     erg_w = pWhite.Keizer_StartPts * form.tbBonusFreilos.Value / 100.0f;
-                if (pWhite.state == cSqliteInterface.ePlayerState.eRetired)
+                if (pWhite.state == SqliteInterface.ePlayerState.eRetired)
                 {
-                    if (pair.result == cSqliteInterface.eResults.eWin_Black)
+                    if (pair.result == SqliteInterface.eResults.eWin_Black)
                         erg_s = pBlack.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
-                    else if (pair.result == cSqliteInterface.eResults.eDraw)
+                    else if (pair.result == SqliteInterface.eResults.eDraw)
                         erg_s = 0.5f * pBlack.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
                     else
                         erg_s = 0;
                     erg_w = 0;
                 }
-                if (pBlack.state == cSqliteInterface.ePlayerState.eRetired)
+                if (pBlack.state == SqliteInterface.ePlayerState.eRetired)
                 {
-                    if (pair.result == cSqliteInterface.eResults.eWin_White)
+                    if (pair.result == SqliteInterface.eResults.eWin_White)
                         erg_w = pWhite.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
-                    else if (pair.result == cSqliteInterface.eResults.eDraw)
+                    else if (pair.result == SqliteInterface.eResults.eDraw)
                         erg_w = 0.5f * pWhite.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
                     else
                         erg_w = 0;
@@ -154,7 +154,7 @@
             return true;
         }
 
-        readonly cSqliteInterface db;
+        readonly SqliteInterface db;
         readonly frmMainform form;
     }
 }
