@@ -130,7 +130,7 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
             fCreateConfigTab();
             cLangCode = fGetConfigText("LANGCODE");
-            this.fAddRatingWDeltaColIfNeeded();
+            this.AddRatingWDeltaColIfNeeded();
             return true;
         }
 
@@ -230,7 +230,7 @@ namespace KeizerForClubs
         #endregion Config
 
         #region Player
-        public bool fInsPlayerNew(string name, int rtg)
+        public bool InsPlayerNew(string name, int rtg)
         {
             sqlCommand.CommandText = " INSERT INTO Player (Name,Rating, Rank)  VALUES (@pName, @pRtg, 99) ";
             sqlCommand.Parameters.AddWithValue("pName", name);
@@ -240,7 +240,7 @@ namespace KeizerForClubs
             return true;
         }
 
-        public bool fUpdPlayer(int id, string name, int rtg, int status)
+        public bool UpdPlayer(int id, string name, int rtg, int status)
         {
             sqlCommand.CommandText = " UPDATE Player  SET name=@pName,  Rating=@pRtg,  State=@pState  WHERE ID=@pID ";
             sqlCommand.Parameters.AddWithValue("pName", name);
@@ -252,7 +252,7 @@ namespace KeizerForClubs
             return true;
         }
 
-        public bool fUpdPlayerRatingWDelta(int id, int rtgWDelta)
+        public bool UpdPlayerRatingWDelta(int id, int rtgWDelta)
         {
             sqlCommand.CommandText = " UPDATE Player  SET RatingWDelta=@pRtg  WHERE ID=@pID ";
             sqlCommand.Parameters.AddWithValue("pRtg", rtgWDelta);
@@ -263,7 +263,7 @@ namespace KeizerForClubs
         }
 
         /// <summary> Schreibt die Summe nach Keizer_SumPts des Spielers mit der ID. </summary>
-        public void fUpdPlayer_KeizerSumPts(int id, float summe)
+        public void UpdPlayer_KeizerSumPts(int id, float summe)
         {
             sqlCommand.CommandText = " UPDATE Player  SET Keizer_SumPts=@pPts  WHERE ID=@pID ";
             sqlCommand.Parameters.AddWithValue("pPts", summe);
@@ -272,7 +272,7 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
         }
 
-        public bool fUpdPlayer_SetRankAndStartPts(int id, int rang, float pkte)
+        public bool UpdPlayer_SetRankAndStartPts(int id, int rang, float pkte)
         {
             sqlCommand.CommandText = " UPDATE Player  SET Rank = @pRang, Keizer_StartPts=@pPts  WHERE ID=@pID ";
             sqlCommand.Parameters.AddWithValue("pRang", rang);
@@ -284,7 +284,7 @@ namespace KeizerForClubs
         }
 
         // Partien eines Spieler abfragen(für Kreuztabelle)
-        public bool fGetPlayerGames(int ID, ref string[] sResults)
+        public bool GetPlayerGames(int ID, ref string[] sResults)
         {
             sqlCommand.CommandText = " Select pr.Rnd, pr.PID_W, pr.PID_B, pr.Result,  (Select Player.Rank from Player   where PID IN (pr.PID_W, pr.PID_B) and PID<>:pNr) as Gegnerrang  from Pairing pr  where (PID_W=:pID or PID_B=:pID)  order by rnd ";
             sqlCommand.Parameters.AddWithValue("pID", (object)ID);
@@ -312,13 +312,13 @@ namespace KeizerForClubs
 
         // Farbverteilung eines Spieler abfragen:
         //  Gibt die Differenz aus Weiß- und Schwarzpartien des Spielers zurück. 
-        public int fGetPlayerWeissUeberschuss(int ID)
+        public int GetPlayerWeissUeberschuss(int ID)
         {
             int playerFarbzaehlung = 0;
             string str = ID.ToString();
             string sWhere = " where ((PID_W=" + str + " and PID_B>=0) or PID_B=" + str + ") ";
             SqliteInterface.stPairing[] pList = new SqliteInterface.stPairing[50];
-            int cnt = fGetPairingList(ref pList, sWhere, "");
+            int cnt = GetPairingList(ref pList, sWhere, "");
             for (int index = 0; index < cnt; ++index)
             {
                 if (pList[index].id_w == ID)
@@ -329,7 +329,7 @@ namespace KeizerForClubs
             return playerFarbzaehlung;
         }
 
-        public string fGetPlayerName(int ID)
+        public string GetPlayerName(int ID)
         {
             if (ID < 0)
                 return "NN";
@@ -339,7 +339,7 @@ namespace KeizerForClubs
         }
 
         /// <summary> Gibt die PlayerId des Spielers mit dem Namen zurück oder -1, falls keiner gefunden. </summary>
-        public int fGetPlayerID(string sName)
+        public int GetPlayerID(string sName)
         {
             sqlCommand.CommandText = " Select ID from player  where name=:pName ";
             sqlCommand.Parameters.AddWithValue("pName", sName);
@@ -347,7 +347,7 @@ namespace KeizerForClubs
             return Convert.ToInt16(res);
         }
 
-        public int fCntPlayerNames(string sName)
+        public int CntPlayerNames(string sName)
         {
             sqlCommand.CommandText = " Select Count(*) from player  where name=:pName ";
             sqlCommand.Parameters.AddWithValue("pName", (object)sName);
@@ -358,7 +358,7 @@ namespace KeizerForClubs
         /// momentan aus der DB ergibt. Das ist zu Anfang der Berechnung des Tabellenstands einer Runde 
         /// ein anderer Wert als am Ende. </summary>
         /// <param name="ID">Spieler-ID</param>
-        public float fGetPlayer_PunktSumme(int ID)
+        public float GetPlayer_PunktSumme(int ID)
         {
             sqlCommand.CommandText = @" select  Keizer_StartPts +   
                 (Select ifnull(Sum( Pts_W),0.0) from Pairing where PID_W = p1.ID) +    
@@ -370,7 +370,7 @@ namespace KeizerForClubs
         }
 
         // Partiepunkte (Sieg=1, remis=1/2) liefern  
-        public float fGetPlayer_PartiePunkte(int ID)
+        public float GetPlayer_PartiePunkte(int ID)
         {
             sqlCommand.CommandText = @" select  (Select Count(*) from Pairing where PID_W= p1.ID and result=1) +
                 (Select Count(*) from Pairing where PID_B= p1.ID and result=3) +
@@ -396,7 +396,7 @@ namespace KeizerForClubs
             return ok;
         }
 
-        private void fAddRatingWDeltaColIfNeeded()
+        private void AddRatingWDeltaColIfNeeded()
         {
             bool hasCol = HasColumn("Player", "RatingWDelta");
             if (!hasCol)
@@ -416,10 +416,10 @@ namespace KeizerForClubs
         /// <summary> In der Player-Liste kann man Player auf status "deleted" setzen. Diese Fkt. 
         /// löscht alle Player mit dem Status "deleted" aus der Player-Liste. </summary>
         /// <returns>Anzahl gelöschter Spieler. </returns>
-        public int fDelDeletedPlayers()
+        public int DelDeletedPlayers()
         {
             int nDeleted = 0;
-            if (fGetMaxRound() == 0)
+            if (GetMaxRound() == 0)
             {
                 sqlCommand.CommandText = " SELECT COUNT(1) from player where state = " + (int)ePlayerState.eDeleted;
                 nDeleted = Helper.ToInt(sqlCommand.ExecuteScalar());
@@ -445,14 +445,14 @@ namespace KeizerForClubs
         }
 
         // Anzahl Paarungen ohne Ergebnis (=Runde nicht beendet?)
-        public int fGetPairings_NoResult()
+        public int GetPairings_NoResult()
         {
             sqlCommand.CommandText = " Select Count(*) from Pairing  WHERE result=-1 ";
             return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
         }
 
         /// <summary> Gibt die Anzahl der Runden zurück, die bisher gelost sind. Egal ob schon gespielt oder nicht. </summary>
-        public int fGetMaxRound()
+        public int GetMaxRound()
         {
             int m = 0;
             sqlCommand.CommandText = " Select Max(rnd) from pairing ";
@@ -464,7 +464,7 @@ namespace KeizerForClubs
             return m;
         }
 
-        public bool fInsPairingNew(int runde, int brett, int idw, int ids)
+        public bool InsPairingNew(int runde, int brett, int idw, int ids)
         {
             sqlCommand.CommandText = " INSERT INTO Pairing  (Rnd, board, PID_W, PID_B, Result, Pts_W,Pts_B)  " +
                                                   "VALUES  (@pRnd, @pBoard, @pPID_W, @pPID_B, -1 , 0, 0); ";
@@ -478,7 +478,7 @@ namespace KeizerForClubs
         }
 
         // Ergebnis einer Paarung eintragen
-        public bool fUpdPairingResult(int runde, int idw, int ids, SqliteInterface.eResults erg)
+        public bool UpdPairingResult(int runde, int idw, int ids, SqliteInterface.eResults erg)
         {
             // Ergebnis gültig? 
             // "Normal" oder "Spezialergebnis" je nach richtiger oder Pseudo-Paarung
@@ -510,7 +510,7 @@ namespace KeizerForClubs
         }
 
         /// <summary> Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0. </summary>
-        public void fUpdPairing_AllPairingsAndAllKeizerSumsResetValues()
+        public void UpdPairing_AllPairingsAndAllKeizerSumsResetValues()
         {
             sqlCommand.CommandText = " UPDATE Pairing  SET PTS_W=0, PTS_B=0 ";
             sqlCommand.Prepare();
@@ -524,7 +524,7 @@ namespace KeizerForClubs
         /// <param name="erg_w"> KeizerPts für W. </param>
         /// <param name="erg_s"> KeizerPts für S. </param>
         /// <returns></returns>
-        public bool fUpdPairingValues(int runde, int board, float erg_w, float erg_s)
+        public bool UpdPairingValues(int runde, int board, float erg_w, float erg_s)
         {
             sqlCommand.CommandText = " UPDATE Pairing  SET Pts_W=@pPts_W, Pts_B=@pPts_B " +
                                         " WHERE Rnd=@pRunde  AND board=@pBoard ";
@@ -539,7 +539,7 @@ namespace KeizerForClubs
 
         // Gibt die Anzahl der Paarungen idw - idb seit minrunde zurück. 
         // Umgedrehte Farben werden nicht berücksichtigt. 
-        public int fCountPairingVorhandenSinceOneWay(int minrunde, int idw, int ids)
+        public int CountPairingVorhandenSinceOneWay(int minrunde, int idw, int ids)
         {
             SQLiteCommand sqlCmdCheckVorhanden = new SQLiteCommand(SQLiteMyDB);
             sqlCmdCheckVorhanden.CommandText = " SELECT Count(1) FROM Pairing " +
@@ -559,14 +559,14 @@ namespace KeizerForClubs
 
         // Gibt die Anzahl der Paarungen idw - idb seit minrunde zurück. 
         // Umgedrehte Farben werden mitgezählt.
-        public int fCountPairingVorhandenSince(int minrunde, int idw, int ids)
+        public int CountPairingVorhandenSince(int minrunde, int idw, int ids)
         {
-            int n = fCountPairingVorhandenSinceOneWay(minrunde, idw, ids);
-            n += fCountPairingVorhandenSinceOneWay(minrunde, ids, idw);
+            int n = CountPairingVorhandenSinceOneWay(minrunde, idw, ids);
+            n += CountPairingVorhandenSinceOneWay(minrunde, ids, idw);
             return n;
         }
 
-        public int fGetPairingList(ref SqliteInterface.stPairing[] pList, string sWhere, string sSortorder)
+        public int GetPairingList(ref SqliteInterface.stPairing[] pList, string sWhere, string sSortorder)
         {
             int pairingList = 0;
             sqlCommand.CommandText = " SELECT Rnd, board, pid_w, pid_b, result, pts_w, pts_b  FROM Pairing " + sWhere + sSortorder;
@@ -599,7 +599,7 @@ namespace KeizerForClubs
         public Li<SqliteInterface.stPairing> GetPairingLi(string sWhere, string sSortorder)
         {
             SqliteInterface.stPairing[] pList1 = new SqliteInterface.stPairing[100];
-            var n = fGetPairingList(ref pList1, sWhere, sSortorder);
+            var n = GetPairingList(ref pList1, sWhere, sSortorder);
             var li = new Li<SqliteInterface.stPairing>(pList1.Take(n));
             return li;
         }
@@ -611,7 +611,7 @@ namespace KeizerForClubs
         /// schon gelost ist. 
         /// </summary>
         /// <returns>Number of players.</returns>
-        public int fGetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder, int runde)
+        public int GetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder, int runde)
         {
             string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
                                 WHERE result in (4,5,6,7) GROUP BY pid_w) f on f.PID_W = p.id ";
@@ -672,10 +672,10 @@ namespace KeizerForClubs
         /// <summary> Spielerliste aus der DB abfragen.  Auch Tabellenstand möglich über SortOrder.
         /// Aber Achtung. Spieler-State ist in RUnde N durch die Pairing-Tabelle definiert, wenn Runde n
         /// schon gelost ist.  </summary>
-        public Li<stPlayer> fGetPlayerLi(string sWhere, string sSortorder, int runde)
+        public Li<stPlayer> GetPlayerLi(string sWhere, string sSortorder, int runde)
         {
             SqliteInterface.stPlayer[] arr = new stPlayer[100];
-            int playerCount = fGetPlayerList(ref arr, sWhere, sSortorder, runde);
+            int playerCount = GetPlayerList(ref arr, sWhere, sSortorder, runde);
             return new Li<stPlayer>(arr.Take(playerCount));
         }
 
@@ -684,7 +684,7 @@ namespace KeizerForClubs
         public Li<stPlayer> GetPreviousPlayerLi(string sWhere, string sSortorder, int runde)
         {
             SqliteInterface.stPlayer[] players = new stPlayer[100];
-            int count = fGetPlayerList(ref players, sWhere, sSortorder, fGetMaxRound() + 1);
+            int count = GetPlayerList(ref players, sWhere, sSortorder, GetMaxRound() + 1);
             var pairings = GetPairingLi($" WHERE Rnd={runde} ", "");
             for (int i = 0; i < count; ++i)
             {
@@ -715,20 +715,20 @@ namespace KeizerForClubs
         }
 
 
-        public int fGetPlayerList_Available(ref stPlayer[] pList, int runde)
+        public int GetPlayerList_Available(ref stPlayer[] pList, int runde)
         {
             string sWhere = " WHERE state IN (1) ";
             string sSortorder = " ORDER BY ID ";
-            return fGetPlayerList(ref pList, sWhere, sSortorder, runde);
+            return GetPlayerList(ref pList, sWhere, sSortorder, runde);
         }
 
-        public int fGetPlayerList_NotDropped(ref stPlayer[] pList, string sOrder, int runde)
+        public int GetPlayerList_NotDropped(ref stPlayer[] pList, string sOrder, int runde)
         {
             string sWhere = " WHERE state NOT IN (9) ";
-            return fGetPlayerList(ref pList, sWhere, sOrder, runde);
+            return GetPlayerList(ref pList, sWhere, sOrder, runde);
         }
 
-        public int fGetPlayerCount()
+        public int GetPlayerCount()
         {
             sqlCommand.CommandText = @" SELECT Count(1) FROM Player p ";
             int playerCount = Convert.ToInt32(sqlCommand.ExecuteScalar());
@@ -737,16 +737,16 @@ namespace KeizerForClubs
 
         /// <summary> Returns the first player that matches the query. New empty player wiht state 
         /// unknown and id -1, if none found. </summary>
-        public stPlayer fGetPlayer(string sWhere, string sSortorder, int runde)
+        public stPlayer GetPlayer(string sWhere, string sSortorder, int runde)
         {
             var arr = new stPlayer[1];
-            int n = fGetPlayerList(ref arr, sWhere, sSortorder, runde);
+            int n = GetPlayerList(ref arr, sWhere, sSortorder, runde);
             return n == 0 ? new stPlayer { id = -1 } : arr[0];
         }
         #endregion Playerlist
 
         #region Localization
-        public string fLocl_GetText(string topic, string key)
+        public string Locl_GetText(string topic, string key)
         {
             string s = key;
             try
@@ -766,7 +766,7 @@ namespace KeizerForClubs
             return s;
         }
 
-        public string fLocl_FindKey(string topic, string pvalue)
+        public string Locl_FindKey(string topic, string pvalue)
         {
             sqlCommand.CommandText = " SELECT key FROM config_db.LangText  WHERE code= @pCode  AND topic=@pTopic  AND text=@pValue ";
             sqlCommand.Parameters.AddWithValue("pCode", (object)cLangCode);
@@ -776,31 +776,31 @@ namespace KeizerForClubs
             return Convert.ToString(sqlCommand.ExecuteScalar());
         }
 
-        public int fLocl_GetPlayerState(string state)
+        public int Locl_GetPlayerState(string state)
         {
-            string key = fLocl_FindKey("PLAYERSTATE", state);
+            string key = Locl_FindKey("PLAYERSTATE", state);
             return !(key == "") ? Convert.ToInt32(key, 16) : -1;
         }
 
-        public string fLocl_GetPlayerStateText(SqliteInterface.ePlayerState state)
+        public string Locl_GetPlayerStateText(SqliteInterface.ePlayerState state)
         {
             // In der fLocl_GetText("PLAYERSTATE", ..) Fkt steht der Playerstate eDeleted als "A".
             // Deshalb das ToString("X", das macht Hex. Also 10 -> A
             var sState = ((int)state).ToString("X");
-            return fLocl_GetText("PLAYERSTATE", sState);
+            return Locl_GetText("PLAYERSTATE", sState);
         }
 
-        public SqliteInterface.eResults fLocl_GetGameResult(string result)
+        public SqliteInterface.eResults Locl_GetGameResult(string result)
         {
-            string key = fLocl_FindKey("GAMERESULT", result);
+            string key = Locl_FindKey("GAMERESULT", result);
             return !(key == "") ? (SqliteInterface.eResults)Convert.ToInt32(key) : SqliteInterface.eResults.eErrUndefined;
         }
 
-        public string fLocl_GetGameResultText(SqliteInterface.eResults result) => fLocl_GetText("GAMERESULT", ((int)result).ToString());
+        public string Locl_GetGameResultText(SqliteInterface.eResults result) => Locl_GetText("GAMERESULT", ((int)result).ToString());
 
-        public string fLocl_GetGameResultShort(SqliteInterface.eResults result)
+        public string Locl_GetGameResultShort(SqliteInterface.eResults result)
         {
-            var s = fLocl_GetGameResultText(result);
+            var s = Locl_GetGameResultText(result);
             if (s.StartsWith("-") || s.StartsWith("+"))
             {
                 if (s.Length >= 5)
@@ -816,7 +816,7 @@ namespace KeizerForClubs
             return s;
         }
 
-        public int fLocl_GetTopicTexte(string topic, string sWhereAdd, ref string[] texte)
+        public int Locl_GetTopicTexte(string topic, string sWhereAdd, ref string[] texte)
         {
             int topicTexte = 0;
             sqlCommand.CommandText = " SELECT text FROM config_db.LangText  WHERE code= @pCode  AND topic=@pTopic " + sWhereAdd + " ORDER BY key ";

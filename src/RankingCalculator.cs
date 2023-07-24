@@ -13,9 +13,9 @@
         {
             ReportingUnit cReportingUnit = null; //  new cReportingUnit(sTurniername, db);
             cReportingUnit?.DeleteDump();
-            int maxRound = db.fGetMaxRound();
+            int maxRound = db.GetMaxRound();
 
-            db.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
+            db.UpdPairing_AllPairingsAndAllKeizerSumsResetValues();
             this.AllPlayersSetInitialStartPts(maxRound); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPts();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
@@ -24,7 +24,7 @@
             int nExtraRecursions = 0;
             for (int runde1 = 1; runde1 <= maxRound; ++runde1)
             {
-                db.fUpdPairing_AllPairingsAndAllKeizerSumsResetValues();
+                db.UpdPairing_AllPairingsAndAllKeizerSumsResetValues();
                 for (int runde2 = 1; runde2 <= runde1; ++runde2)
                     this.OneRoundAllPairingsSetKeizerPts(runde2);
                 this.AllPlayersSetKeizerSumPts();
@@ -54,17 +54,17 @@
             var firstRoundRandom = currRunde != 1 ? 0 : db.fGetConfigInt("OPTION.FirstRoundRandom", 0);
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
-            int playerCount = db.fGetPlayerList(ref pList, " ", $" ORDER BY {order} desc ", currRunde);
+            int playerCount = db.GetPlayerList(ref pList, " ", $" ORDER BY {order} desc ", currRunde);
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
                 if (pList[index].state != SqliteInterface.ePlayerState.eRetired)
                 {
-                    db.fUpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, firstStartPts);
+                    db.UpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, firstStartPts);
                     --firstStartPts;
                 }
                 else
-                    db.fUpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, 0);
+                    db.UpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, 0);
             }
         }
 
@@ -73,24 +73,24 @@
         private void AllPlayersSetKeizerSumPts()
         {
             SqliteInterface.stPlayer[] players = new SqliteInterface.stPlayer[100];
-            int playerCount = db.fGetPlayerList(ref players, "", " ", db.fGetMaxRound());
+            int playerCount = db.GetPlayerList(ref players, "", " ", db.GetMaxRound());
             for (int index = 0; index < playerCount; ++index)
-                players[index].Keizer_SumPts = db.fGetPlayer_PunktSumme(players[index].id);
+                players[index].Keizer_SumPts = db.GetPlayer_PunktSumme(players[index].id);
             for (int index = 0; index < playerCount; ++index)
-                db.fUpdPlayer_KeizerSumPts(players[index].id, players[index].Keizer_SumPts);
+                db.UpdPlayer_KeizerSumPts(players[index].id, players[index].Keizer_SumPts);
         }
 
         /// <summary> For all players: calc his current rank and set the rank and the resulting 
         /// Keizer_StartPts into the DB. </summary>
         private void AllPlayersSetRankAndStartPts()
         {
-            var players = db.fGetPlayerLi(" ", " ORDER BY Keizer_SumPts desc, rating desc ", db.fGetMaxRound());
+            var players = db.GetPlayerLi(" ", " ORDER BY Keizer_SumPts desc, rating desc ", db.GetMaxRound());
             int firstStartPts = FirstStartPts(players.Count);
             for (int i = 0; i < players.Count; ++i)
             {
                 if (players[i].state == SqliteInterface.ePlayerState.eRetired)
                     continue;
-                db.fUpdPlayer_SetRankAndStartPts(players[i].id, i + 1, firstStartPts);
+                db.UpdPlayer_SetRankAndStartPts(players[i].id, i + 1, firstStartPts);
                 --firstStartPts;
             }
         }
@@ -107,8 +107,8 @@
             {
                 var pair = pairings[index];
                 float erg_w = 0.0f, erg_s = 0.0f;
-                var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
-                var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
+                var pWhite = db.GetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
+                var pBlack = db.GetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
 
                 if (pair.result == SqliteInterface.eResults.eWin_White)
                     erg_w = pBlack.Keizer_StartPts;
@@ -147,7 +147,7 @@
                         erg_w = 0;
                     erg_s = 0;
                 }
-                db.fUpdPairingValues(runde, pair.board, erg_w, erg_s);
+                db.UpdPairingValues(runde, pair.board, erg_w, erg_s);
             }
             return true;
         }

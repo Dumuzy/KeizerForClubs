@@ -23,7 +23,7 @@ namespace KeizerForClubs
         }
         #region Paarungen 
         private string GetPaarungenBasename(int runde) => "export\\" + this.sTurnier + "_" +
-            db.fLocl_GetText("GUI_LABEL", "Runde") + "-" + runde;
+            db.Locl_GetText("GUI_LABEL", "Runde") + "-" + runde;
 
         public bool fReport_Paarungen(int runde)
         {
@@ -43,7 +43,7 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, db.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
+                MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
             return true;
@@ -52,20 +52,20 @@ namespace KeizerForClubs
         TableW2Headers fReportPaarungenTable(int runde)
         {
             var t = new TableW2Headers(sTurnier);
-            t.Header2 = db.fLocl_GetText("GUI_MENU", "Paarungen") + " " + 
-                db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
+            t.Header2 = db.Locl_GetText("GUI_MENU", "Paarungen") + " " + 
+                db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
             t.AddRow("Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis".Split().
-                    Select(s => db.fLocl_GetText("GUI_COLS", s)).ToLi());
+                    Select(s => db.Locl_GetText("GUI_COLS", s)).ToLi());
 
             SqliteInterface.stPairing[] pList = new SqliteInterface.stPairing[50];
-            int pairingList = db.fGetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+            int pairingList = db.GetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
             for (int index = 0; index < pairingList; ++index)
             {
                 var r = new Li<string>();
                 r.Add((index + 1).ToString() + ".");
-                r.Add(db.fGetPlayerName(pList[index].id_w));
-                r.Add(db.fGetPlayerName(pList[index].id_b));
-                r.Add(db.fLocl_GetGameResultText(pList[index].result));
+                r.Add(db.GetPlayerName(pList[index].id_w));
+                r.Add(db.GetPlayerName(pList[index].id_b));
+                r.Add(db.Locl_GetGameResultText(pList[index].result));
                 t.AddRow(r);
             }
             t.Footer = TableFooter;
@@ -75,13 +75,13 @@ namespace KeizerForClubs
 
         #region Tabellenstand
         private string GetFileTabellenstandBasename(int runde) =>
-            "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "-" + runde;
+            "export\\" + this.sTurnier + "_" + db.Locl_GetText("GUI_MENU", "Listen.Calc") + "-" + runde;
 
         public bool fReport_Tabellenstand(int runde)
         {
             try
             {
-                TableW2Headers table = runde != db.fGetMaxRound() ? 
+                TableW2Headers table = runde != db.GetMaxRound() ? 
                     db.ReadTableWHeadersFromDb(eTableType.Stand, runde) : fReportTabellenstandTable();
                 var fileBase = GetFileTabellenstandBasename(runde);
 
@@ -99,7 +99,7 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, db.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
+                MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
             return true;
@@ -108,13 +108,13 @@ namespace KeizerForClubs
         TableW2Headers fReportTabellenstandTable()
         {
             var t = new TableW2Headers(sTurnier);
-            var runde = db.fGetMaxRound();
-            string str2 = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
-            t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
+            var runde = db.GetMaxRound();
+            string str2 = db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
+            t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
-            var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc ", runde);
-            var lih = new Li<string>(new string[] { "", db.fLocl_GetText("GUI_TEXT", "Name"),
-                db.fLocl_GetText("GUI_TEXT", "Keizer-Punkte"), db.fLocl_GetText("GUI_TEXT", "Spiel-Punkte") });
+            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc ", runde);
+            var lih = new Li<string>(new string[] { "", db.Locl_GetText("GUI_TEXT", "Name"),
+                db.Locl_GetText("GUI_TEXT", "Keizer-Punkte"), db.Locl_GetText("GUI_TEXT", "Spiel-Punkte") });
             t.AddRow(lih);
             for (int index = 0, num1 = 1; index < players.Count; ++index)
             {
@@ -125,7 +125,7 @@ namespace KeizerForClubs
                     li.Add(num1++.ToString() + ".");
                     li.Add(player.name);
                     li.Add(player.Keizer_SumPts.ToString("0.00"));
-                    li.Add(db.fGetPlayer_PartiePunkte(player.id).ToString());
+                    li.Add(db.GetPlayer_PartiePunkte(player.id).ToString());
                     t.AddRow(li);
                 }
             }
@@ -140,7 +140,7 @@ namespace KeizerForClubs
         {
             try
             {
-                TableW2Headers tableVoll = runde != db.fGetMaxRound() ?
+                TableW2Headers tableVoll = runde != db.GetMaxRound() ?
                         db.ReadTableWHeadersFromDb(eTableType.Kreuz, runde) : fReportTabellenstandVollTable();
 
                 var fileBaseVoll = GetFileTabellenstandExBasename(runde);
@@ -155,24 +155,24 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, db.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
+                MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
             return true;
         }
 
         private string GetFileTabellenstandExBasename(int runde) =>
-            "export\\" + this.sTurnier + "_" + db.fLocl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + runde;
+            "export\\" + this.sTurnier + "_" + db.Locl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + runde;
 
         TableW2Headers fReportTabellenstandVollTable()
         {
             var t = new TableW2Headers(sTurnier);
-            int runde = db.fGetMaxRound();
+            int runde = db.GetMaxRound();
             SqliteInterface.stPairing[] pList4 = new SqliteInterface.stPairing[1];
-            var players = db.fGetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", runde);
+            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", runde);
 
-            string strr = db.fLocl_GetText("GUI_LABEL", "Runde") + " " + db.fGetMaxRound();
-            t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
+            string strr = db.Locl_GetText("GUI_LABEL", "Runde") + " " + db.GetMaxRound();
+            t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
             // var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
             var thead = new Li<string>("Platz Name Keizer-&#8721; GamePts".Split());
             for (int i = 0; i < runde; ++i)
@@ -191,19 +191,19 @@ namespace KeizerForClubs
                 // str1.Add(player.rating.ToString());
                 // str1.Add(player.Keizer_StartPts.ToString());
                 str1.Add(player.Keizer_SumPts.ToString("0.00"));
-                str1.Add(db.fGetPlayer_PartiePunkte(player.id).ToString());
+                str1.Add(db.GetPlayer_PartiePunkte(player.id).ToString());
 
                 for (int index2 = 1; index2 <= runde; ++index2)
                 {
                     string sWhere = " WHERE (PID_W=" + player.id.ToString() +
                         " OR    PID_B=" + player.id.ToString() + ")  AND rnd=" + index2.ToString();
                     string str3;
-                    if (db.fGetPairingList(ref pList4, sWhere, "  ") > 0)
+                    if (db.GetPairingList(ref pList4, sWhere, "  ") > 0)
                     {
                         var pair = pList4[0];
-                        var pWhite = db.fGetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
-                        var pBlack = db.fGetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
-                        string str4 = db.fLocl_GetGameResultShort(pair.result) + " ";
+                        var pWhite = db.GetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
+                        var pBlack = db.GetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
+                        string str4 = db.Locl_GetGameResultShort(pair.result) + " ";
                         if (pair.result > SqliteInterface.eResults.eWin_Black)
                         {
                             str3 = str4 + " - - p=" + pair.pts_w.ToString();
@@ -260,7 +260,7 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
-                int num = (int)MessageBox.Show(ex.Message, db.fLocl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
+                int num = (int)MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
             return true;
@@ -269,10 +269,10 @@ namespace KeizerForClubs
 
         TableW2Headers fReportTeilnehmerTable(int runde)
         {
-            var maxRound = db.fGetMaxRound();
+            var maxRound = db.GetMaxRound();
             var t = new TableW2Headers(sTurnier);
-            t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
-                db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
+            t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
+                db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
 
             var players = db.GetPreviousPlayerLi("", " ORDER BY ID ",  runde);
             // players.Sort(p => p.id);  // TODO
@@ -283,7 +283,7 @@ namespace KeizerForClubs
                 row.Add((index + 1).ToString() + ".");
                 row.Add(player.name);
                 row.Add(player.rating.ToString());
-                row.Add(db.fLocl_GetPlayerStateText(player.state));
+                row.Add(db.Locl_GetPlayerStateText(player.state));
                 t.AddRow(row);
             }
             t.Footer = TableFooter;
@@ -292,12 +292,12 @@ namespace KeizerForClubs
 
         TableW2Headers fReportTeilnehmerTableOld(SqliteInterface sqlintf)
         {
-            var runde = db.fGetMaxRound();
+            var runde = db.GetMaxRound();
             var t = new TableW2Headers(sTurnier);
-            t.Header2 = sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
-                db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde; 
+            t.Header2 = sqlintf.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
+                db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde; 
 
-            var players = sqlintf.fGetPlayerLi("", " ORDER BY ID ", runde);
+            var players = sqlintf.GetPlayerLi("", " ORDER BY ID ", runde);
             for (int index = 0; index < players.Count; ++index)
             {
                 var player = players[index];
@@ -305,7 +305,7 @@ namespace KeizerForClubs
                 row.Add((index + 1).ToString() + ".");
                 row.Add(player.name);
                 row.Add(player.rating.ToString());
-                row.Add(sqlintf.fLocl_GetPlayerStateText(player.state));
+                row.Add(sqlintf.Locl_GetPlayerStateText(player.state));
                 t.AddRow(row);
             }
             t.Footer = TableFooter;
@@ -313,13 +313,13 @@ namespace KeizerForClubs
         }
 
         private string GetTeilnehmerBasename(SqliteInterface sqlintf, int runde) => "export\\" + this.sTurnier + "_" +
-                sqlintf.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + runde;
+                sqlintf.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + runde;
         #endregion Teilnehmer
 
         #region Misc
         public void WriteCurrentTablesToDb()
         {
-            int maxRound = db.fGetMaxRound();
+            int maxRound = db.GetMaxRound();
             if (maxRound > 0)
             {
                 db.WriteTableWHeaders2Db(eTableType.Stand, maxRound, fReportTabellenstandTable());
