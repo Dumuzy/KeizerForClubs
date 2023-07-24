@@ -435,7 +435,7 @@ namespace KeizerForClubs
 
         #region Pairing
         // Alle Paarungen einer Runde löschen 
-        public bool fDelPairings(int runde)
+        public bool DelPairings(int runde)
         {
             sqlCommand.CommandText = " DELETE FROM Pairing  WHERE Rnd=@pRunde ";
             sqlCommand.Parameters.AddWithValue("pRunde", runde);
@@ -596,7 +596,7 @@ namespace KeizerForClubs
             return pairingList;
         }
 
-        public Li<SqliteInterface.stPairing> fGetPairingLi(string sWhere, string sSortorder)
+        public Li<SqliteInterface.stPairing> GetPairingLi(string sWhere, string sSortorder)
         {
             SqliteInterface.stPairing[] pList1 = new SqliteInterface.stPairing[100];
             var n = fGetPairingList(ref pList1, sWhere, sSortorder);
@@ -678,6 +678,42 @@ namespace KeizerForClubs
             int playerCount = fGetPlayerList(ref arr, sWhere, sSortorder, runde);
             return new Li<stPlayer>(arr.Take(playerCount));
         }
+
+        /// <summary> Gibt die Liste der Spieler aus früheren Runden zurück. Nur Id, Name, Rating 
+        /// und Status sind verwertbar und richtig. </summary>
+        public Li<stPlayer> GetPreviousPlayerLi(string sWhere, string sSortorder, int runde)
+        {
+            SqliteInterface.stPlayer[] players = new stPlayer[100];
+            int count = fGetPlayerList(ref players, sWhere, sSortorder, fGetMaxRound() + 1);
+            var pairings = GetPairingLi($" WHERE Rnd={runde} ", "");
+            for (int i = 0; i < count; ++i)
+            {
+                players[i].state = ePlayerState.eRetired;
+                foreach (var pa in pairings)
+                {
+                    if (pa.id_w == players[i].id || pa.id_b == players[i].id)
+                    {
+                        if (pa.result.IsContainedIn(new eResults[]{ eResults.eWin_White, eResults.eDraw,
+                                        eResults.eWin_Black, eResults.eFreeWin }.ToLi()))
+                        {
+                            players[i].state = ePlayerState.eAvailable;
+                            break;
+                        }
+                    }
+                    if (pa.id_w == players[i].id)
+                    {
+                        if (pa.result.IsContainedIn(new eResults[]{ eResults.eHindered, eResults.eExcused,
+                                        eResults.eUnexcused}.ToLi()))
+                        {
+                            players[i].state = (ePlayerState)(int)(pa.result);
+                            break;
+                        }
+                    }
+                }
+            }
+            return new Li<stPlayer>(players.Take(count));
+        }
+
 
         public int fGetPlayerList_Available(ref stPlayer[] pList, int runde)
         {
@@ -851,14 +887,12 @@ namespace KeizerForClubs
 
         string TabWHName(eTableType tt, int runde) => "t" + tt.ToString() + "_" + runde;
 
-        public void fDelCurrentTables(int runde)
+        public void DelCurrentStoredTablesWHeader(int runde)
         {
-            var tns = new string[] { TabWHName(eTableType.Stand, runde), TabWHName(eTableType.Kreuz, runde), 
-                TabWHName(eTableType.Spieler, runde + 1) };
+            var tns = new string[] { TabWHName(eTableType.Stand, runde), TabWHName(eTableType.Kreuz, runde) };
             sqlCommand.CommandText = $@"
                 DROP TABLE IF EXISTS {tns[0]};
-                DROP TABLE IF EXISTS {tns[1]};
-                DROP TABLE IF EXISTS {tns[2]};";
+                DROP TABLE IF EXISTS {tns[1]};";
             sqlCommand.ExecuteNonQuery();
         }
         #endregion Tabelle

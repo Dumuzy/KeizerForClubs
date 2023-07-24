@@ -122,7 +122,7 @@ namespace KeizerForClubs
             mnuHelp.Enabled = true;
             mnuStartLanguage.Enabled = true;
             LoadPlayerlist();
-            fLoadPairingList();
+            LoadPairingList();
 
             tbBonusClub.Value = db.fGetConfigInt("BONUS.Clubgame");
             tbBonusExcused.Value = db.fGetConfigInt("BONUS.Excused");
@@ -252,7 +252,7 @@ for determining the first round pairings.";
 
         void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.FAQ.%LNG%.%X%");
 
-        void NumRoundSelectValueChanged(object sender, EventArgs e) => fLoadPairingList();
+        void NumRoundSelectValueChanged(object sender, EventArgs e) => LoadPairingList();
 
         void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
@@ -282,16 +282,16 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             int maxRound = db.fGetMaxRound();
-            if (this.numRoundSelect.Value != (Decimal)maxRound)
+            if (SelectedRound != maxRound)
             {
                 int num = (int)MessageBox.Show(db.fLocl_GetText("GUI_TEXT", "Hinweis.DelLetzteRd"), "No....", MessageBoxButtons.OK);
             }
             else
             {
-                db.fDelPairings(maxRound);
-                db.fDelCurrentTables(maxRound);
+                db.DelPairings(maxRound);
+                db.DelCurrentStoredTablesWHeader(maxRound);
                 this.numRoundSelect.Value = (Decimal)(maxRound - 1);
-                this.fLoadPairingList();
+                this.LoadPairingList();
             }
             ApplyPlayerStateTexte();
         }
@@ -303,7 +303,7 @@ for determining the first round pairings.";
             this.fSelectLanguage();
             this.ApplyLanguageText();
             this.LoadPlayerlist();
-            this.fLoadPairingList();
+            this.LoadPairingList();
         }
 
         private void GrdPlayersDataError(object sender, DataGridViewDataErrorEventArgs e) => e.Cancel = false;
@@ -311,7 +311,7 @@ for determining the first round pairings.";
         private void ChkPairingOnlyPlayedCheckedChanged(object sender, EventArgs e)
         {
             IncNumClicks();
-            this.fLoadPairingList();
+            this.LoadPairingList();
             db.fSetConfigBool("OPTION.ShowOnlyPlayed", chkPairingOnlyPlayed.Checked);
         }
 
@@ -598,7 +598,7 @@ for determining the first round pairings.";
             }
         }
 
-        private void fLoadPairingList()
+        private void LoadPairingList()
         {
             SqliteInterface.stPairing[] pList = new SqliteInterface.stPairing[50];
             int pairingList = db.fGetPairingList(ref pList, " WHERE rnd=" + this.numRoundSelect.Value.ToString(), " ORDER BY board ");
@@ -656,7 +656,7 @@ for determining the first round pairings.";
                     db.fInsPairingNew(currRunde, index + 1, this.pPairingList[index].id_w, this.pPairingList[index].id_b);
                 this.fPairingInsertNoPlaying();
                 db.EndeTransaktion();
-                this.fLoadPairingList();
+                this.LoadPairingList();
                 return true;
             }
             db.EndeTransaktion();
@@ -829,7 +829,7 @@ for determining the first round pairings.";
                 }
                 this.fPairingInsertNoPlaying();
             }
-            this.fLoadPairingList();
+            this.LoadPairingList();
             return true;
         }
         /// <summary> Returns the directory where the cfg, docs and export directories are located after checkout. </summary>

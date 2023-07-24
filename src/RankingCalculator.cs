@@ -100,7 +100,7 @@
         /// <remarks> Die Punkte sind bei Sieg gleich der momentanen Keizer_StartPts der Gegner. </remarks>
         private bool OneRoundAllPairingsSetKeizerPts(int runde)
         {
-            var pairings = db.fGetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+            var pairings = db.GetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
             if (pairings.Count == 0)
                 return false;
             for (int index = 0; index < pairings.Count; ++index)

@@ -11,8 +11,6 @@ using static KeizerForClubs.SqliteInterface;
 
 namespace KeizerForClubs
 {
-
-
     public class ReportingUnit : ReportingBase
     {
         string sTurnier = "";
@@ -247,8 +245,7 @@ namespace KeizerForClubs
         {
             try
             {
-                TableW2Headers table = runde != db.fGetMaxRound() ?
-                    db.ReadTableWHeadersFromDb(eTableType.Spieler, runde) : fReportTeilnehmerTable(db);
+                TableW2Headers table = fReportTeilnehmerTable(runde);
 
                 var fileBase = GetTeilnehmerBasename(db, runde);
                 if (db.fGetConfigBool("OPTION.Xml"))
@@ -269,7 +266,31 @@ namespace KeizerForClubs
             return true;
         }
 
-        TableW2Headers fReportTeilnehmerTable(SqliteInterface sqlintf)
+
+        TableW2Headers fReportTeilnehmerTable(int runde)
+        {
+            var maxRound = db.fGetMaxRound();
+            var t = new TableW2Headers(sTurnier);
+            t.Header2 = db.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
+                db.fLocl_GetText("GUI_LABEL", "Runde") + " " + runde;
+
+            var players = db.GetPreviousPlayerLi("", " ORDER BY ID ",  runde);
+            // players.Sort(p => p.id);  // TODO
+            for (int index = 0; index < players.Count; ++index)
+            {
+                var player = players[index];
+                var row = new Li<string>();
+                row.Add((index + 1).ToString() + ".");
+                row.Add(player.name);
+                row.Add(player.rating.ToString());
+                row.Add(db.fLocl_GetPlayerStateText(player.state));
+                t.AddRow(row);
+            }
+            t.Footer = TableFooter;
+            return t;
+        }
+
+        TableW2Headers fReportTeilnehmerTableOld(SqliteInterface sqlintf)
         {
             var runde = db.fGetMaxRound();
             var t = new TableW2Headers(sTurnier);
@@ -304,7 +325,6 @@ namespace KeizerForClubs
                 db.WriteTableWHeaders2Db(eTableType.Stand, maxRound, fReportTabellenstandTable());
                 db.WriteTableWHeaders2Db(eTableType.Kreuz, maxRound, fReportTabellenstandVollTable());
             }
-            db.WriteTableWHeaders2Db(eTableType.Spieler, maxRound + 1, fReportTeilnehmerTable(db));
         }
         #endregion Misc
 
