@@ -32,7 +32,7 @@ namespace KeizerForClubs
 
         private ToolStripMenuItem mnuListenParticipants;
         private ToolStripMenuItem mnuListenStanding, mnuListenStandingFull;
-        private ToolStripMenuItem mnuListenPairing;
+        private ToolStripMenuItem mnuListenPairing, mnuListenAll;
         private NumericUpDown numRoundsGameRepeat;
         private ComboBox ddlRatioFirst2Last, ddlFirstRoundRandom;
         private ToolTip tooltip;
@@ -344,26 +344,46 @@ for determining the first round pairings.";
             }
         }
 
+        int SelectedRound => Helper.ToInt(numRoundSelect.Value);
+
+        private void MnuListenAllClick(object sender, EventArgs e)
+        {
+            RecalcIfNeeded();
+            IncNumClicks(db.fGetPlayerCount());
+            var ru = new cReportingUnit(sTurniername, db);
+            ru.fReport_Paarungen(SelectedRound);
+            ru.fReport_Tabellenstand(SelectedRound);
+            ru.fReport_TabellenstandVoll(SelectedRound);
+            ru.fReport_Teilnehmer(SelectedRound);
+        }
+        private void RecalcIfNeeded()
+        {
+            if (SelectedRound >= db.fGetMaxRound())
+            {
+                db.BeginnTransaktion();
+                this.ranking.AllPlayersAllRoundsCalculate();
+                db.EndeTransaktion();
+            }
+        }
+
         private void MnuListenPairingClick(object sender, EventArgs e)
         {
             IncNumClicks(db.fGetPlayerCount() / 2);
-            new cReportingUnit(sTurniername, db).fReport_Paarungen(Helper.ToInt(numRoundSelect.Value));
+            new cReportingUnit(sTurniername, db).fReport_Paarungen(SelectedRound);
         }
 
         private void MnuListenStandingClick(object sender, EventArgs e)
         {
-            db.BeginnTransaktion();
-            this.ranking.AllPlayersAllRoundsCalculate();
-            db.EndeTransaktion();
+            RecalcIfNeeded();
             IncNumClicks(db.fGetPlayerCount());
             if (sender == mnuListenStanding)
-                new cReportingUnit(sTurniername, db).fReport_Tabellenstand(Helper.ToInt(numRoundSelect.Value));
+                new cReportingUnit(sTurniername, db).fReport_Tabellenstand(SelectedRound);
             else if (sender == mnuListenStandingFull)
-                new cReportingUnit(sTurniername, db).fReport_TabellenstandVoll(Helper.ToInt(numRoundSelect.Value));
+                new cReportingUnit(sTurniername, db).fReport_TabellenstandVoll(SelectedRound);
         }
 
         private void MnuListenParticipantsClick(object sender, EventArgs e) => 
-            new cReportingUnit(sTurniername, db).fReport_Teilnehmer(Helper.ToInt(numRoundSelect.Value));
+            new cReportingUnit(sTurniername, db).fReport_Teilnehmer(SelectedRound);
 
         private void TbBonusValueChanged(object sender, EventArgs e)
         {
@@ -458,6 +478,8 @@ for determining the first round pairings.";
                 return;
             string newPlayerName = row.Cells[1].Value.ToString().Trim();
             newPlayerName = Regex.Replace(newPlayerName, @"(\s\s+)", " ");
+            // Paragraph sign is not allowed in name, as it is used as splitting char. 
+            newPlayerName = Regex.Replace(newPlayerName, "§", "$");
             if (string.IsNullOrEmpty(newPlayerName))  // kein Name
                 return;
             int gridPlayerId = row.Cells[0].Value != null ? Convert.ToInt16(row.Cells[0].Value) : -1;
@@ -528,6 +550,7 @@ for determining the first round pairings.";
             mnuListenStanding.Text = db.fLocl_GetText("GUI_MENU", "Listen.Calc");
             mnuListenStandingFull.Text = db.fLocl_GetText("GUI_MENU", "Listen.CalcFull");
             mnuListenPairing.Text = db.fLocl_GetText("GUI_MENU", "Listen.Paarungen");
+            mnuListenAll.Text = db.fLocl_GetText("GUI_MENU", "Listen.Alle");
             mnuListenParticipants.Text = db.fLocl_GetText("GUI_MENU", "Listen.Teilnehmer");
             mnuHelp.Text = db.fLocl_GetText("GUI_MENU", "Hilfe");
             mnuHelpDocumentation.Text = db.fLocl_GetText("GUI_MENU", "Hilfe.Doku");
@@ -929,6 +952,7 @@ for determining the first round pairings.";
             this.mnuPaarungDropLast = new ToolStripMenuItem();
             this.mnuListen = new ToolStripMenuItem();
             this.mnuListenPairing = new ToolStripMenuItem();
+            this.mnuListenAll = new ToolStripMenuItem();
             this.mnuListenStanding = new ToolStripMenuItem();
             this.mnuListenStandingFull = new ToolStripMenuItem();
             this.mnuListenParticipants = new ToolStripMenuItem();
@@ -1263,15 +1287,20 @@ for determining the first round pairings.";
             this.mnuPaarungDropLast.Click += new EventHandler(this.MnuPairingDropLastClick);
             this.mnuListen.DropDownItems.AddRange(new ToolStripItem[]
             {
-        (ToolStripItem) this.mnuListenPairing,
-        (ToolStripItem) this.mnuListenStanding,
-        (ToolStripItem) this.mnuListenStandingFull,
-        (ToolStripItem) this.mnuListenParticipants
+                mnuListenAll,
+                mnuListenPairing,
+                mnuListenStanding,
+                mnuListenStandingFull,
+                mnuListenParticipants
             });
             this.mnuListen.Enabled = false;
             this.mnuListen.Name = "mnuListen";
             this.mnuListen.Size = new Size(42, 20);
             this.mnuListen.Text = "Lists";
+            this.mnuListenAll.Name = "mnuListenAll";
+            this.mnuListenAll.Size = new Size(158, 22);
+            this.mnuListenAll.Text = "All";
+            this.mnuListenAll.Click += new EventHandler(this.MnuListenAllClick);
             this.mnuListenPairing.Name = "mnuListenPairing";
             this.mnuListenPairing.Size = new Size(158, 22);
             this.mnuListenPairing.Text = "Pairings/Results";
