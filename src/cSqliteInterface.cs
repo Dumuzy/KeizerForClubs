@@ -637,28 +637,6 @@ namespace KeizerForClubs
                             pList[playerCount].rank = sqLiteDataReader.IsDBNull(6) ? 0 : (int)sqLiteDataReader.GetInt16(6);
                             pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
                             pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
-
-                            if (pList[playerCount].state == ePlayerState.eRetired)
-                            {
-                                /// OOOOHHHHH ELEND, des ist ein echtes Problem. 
-                                var pid = pList[playerCount].id;
-                                // Special check needed. This player is only then retired for the
-                                // current round, if he is not in the pairings table. 
-                                var sql = $@"SELECT Result from Pairing WHERE Rnd={runde} AND 
-                                              (PID_W={pid} or PID_B={pid})";
-                                var c = new SQLiteCommand(sql, SQLiteMyDB);
-                                var obj = c.ExecuteScalar();
-                                if (obj != null )
-                                {
-                                    var re = Helper.ToInt(obj);
-                                    // The player has played in the round. 
-                                    if (re.IsContainedIn<int>(new int[] { 5, 6, 7 }.ToLi()))
-                                        pList[playerCount].state = (ePlayerState)re;
-                                    else
-                                        pList[playerCount].state = ePlayerState.eAvailable;
-                                }
-                            }
-
                             ++playerCount;
                         }
                         else

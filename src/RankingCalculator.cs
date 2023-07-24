@@ -84,7 +84,7 @@
         /// Keizer_StartPts into the DB. </summary>
         private void AllPlayersSetRankAndStartPts()
         {
-            var players = db.GetPlayerLi(" ", " ORDER BY Keizer_SumPts desc, rating desc ", db.GetMaxRound());
+            var players = db.GetPlayerLi(" Where state != 9 ", " ORDER BY Keizer_SumPts desc, rating desc ", db.GetMaxRound());
             int firstStartPts = FirstStartPts(players.Count);
             for (int i = 0; i < players.Count; ++i)
             {
