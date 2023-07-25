@@ -167,42 +167,40 @@ namespace KeizerForClubs
         TableW2Headers fReportTabellenstandVollTable()
         {
             var t = new TableW2Headers(sTurnier);
-            int runde = db.GetMaxRound();
+            int maxRound = db.GetMaxRound();
             SqliteInterface.stPairing[] pList4 = new SqliteInterface.stPairing[1];
-            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", runde);
+            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", maxRound);
 
             string strr = db.Locl_GetText("GUI_LABEL", "Runde") + " " + db.GetMaxRound();
             t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
             // var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
             var thead = new Li<string>("Platz Name Keizer-&#8721; GamePts".Split());
-            for (int i = 0; i < runde; ++i)
+            for (int i = 0; i < maxRound; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
             for (int index1 = 0, numPlayer = 1; index1 < players.Count; ++index1)
             {
                 var player = players[index1];
-                var str1 = new Li<string>();
+                var line = new Li<string>();
                 if (player.State != SqliteInterface.PlayerState.Retired)
-                    str1.Add(numPlayer++.ToString("00"));
+                    line.Add(numPlayer++.ToString("00"));
                 else
-                    str1.Add("(ret)");
-                string name = player.Name;
-                str1.Add(name);
+                    line.Add("(ret)");
+                line.Add(player.Name);
                 // str1.Add(player.rating.ToString());
                 // str1.Add(player.Keizer_StartPts.ToString());
-                str1.Add(player.KeizerSumPts.ToString("0.00"));
-                str1.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
+                line.Add(player.KeizerSumPts.ToString("0.00"));
+                line.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
 
-                for (int index2 = 1; index2 <= runde; ++index2)
+                for (int runde = 1; runde <= maxRound; ++runde)
                 {
-                    string sWhere = " WHERE (PID_W=" + player.Id.ToString() +
-                        " OR    PID_B=" + player.Id.ToString() + ")  AND rnd=" + index2.ToString();
+                    string sWhere = $" WHERE (PID_W={player.Id} OR PID_B={player.Id}) AND rnd={runde} ";
                     string str3;
                     if (db.GetPairingList(ref pList4, sWhere, "  ") > 0)
                     {
                         var pair = pList4[0];
-                        var pWhite = db.GetPlayer(" WHERE ID=" + (object)pair.IdW, " ", runde);
-                        var pBlack = db.GetPlayer(" WHERE ID=" + (object)pair.IdB, " ", runde);
+                        var pWhite = db.GetPlayer(" WHERE ID=" + pair.IdW, " ", maxRound);
+                        var pBlack = db.GetPlayer(" WHERE ID=" + pair.IdB, " ", maxRound);
                         string str4 = db.Locl_GetGameResultShort(pair.Result) + " ";
                         if (pair.Result > SqliteInterface.Results.WinBlack)
                         {
@@ -230,9 +228,9 @@ namespace KeizerForClubs
                     }
                     else
                         str3 = "-";
-                    str1.Add(str3);
+                    line.Add(str3);
                 }
-                t.AddRow(str1);
+                t.AddRow(line);
             }
             t.Footer = TableFooter;
             return t;
