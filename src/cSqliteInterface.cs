@@ -24,6 +24,7 @@ namespace KeizerForClubs
             eFreilos = 8,
             eRetired = 9,
             eDeleted = 10,
+            eNotYetStarted = 11,
             eErrUndefined = -1
         };
 
@@ -666,6 +667,7 @@ namespace KeizerForClubs
             var pairings = GetPairingLi($" WHERE Rnd={runde} ", "");
             for (int i = 0; i < count; ++i)
             {
+                var playerCurrState = players[i].state;
                 players[i].state = ePlayerState.eRetired;
                 foreach (var pa in pairings)
                 {
@@ -688,8 +690,18 @@ namespace KeizerForClubs
                         }
                     }
                 }
+                if (players[i].state == ePlayerState.eRetired)
+                {
+                    // Hier ist sicher, daß der Spieler nicht vorkam in dieser Runde. Also ist er entweder
+                    // zurückgetreten oder ein Spätstarter. Wenn sein playerCurrState eRetired ist, dann ist er
+                    // irgendwann zurückgetreten. Ich zähle den als zurückgetreten. Es ist nicht 100% korrekt, 
+                    // weil es auch sein könnte, daß es ein zurückgetretener Spätstarter ist und der in der aktuell
+                    // gefragten Runde noch gar nicht da war. 
+                    if (playerCurrState != ePlayerState.eRetired)
+                        players[i].state = ePlayerState.eNotYetStarted;
+                }
             }
-            return new Li<stPlayer>(players.Take(count));
+            return new Li<stPlayer>(players.Take(count).Where(p => p.state != ePlayerState.eNotYetStarted));
         }
 
 
