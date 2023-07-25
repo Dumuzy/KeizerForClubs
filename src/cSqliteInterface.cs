@@ -663,7 +663,8 @@ namespace KeizerForClubs
         }
 
         /// <summary> Gibt die Liste der Spieler aus früheren Runden zurück. Nur Id, Name, Rating 
-        /// und Status sind verwertbar und richtig. </summary>
+        /// und Status sind verwertbar und richtig und sollen exakt so ausehhen wie damals, als
+        /// die Runde gelaufen ist. </summary>
         public Li<stPlayer> GetPreviousPlayerLi(string sWhere, string sSortorder, int runde)
         {
             SqliteInterface.stPlayer[] players = new stPlayer[100];
@@ -677,8 +678,10 @@ namespace KeizerForClubs
                 {
                     if (pa.IdW == players[i].Id || pa.IdB == players[i].Id)
                     {
+                        // Those pairings which have not yet been played have Result == ErrUndefined. 
+                        // In the player list they must show up as available. 
                         if (pa.Result.IsContainedIn(new Results[]{ Results.WinWhite, Results.Draw,
-                                        Results.WinBlack, Results.FreeWin }.ToLi()))
+                                        Results.WinBlack, Results.FreeWin, Results.ErrUndefined }.ToLi()))
                         {
                             players[i].State = PlayerState.Available;
                             break;
@@ -709,10 +712,11 @@ namespace KeizerForClubs
         }
 
 
-        public int GetPlayerList_Available(ref stPlayer[] pList, int runde)
+        public int GetPlayerList_Available(ref stPlayer[] pList, string sSortorder, int runde)
         {
             string sWhere = " WHERE state IN (1) ";
-            string sSortorder = " ORDER BY ID ";
+            if(string.IsNullOrEmpty(sSortorder))
+                sSortorder = " ORDER BY ID ";
             return GetPlayerList(ref pList, sWhere, sSortorder, runde);
         }
 

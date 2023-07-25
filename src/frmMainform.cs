@@ -637,7 +637,7 @@ for determining the first round pairings.";
         private bool ExecutePairing()
         {
             var currRunde = db.GetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
-            this.iPairingPlayerCntAvailable = db.GetPlayerList_Available(ref this.pPairingPlayerList, currRunde);
+            this.iPairingPlayerCntAvailable = db.GetPlayerList_Available(ref this.pPairingPlayerList, "", currRunde);
             this.iPairingMinFreeCnt = 999;
             for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
             {
@@ -797,12 +797,13 @@ for determining the first round pairings.";
             frmPairingManual.btnCancel.Text = db.Locl_GetText("GUI_TEXT", "Abbruch");
             frmPairingManual.colWhite.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Weiss");
             frmPairingManual.colBlack.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Schwarz");
-            this.iPairingPlayerCntAvailable = db.GetPlayerList_Available(ref this.pPairingPlayerList, currRunde);
+            this.iPairingPlayerCntAvailable = db.GetPlayerList_Available(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             for (int i = 0; i < this.iPairingPlayerCntAvailable; ++i)
             {
                 if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Available)
                     frmPairingManual.lstNames.Items.Add(this.pPairingPlayerList[i].Name);
             }
+
             for (int i = 0; i < frmPairingManual.lstNames.Items.Count; i += 2)
                 frmPairingManual.grdPaarungen.Rows.Add();
             this.iPairingPlayerCntAll = db.GetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
@@ -841,6 +842,7 @@ for determining the first round pairings.";
             this.LoadPairingList();
             return true;
         }
+
         /// <summary> Returns the directory where the cfg, docs and export directories are located after checkout. </summary>
         private string GetCheckoutBaseDir()
         {
