@@ -13,70 +13,74 @@ namespace KeizerForClubs
         private SQLiteCommand sqlCommand;
 
 
-        public enum ePlayerState
+        public enum PlayerState
         {
-            eUnknown = 0,
-            eAvailable = 1,
-            ePaired = 2,
-            eHindered = 5,
-            eExcused = 6,
-            eUnexcused = 7,
-            eFreilos = 8,
-            eRetired = 9,
-            eDeleted = 10,
-            eNotYetStarted = 11,
-            eErrUndefined = -1
+            ErrUndefined = -1,
+            Unknown = 0,
+
+            Available = 1,
+            Paired = 2,
+
+            Hindered = 5,
+            Excused = 6,
+            Unexcused = 7,
+            
+            Freilos = 8,
+            Retired = 9,
+            Deleted = 10,
+            NotYetStarted = 11,
         };
 
-        public enum eResults
+        public enum Results
         {
-            eWin_White = 1,
-            eDraw = 2,
-            eWin_Black = 3,
+            ErrUndefined = -1,
+            Unknown = 0,
 
-            eFreeWin = 4,
+            WinWhite = 1,
+            Draw = 2,
+            WinBlack = 3,
 
-            eHindered = 5,
-            eExcused = 6,
-            eUnexcused = 7,
+            FreeWin = 4,
 
-            eErrUndefined = -1
+            Hindered = 5,
+            Excused = 6,
+            Unexcused = 7,
         };
 
-        public enum eTableType
+        public enum TableType
         {
             None = 0, Stand, Kreuz, Spieler
         }
 
         public struct stPlayer
         {
-            public int id;
-            public string name;
-            public int rating;
+            public int Id;
+            public string Name;
+            public int Rating;
             public int RatingWDelta;  // Original Rating plus delta, if FirstRoundRandom.
-            public int rank;
-            public ePlayerState state;
-            public float Keizer_StartPts;
-            public float Keizer_SumPts;
+            public int Rank;
+            public PlayerState State;
+            public float KeizerStartPts;
+            public float KeizerSumPts;
             public int FreeCnt;	// Anzahl Freilose; nur für Auslosung aufgenommen      
             public override string ToString()
             {
-                return $"{id} {name} rank:{rank} state:{state} frei:{FreeCnt} kStart {Keizer_StartPts} kSum {Keizer_SumPts}";
+                return $"{Id} {Name} rank:{Rank} state:{State} frei:{FreeCnt} kStart {KeizerStartPts} kSum {KeizerSumPts}";
             }
         };
 
         public struct stPairing
         {
-            public int round;
-            public int board;
-            public int id_w;
-            public int id_b;
-            public eResults result;
-            public float pts_w;
-            public float pts_b;
+            public int Round;
+            public int Board;
+            public int IdW;
+            public int IdB;
+            public Results Result;
+            public float PtsW;
+            public float PtsB;
             public override string ToString()
             {
-                return $"{round} {board} W:{id_w} B:{id_b} res:{result} pts_w {pts_w} pts_b {pts_b}";
+                return $"{Round} {Board} W:{IdW} B:{IdB} res:{Result} pts_w {PtsW} pts_b {PtsB}";
             }
         };
 
@@ -322,9 +326,9 @@ namespace KeizerForClubs
             int cnt = GetPairingList(ref pList, sWhere, "");
             for (int index = 0; index < cnt; ++index)
             {
-                if (pList[index].id_w == ID)
+                if (pList[index].IdW == ID)
                     ++playerFarbzaehlung;
-                if (pList[index].id_b == ID)
+                if (pList[index].IdB == ID)
                     --playerFarbzaehlung;
             }
             return playerFarbzaehlung;
@@ -422,11 +426,11 @@ namespace KeizerForClubs
             int nDeleted = 0;
             if (GetMaxRound() == 0)
             {
-                sqlCommand.CommandText = " SELECT COUNT(1) from player where state = " + (int)ePlayerState.eDeleted;
+                sqlCommand.CommandText = " SELECT COUNT(1) from player where state = " + (int)PlayerState.Deleted;
                 nDeleted = Helper.ToInt(sqlCommand.ExecuteScalar());
                 if (nDeleted > 0)
                 {
-                    sqlCommand.CommandText = " DELETE from player where state = " + (int)ePlayerState.eDeleted;
+                    sqlCommand.CommandText = " DELETE from player where state = " + (int)PlayerState.Deleted;
                     sqlCommand.ExecuteScalar();
                 }
             }
@@ -479,22 +483,22 @@ namespace KeizerForClubs
         }
 
         // Ergebnis einer Paarung eintragen
-        public bool UpdPairingResult(int runde, int idw, int ids, SqliteInterface.eResults erg)
+        public bool UpdPairingResult(int runde, int idw, int ids, SqliteInterface.Results erg)
         {
             // Ergebnis gültig? 
             // "Normal" oder "Spezialergebnis" je nach richtiger oder Pseudo-Paarung
             if (ids > 0)
             {
-                if (erg != SqliteInterface.eResults.eWin_White &&
-                    erg != SqliteInterface.eResults.eWin_Black &&
-                    erg != SqliteInterface.eResults.eDraw)
+                if (erg != SqliteInterface.Results.WinWhite &&
+                    erg != SqliteInterface.Results.WinBlack &&
+                    erg != SqliteInterface.Results.Draw)
                     return false;
             }
             else
             {   // Pseudo-Paarung (Freilos, entschuldigt abwesend etc)
-                if (erg == eResults.eWin_White ||
-                    erg == eResults.eWin_Black ||
-                    erg == eResults.eDraw)
+                if (erg == Results.WinWhite ||
+                    erg == Results.WinBlack ||
+                    erg == Results.Draw)
                     return false;
             }
 
@@ -579,14 +583,14 @@ namespace KeizerForClubs
                     {
                         if (pairingList < pList.Length)
                         {
-                            pList[pairingList].round = sqLiteDataReader.IsDBNull(0) ? 0 : (int)sqLiteDataReader.GetInt16(0);
-                            pList[pairingList].board = sqLiteDataReader.IsDBNull(1) ? 0 : (int)sqLiteDataReader.GetInt16(1);
-                            pList[pairingList].id_w = sqLiteDataReader.IsDBNull(2) ? 0 : (int)sqLiteDataReader.GetInt16(2);
-                            pList[pairingList].id_b = sqLiteDataReader.IsDBNull(3) ? 0 : (int)sqLiteDataReader.GetInt16(3);
+                            pList[pairingList].Round = sqLiteDataReader.IsDBNull(0) ? 0 : (int)sqLiteDataReader.GetInt16(0);
+                            pList[pairingList].Board = sqLiteDataReader.IsDBNull(1) ? 0 : (int)sqLiteDataReader.GetInt16(1);
+                            pList[pairingList].IdW = sqLiteDataReader.IsDBNull(2) ? 0 : (int)sqLiteDataReader.GetInt16(2);
+                            pList[pairingList].IdB = sqLiteDataReader.IsDBNull(3) ? 0 : (int)sqLiteDataReader.GetInt16(3);
                             int num = sqLiteDataReader.IsDBNull(4) ? 0 : sqLiteDataReader.GetInt32(4);
-                            pList[pairingList].result = (SqliteInterface.eResults)num;
-                            pList[pairingList].pts_w = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
-                            pList[pairingList].pts_b = sqLiteDataReader.IsDBNull(6) ? 0.0f : sqLiteDataReader.GetFloat(6);
+                            pList[pairingList].Result = (SqliteInterface.Results)num;
+                            pList[pairingList].PtsW = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
+                            pList[pairingList].PtsB = sqLiteDataReader.IsDBNull(6) ? 0.0f : sqLiteDataReader.GetFloat(6);
                             ++pairingList;
                         }
                         else
@@ -628,14 +632,14 @@ namespace KeizerForClubs
                     {
                         if (playerCount < pList.Length)
                         {
-                            pList[playerCount].id = sqLiteDataReader.IsDBNull(0) ? 0 : (int)sqLiteDataReader.GetInt16(0);
-                            pList[playerCount].name = sqLiteDataReader.IsDBNull(1) ? "" : sqLiteDataReader.GetString(1);
-                            pList[playerCount].rating = sqLiteDataReader.IsDBNull(2) ? 0 : (int)sqLiteDataReader.GetInt16(2);
+                            pList[playerCount].Id = sqLiteDataReader.IsDBNull(0) ? 0 : (int)sqLiteDataReader.GetInt16(0);
+                            pList[playerCount].Name = sqLiteDataReader.IsDBNull(1) ? "" : sqLiteDataReader.GetString(1);
+                            pList[playerCount].Rating = sqLiteDataReader.IsDBNull(2) ? 0 : (int)sqLiteDataReader.GetInt16(2);
                             int num = sqLiteDataReader.IsDBNull(3) ? 0 : sqLiteDataReader.GetInt32(3);
-                            pList[playerCount].state = (ePlayerState)num;
-                            pList[playerCount].Keizer_StartPts = sqLiteDataReader.IsDBNull(4) ? 0.0f : sqLiteDataReader.GetFloat(4);
-                            pList[playerCount].Keizer_SumPts = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
-                            pList[playerCount].rank = sqLiteDataReader.IsDBNull(6) ? 0 : (int)sqLiteDataReader.GetInt16(6);
+                            pList[playerCount].State = (PlayerState)num;
+                            pList[playerCount].KeizerStartPts = sqLiteDataReader.IsDBNull(4) ? 0.0f : sqLiteDataReader.GetFloat(4);
+                            pList[playerCount].KeizerSumPts = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
+                            pList[playerCount].Rank = sqLiteDataReader.IsDBNull(6) ? 0 : (int)sqLiteDataReader.GetInt16(6);
                             pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
                             pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
                             ++playerCount;
@@ -667,41 +671,41 @@ namespace KeizerForClubs
             var pairings = GetPairingLi($" WHERE Rnd={runde} ", "");
             for (int i = 0; i < count; ++i)
             {
-                var playerCurrState = players[i].state;
-                players[i].state = ePlayerState.eRetired;
+                var playerCurrState = players[i].State;
+                players[i].State = PlayerState.Retired;
                 foreach (var pa in pairings)
                 {
-                    if (pa.id_w == players[i].id || pa.id_b == players[i].id)
+                    if (pa.IdW == players[i].Id || pa.IdB == players[i].Id)
                     {
-                        if (pa.result.IsContainedIn(new eResults[]{ eResults.eWin_White, eResults.eDraw,
-                                        eResults.eWin_Black, eResults.eFreeWin }.ToLi()))
+                        if (pa.Result.IsContainedIn(new Results[]{ Results.WinWhite, Results.Draw,
+                                        Results.WinBlack, Results.FreeWin }.ToLi()))
                         {
-                            players[i].state = ePlayerState.eAvailable;
+                            players[i].State = PlayerState.Available;
                             break;
                         }
                     }
-                    if (pa.id_w == players[i].id)
+                    if (pa.IdW == players[i].Id)
                     {
-                        if (pa.result.IsContainedIn(new eResults[]{ eResults.eHindered, eResults.eExcused,
-                                        eResults.eUnexcused}.ToLi()))
+                        if (pa.Result.IsContainedIn(new Results[]{ Results.Hindered, Results.Excused,
+                                        Results.Unexcused}.ToLi()))
                         {
-                            players[i].state = (ePlayerState)(int)(pa.result);
+                            players[i].State = (PlayerState)(int)(pa.Result);
                             break;
                         }
                     }
                 }
-                if (players[i].state == ePlayerState.eRetired)
+                if (players[i].State == PlayerState.Retired)
                 {
                     // Hier ist sicher, daß der Spieler nicht vorkam in dieser Runde. Also ist er entweder
                     // zurückgetreten oder ein Spätstarter. Wenn sein playerCurrState eRetired ist, dann ist er
                     // irgendwann zurückgetreten. Ich zähle den als zurückgetreten. Es ist nicht 100% korrekt, 
                     // weil es auch sein könnte, daß es ein zurückgetretener Spätstarter ist und der in der aktuell
                     // gefragten Runde noch gar nicht da war. 
-                    if (playerCurrState != ePlayerState.eRetired)
-                        players[i].state = ePlayerState.eNotYetStarted;
+                    if (playerCurrState != PlayerState.Retired)
+                        players[i].State = PlayerState.NotYetStarted;
                 }
             }
-            return new Li<stPlayer>(players.Take(count).Where(p => p.state != ePlayerState.eNotYetStarted));
+            return new Li<stPlayer>(players.Take(count).Where(p => p.State != PlayerState.NotYetStarted));
         }
 
 
@@ -731,7 +735,7 @@ namespace KeizerForClubs
         {
             var arr = new stPlayer[1];
             int n = GetPlayerList(ref arr, sWhere, sSortorder, runde);
-            return n == 0 ? new stPlayer { id = -1 } : arr[0];
+            return n == 0 ? new stPlayer { Id = -1 } : arr[0];
         }
         #endregion Playerlist
 
@@ -772,7 +776,7 @@ namespace KeizerForClubs
             return !(key == "") ? Convert.ToInt32(key, 16) : -1;
         }
 
-        public string Locl_GetPlayerStateText(SqliteInterface.ePlayerState state)
+        public string Locl_GetPlayerStateText(SqliteInterface.PlayerState state)
         {
             // In der fLocl_GetText("PLAYERSTATE", ..) Fkt steht der Playerstate eDeleted als "A".
             // Deshalb das ToString("X", das macht Hex. Also 10 -> A
@@ -780,15 +784,15 @@ namespace KeizerForClubs
             return Locl_GetText("PLAYERSTATE", sState);
         }
 
-        public SqliteInterface.eResults Locl_GetGameResult(string result)
+        public SqliteInterface.Results Locl_GetGameResult(string result)
         {
             string key = Locl_FindKey("GAMERESULT", result);
-            return !(key == "") ? (SqliteInterface.eResults)Convert.ToInt32(key) : SqliteInterface.eResults.eErrUndefined;
+            return !(key == "") ? (SqliteInterface.Results)Convert.ToInt32(key) : SqliteInterface.Results.ErrUndefined;
         }
 
-        public string Locl_GetGameResultText(SqliteInterface.eResults result) => Locl_GetText("GAMERESULT", ((int)result).ToString());
+        public string Locl_GetGameResultText(SqliteInterface.Results result) => Locl_GetText("GAMERESULT", ((int)result).ToString());
 
-        public string Locl_GetGameResultShort(SqliteInterface.eResults result)
+        public string Locl_GetGameResultShort(SqliteInterface.Results result)
         {
             var s = Locl_GetGameResultText(result);
             if (s.StartsWith("-") || s.StartsWith("+"))
@@ -831,7 +835,7 @@ namespace KeizerForClubs
         #region Tabelle
         const string tableSplitter = "§";
 
-        public void WriteTableWHeaders2Db(eTableType tt, int runde, TableW2Headers table)
+        public void WriteTableWHeaders2Db(TableType tt, int runde, TableW2Headers table)
         {
             var tn = TabWHName(tt, runde);
             var sql = new Li<string>();
@@ -849,7 +853,7 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
         }
 
-        public TableW2Headers ReadTableWHeadersFromDb(eTableType tt, int runde)
+        public TableW2Headers ReadTableWHeadersFromDb(TableType tt, int runde)
         {
             var tn = TabWHName(tt, runde);
             var table = new TableW2Headers("");
@@ -875,11 +879,11 @@ namespace KeizerForClubs
             return table;
         }
 
-        string TabWHName(eTableType tt, int runde) => "t" + tt.ToString() + "_" + runde;
+        string TabWHName(TableType tt, int runde) => "t" + tt.ToString() + "_" + runde;
 
         public void DelCurrentStoredTablesWHeader(int runde)
         {
-            var tns = new string[] { TabWHName(eTableType.Stand, runde), TabWHName(eTableType.Kreuz, runde) };
+            var tns = new string[] { TabWHName(TableType.Stand, runde), TabWHName(TableType.Kreuz, runde) };
             sqlCommand.CommandText = $@"
                 DROP TABLE IF EXISTS {tns[0]};
                 DROP TABLE IF EXISTS {tns[1]};";

@@ -63,9 +63,9 @@ namespace KeizerForClubs
             {
                 var r = new Li<string>();
                 r.Add((index + 1).ToString() + ".");
-                r.Add(db.GetPlayerName(pList[index].id_w));
-                r.Add(db.GetPlayerName(pList[index].id_b));
-                r.Add(db.Locl_GetGameResultText(pList[index].result));
+                r.Add(db.GetPlayerName(pList[index].IdW));
+                r.Add(db.GetPlayerName(pList[index].IdB));
+                r.Add(db.Locl_GetGameResultText(pList[index].Result));
                 t.AddRow(r);
             }
             t.Footer = TableFooter;
@@ -82,7 +82,7 @@ namespace KeizerForClubs
             try
             {
                 TableW2Headers table = runde != db.GetMaxRound() ? 
-                    db.ReadTableWHeadersFromDb(eTableType.Stand, runde) : fReportTabellenstandTable();
+                    db.ReadTableWHeadersFromDb(TableType.Stand, runde) : fReportTabellenstandTable();
                 var fileBase = GetFileTabellenstandBasename(runde);
 
                 if (db.fGetConfigBool("OPTION.Xml"))
@@ -119,13 +119,13 @@ namespace KeizerForClubs
             for (int index = 0, num1 = 1; index < players.Count; ++index)
             {
                 var player = players[index];
-                if (player.state != SqliteInterface.ePlayerState.eRetired)
+                if (player.State != SqliteInterface.PlayerState.Retired)
                 {
                     var li = new Li<string>();
                     li.Add(num1++.ToString() + ".");
-                    li.Add(player.name);
-                    li.Add(player.Keizer_SumPts.ToString("0.00"));
-                    li.Add(db.GetPlayer_PartiePunkte(player.id).ToString());
+                    li.Add(player.Name);
+                    li.Add(player.KeizerSumPts.ToString("0.00"));
+                    li.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
                     t.AddRow(li);
                 }
             }
@@ -141,7 +141,7 @@ namespace KeizerForClubs
             try
             {
                 TableW2Headers tableVoll = runde != db.GetMaxRound() ?
-                        db.ReadTableWHeadersFromDb(eTableType.Kreuz, runde) : fReportTabellenstandVollTable();
+                        db.ReadTableWHeadersFromDb(TableType.Kreuz, runde) : fReportTabellenstandVollTable();
 
                 var fileBaseVoll = GetFileTabellenstandExBasename(runde);
 
@@ -182,49 +182,49 @@ namespace KeizerForClubs
             {
                 var player = players[index1];
                 var str1 = new Li<string>();
-                if (player.state != SqliteInterface.ePlayerState.eRetired)
+                if (player.State != SqliteInterface.PlayerState.Retired)
                     str1.Add(numPlayer++.ToString("00"));
                 else
                     str1.Add("(ret)");
-                string name = player.name;
+                string name = player.Name;
                 str1.Add(name);
                 // str1.Add(player.rating.ToString());
                 // str1.Add(player.Keizer_StartPts.ToString());
-                str1.Add(player.Keizer_SumPts.ToString("0.00"));
-                str1.Add(db.GetPlayer_PartiePunkte(player.id).ToString());
+                str1.Add(player.KeizerSumPts.ToString("0.00"));
+                str1.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
 
                 for (int index2 = 1; index2 <= runde; ++index2)
                 {
-                    string sWhere = " WHERE (PID_W=" + player.id.ToString() +
-                        " OR    PID_B=" + player.id.ToString() + ")  AND rnd=" + index2.ToString();
+                    string sWhere = " WHERE (PID_W=" + player.Id.ToString() +
+                        " OR    PID_B=" + player.Id.ToString() + ")  AND rnd=" + index2.ToString();
                     string str3;
                     if (db.GetPairingList(ref pList4, sWhere, "  ") > 0)
                     {
                         var pair = pList4[0];
-                        var pWhite = db.GetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
-                        var pBlack = db.GetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
-                        string str4 = db.Locl_GetGameResultShort(pair.result) + " ";
-                        if (pair.result > SqliteInterface.eResults.eWin_Black)
+                        var pWhite = db.GetPlayer(" WHERE ID=" + (object)pair.IdW, " ", runde);
+                        var pBlack = db.GetPlayer(" WHERE ID=" + (object)pair.IdB, " ", runde);
+                        string str4 = db.Locl_GetGameResultShort(pair.Result) + " ";
+                        if (pair.Result > SqliteInterface.Results.WinBlack)
                         {
-                            str3 = str4 + " - - p=" + pair.pts_w.ToString();
+                            str3 = str4 + " - - p=" + pair.PtsW.ToString();
                         }
                         else
                         {
-                            if (player.id == pair.id_w)
+                            if (player.Id == pair.IdW)
                             {
                                 string str5 = str4 + "w ";
-                                str3 = (pBlack.state != SqliteInterface.ePlayerState.eRetired ?
-                                    str5 + " " + pBlack.name + " " :
-                                    str5 + " " + pBlack.name + " (r) ") +
-                                    "p=" + pair.pts_w.ToString() + " ";
+                                str3 = (pBlack.State != SqliteInterface.PlayerState.Retired ?
+                                    str5 + " " + pBlack.Name + " " :
+                                    str5 + " " + pBlack.Name + " (r) ") +
+                                    "p=" + pair.PtsW.ToString() + " ";
                             }
                             else
                             {
                                 string str6 = str4 + "b ";
-                                str3 = (pWhite.state != SqliteInterface.ePlayerState.eRetired ?
-                                    str6 + " " + pWhite.name + " " :
-                                    str6 + " " + pWhite.name + " (r) ") +
-                                    "p=" + pair.pts_b.ToString() + " ";
+                                str3 = (pWhite.State != SqliteInterface.PlayerState.Retired ?
+                                    str6 + " " + pWhite.Name + " " :
+                                    str6 + " " + pWhite.Name + " (r) ") +
+                                    "p=" + pair.PtsB.ToString() + " ";
                             }
                         }
                     }
@@ -281,9 +281,9 @@ namespace KeizerForClubs
                 var player = players[index];
                 var row = new Li<string>();
                 row.Add((index + 1).ToString() + ".");
-                row.Add(player.name);
-                row.Add(player.rating.ToString());
-                row.Add(db.Locl_GetPlayerStateText(player.state));
+                row.Add(player.Name);
+                row.Add(player.Rating.ToString());
+                row.Add(db.Locl_GetPlayerStateText(player.State));
                 t.AddRow(row);
             }
             t.Footer = TableFooter;
@@ -303,9 +303,9 @@ namespace KeizerForClubs
                 var player = players[index];
                 var row = new Li<string>();
                 row.Add((index + 1).ToString() + ".");
-                row.Add(player.name);
-                row.Add(player.rating.ToString());
-                row.Add(sqlintf.Locl_GetPlayerStateText(player.state));
+                row.Add(player.Name);
+                row.Add(player.Rating.ToString());
+                row.Add(sqlintf.Locl_GetPlayerStateText(player.State));
                 t.AddRow(row);
             }
             t.Footer = TableFooter;
@@ -322,8 +322,8 @@ namespace KeizerForClubs
             int maxRound = db.GetMaxRound();
             if (maxRound > 0)
             {
-                db.WriteTableWHeaders2Db(eTableType.Stand, maxRound, fReportTabellenstandTable());
-                db.WriteTableWHeaders2Db(eTableType.Kreuz, maxRound, fReportTabellenstandVollTable());
+                db.WriteTableWHeaders2Db(TableType.Stand, maxRound, fReportTabellenstandTable());
+                db.WriteTableWHeaders2Db(TableType.Kreuz, maxRound, fReportTabellenstandVollTable());
             }
         }
         #endregion Misc

@@ -58,13 +58,13 @@
             int firstStartPts = FirstStartPts(playerCount);
             for (int index = 0; index < playerCount; ++index)
             {
-                if (pList[index].state != SqliteInterface.ePlayerState.eRetired)
+                if (pList[index].State != SqliteInterface.PlayerState.Retired)
                 {
-                    db.UpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, firstStartPts);
+                    db.UpdPlayer_SetRankAndStartPts(pList[index].Id, index + 1, firstStartPts);
                     --firstStartPts;
                 }
                 else
-                    db.UpdPlayer_SetRankAndStartPts(pList[index].id, index + 1, 0);
+                    db.UpdPlayer_SetRankAndStartPts(pList[index].Id, index + 1, 0);
             }
         }
 
@@ -75,9 +75,9 @@
             SqliteInterface.stPlayer[] players = new SqliteInterface.stPlayer[100];
             int playerCount = db.GetPlayerList(ref players, "", " ", db.GetMaxRound());
             for (int index = 0; index < playerCount; ++index)
-                players[index].Keizer_SumPts = db.GetPlayer_PunktSumme(players[index].id);
+                players[index].KeizerSumPts = db.GetPlayer_PunktSumme(players[index].Id);
             for (int index = 0; index < playerCount; ++index)
-                db.UpdPlayer_KeizerSumPts(players[index].id, players[index].Keizer_SumPts);
+                db.UpdPlayer_KeizerSumPts(players[index].Id, players[index].KeizerSumPts);
         }
 
         /// <summary> For all players: calc his current rank and set the rank and the resulting 
@@ -88,9 +88,9 @@
             int firstStartPts = FirstStartPts(players.Count);
             for (int i = 0; i < players.Count; ++i)
             {
-                if (players[i].state == SqliteInterface.ePlayerState.eRetired)
+                if (players[i].State == SqliteInterface.PlayerState.Retired)
                     continue;
-                db.UpdPlayer_SetRankAndStartPts(players[i].id, i + 1, firstStartPts);
+                db.UpdPlayer_SetRankAndStartPts(players[i].Id, i + 1, firstStartPts);
                 --firstStartPts;
             }
         }
@@ -107,47 +107,47 @@
             {
                 var pair = pairings[index];
                 float erg_w = 0.0f, erg_s = 0.0f;
-                var pWhite = db.GetPlayer(" WHERE ID=" + (object)pair.id_w, " ", runde);
-                var pBlack = db.GetPlayer(" WHERE ID=" + (object)pair.id_b, " ", runde);
+                var pWhite = db.GetPlayer(" WHERE ID=" + (object)pair.IdW, " ", runde);
+                var pBlack = db.GetPlayer(" WHERE ID=" + (object)pair.IdB, " ", runde);
 
-                if (pair.result == SqliteInterface.eResults.eWin_White)
-                    erg_w = pBlack.Keizer_StartPts;
-                else if (pair.result == SqliteInterface.eResults.eDraw)
+                if (pair.Result == SqliteInterface.Results.WinWhite)
+                    erg_w = pBlack.KeizerStartPts;
+                else if (pair.Result == SqliteInterface.Results.Draw)
                 {
-                    erg_w = pBlack.Keizer_StartPts / 2f;
-                    erg_s = pWhite.Keizer_StartPts / 2f;
+                    erg_w = pBlack.KeizerStartPts / 2f;
+                    erg_s = pWhite.KeizerStartPts / 2f;
                 }
-                else if (pair.result == SqliteInterface.eResults.eWin_Black)
-                    erg_s = pWhite.Keizer_StartPts;
-                else if (pair.result == SqliteInterface.eResults.eExcused)
-                    erg_w = pWhite.Keizer_StartPts * form.tbBonusExcused.Value / 100.0f;
-                else if (pair.result == SqliteInterface.eResults.eUnexcused)
-                    erg_w = pWhite.Keizer_StartPts * form.tbBonusUnexcused.Value / 100.0f;
-                else if (pair.result == SqliteInterface.eResults.eHindered)
-                    erg_w = pWhite.Keizer_StartPts * form.tbBonusClub.Value / 100.0f;
-                else if (pair.result == SqliteInterface.eResults.eFreeWin)
-                    erg_w = pWhite.Keizer_StartPts * form.tbBonusFreilos.Value / 100.0f;
-                if (pWhite.state == SqliteInterface.ePlayerState.eRetired)
+                else if (pair.Result == SqliteInterface.Results.WinBlack)
+                    erg_s = pWhite.KeizerStartPts;
+                else if (pair.Result == SqliteInterface.Results.Excused)
+                    erg_w = pWhite.KeizerStartPts * form.tbBonusExcused.Value / 100.0f;
+                else if (pair.Result == SqliteInterface.Results.Unexcused)
+                    erg_w = pWhite.KeizerStartPts * form.tbBonusUnexcused.Value / 100.0f;
+                else if (pair.Result == SqliteInterface.Results.Hindered)
+                    erg_w = pWhite.KeizerStartPts * form.tbBonusClub.Value / 100.0f;
+                else if (pair.Result == SqliteInterface.Results.FreeWin)
+                    erg_w = pWhite.KeizerStartPts * form.tbBonusFreilos.Value / 100.0f;
+                if (pWhite.State == SqliteInterface.PlayerState.Retired)
                 {
-                    if (pair.result == SqliteInterface.eResults.eWin_Black)
-                        erg_s = pBlack.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
-                    else if (pair.result == SqliteInterface.eResults.eDraw)
-                        erg_s = 0.5f * pBlack.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    if (pair.Result == SqliteInterface.Results.WinBlack)
+                        erg_s = pBlack.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
+                    else if (pair.Result == SqliteInterface.Results.Draw)
+                        erg_s = 0.5f * pBlack.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
                     else
                         erg_s = 0;
                     erg_w = 0;
                 }
-                if (pBlack.state == SqliteInterface.ePlayerState.eRetired)
+                if (pBlack.State == SqliteInterface.PlayerState.Retired)
                 {
-                    if (pair.result == SqliteInterface.eResults.eWin_White)
-                        erg_w = pWhite.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
-                    else if (pair.result == SqliteInterface.eResults.eDraw)
-                        erg_w = 0.5f * pWhite.Keizer_StartPts * form.tbBonusRetired.Value / 100.0f;
+                    if (pair.Result == SqliteInterface.Results.WinWhite)
+                        erg_w = pWhite.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
+                    else if (pair.Result == SqliteInterface.Results.Draw)
+                        erg_w = 0.5f * pWhite.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
                     else
                         erg_w = 0;
                     erg_s = 0;
                 }
-                db.UpdPairingValues(runde, pair.board, erg_w, erg_s);
+                db.UpdPairingValues(runde, pair.Board, erg_w, erg_s);
             }
             return true;
         }
