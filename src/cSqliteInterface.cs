@@ -349,7 +349,7 @@ namespace KeizerForClubs
             sqlCommand.CommandText = " Select ID from player  where name=:pName ";
             sqlCommand.Parameters.AddWithValue("pName", sName);
             var res = sqlCommand.ExecuteScalar();
-            return Convert.ToInt16(res);
+            return res != null ? Convert.ToInt16(res) : -1; 
         }
 
         public int CntPlayerNames(string sName)
