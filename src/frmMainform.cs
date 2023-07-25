@@ -260,7 +260,7 @@ for determining the first round pairings.";
             DelDeletedPlayers();
             new ReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
             if (db.GetPairings_NoResult() == 0)
-                fExecutePairing();
+                ExecutePairing();
             else
                 MessageBox.Show(db.Locl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
             ApplyPlayerStateTexte();
@@ -272,7 +272,7 @@ for determining the first round pairings.";
             DelDeletedPlayers();
             new ReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
             if (db.GetPairings_NoResult() == 0)
-                fExecutePairingManual();
+                ExecutePairingManual();
             else
                 MessageBox.Show(db.Locl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
             ApplyPlayerStateTexte();
@@ -634,7 +634,7 @@ for determining the first round pairings.";
             }
         }
 
-        private bool fExecutePairing()
+        private bool ExecutePairing()
         {
             var currRunde = db.GetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             this.iPairingPlayerCntAvailable = db.GetPlayerList_Available(ref this.pPairingPlayerList, currRunde);
@@ -649,12 +649,12 @@ for determining the first round pairings.";
             this.ranking.AllPlayersAllRoundsCalculate();
             this.iPairingPlayerCntAll = db.GetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             this.iPairingRekursionCnt = 0;
-            if (this.fPairingRekursion(0, currRunde))
+            if (this.RunPairingRecursion(0, currRunde))
             {
                 this.numRoundSelect.Value = (Decimal)currRunde;
                 for (int index = 0; index < this.iPairingPlayerCntAvailable / 2; ++index)
                     db.InsPairingNew(currRunde, index + 1, this.pPairingList[index].IdW, this.pPairingList[index].IdB);
-                this.fPairingInsertNoPlaying();
+                this.PairingInsertNoPlaying();
                 db.EndeTransaktion();
                 this.LoadPairingList();
                 return true;
@@ -664,7 +664,7 @@ for determining the first round pairings.";
             return false;
         }
 
-        private void fDealFreilos()
+        private void DealFreilos()
         {
             if (iPairingPlayerCntAvailable % 2 == 1)
                 for (int index = this.iPairingPlayerCntAll - 1; index >= 0; --index)
@@ -679,11 +679,11 @@ for determining the first round pairings.";
                 }
         }
 
-        private bool fPairingRekursion(int brett, int currRunde)
+        private bool RunPairingRecursion(int brett, int currRunde)
         {
             Debug.WriteLine($"fPairingRekursion brett:{brett}");
             if (brett == 0)
-                fDealFreilos();
+                DealFreilos();
             int minrunde = currRunde - Convert.ToInt16(this.numRoundsGameRepeat.Value);
             if (this.iPairingRekursionCnt++ > 100000)
                 return false;
@@ -706,9 +706,9 @@ for determining the first round pairings.";
                             int p1WeissPlus = db.GetPlayerWeissUeberschuss(player1.Id);
                             int p2WeissPlus = db.GetPlayerWeissUeberschuss(player2.Id);
                             if (p1WeissPlus > p2WeissPlus)
-                                fSetPairing2List(brett, player2, player1);
+                                SetPairing2List(brett, player2, player1);
                             else if (p1WeissPlus < p2WeissPlus)
-                                fSetPairing2List(brett, player1, player2);
+                                SetPairing2List(brett, player1, player2);
                             else
                             {  // WeissPlus Gleichheit. 
                                 var nplayed = db.CountPairingVorhandenSince(0, player1.Id, player2.Id);
@@ -719,13 +719,13 @@ for determining the first round pairings.";
                                     if (currRunde == 1 && db.GetConfigInt("OPTION.FirstRoundRandom") != 0)
                                     {
                                         if (random.NextSingle() > 0.5f)
-                                            fSetPairing2List(brett, player2, player1);
+                                            SetPairing2List(brett, player2, player1);
                                         else
-                                            fSetPairing2List(brett, player1, player2);
+                                            SetPairing2List(brett, player1, player2);
                                     }
                                     else
                                         // sonst kriegt der weiter vorne in der Rangliste schwarz. 
-                                        fSetPairing2List(brett, player2, player1);
+                                        SetPairing2List(brett, player2, player1);
                                 }
                                 else
                                 {
@@ -734,13 +734,13 @@ for determining the first round pairings.";
                                     var cntPlayer1W = db.CountPairingVorhandenSinceOneWay(0, player1.Id, player2.Id);
                                     var cntPlayer2W = nplayed - cntPlayer1W;
                                     if (cntPlayer1W > cntPlayer2W)
-                                        fSetPairing2List(brett, player2, player1);
+                                        SetPairing2List(brett, player2, player1);
                                     else
-                                        fSetPairing2List(brett, player1, player2);
+                                        SetPairing2List(brett, player1, player2);
                                 }
                             }
                             Debug.WriteLine($"fPairingRekursion brett:{brett} paired:{player1.Name} vs {player2.Name}");
-                            if (this.fPairingRekursion(brett + 1, currRunde))
+                            if (this.RunPairingRecursion(brett + 1, currRunde))
                                 return true;
                             player2.State = SqliteInterface.PlayerState.Available;
                             if (this.iPairingRekursionCnt > 100000)
@@ -753,14 +753,14 @@ for determining the first round pairings.";
             return false;
         }
 
-        private void fSetPairing2List(int brett, SqliteInterface.stPlayer playerWhite,
+        private void SetPairing2List(int brett, SqliteInterface.stPlayer playerWhite,
             SqliteInterface.stPlayer playerBlack)
         {
             this.pPairingList[brett].IdW = playerWhite.Id;
             this.pPairingList[brett].IdB = playerBlack.Id;
         }
 
-        private bool fPairingInsertNoPlaying()
+        private bool PairingInsertNoPlaying()
         {
             int maxRound = db.GetMaxRound();
             int num = 100;
@@ -790,7 +790,7 @@ for determining the first round pairings.";
             return true;
         }
 
-        private bool fExecutePairingManual()
+        private bool ExecutePairingManual()
         {
             var currRunde = db.GetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             frmPairingManual frmPairingManual = new frmPairingManual();
@@ -798,12 +798,12 @@ for determining the first round pairings.";
             frmPairingManual.colWhite.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Weiss");
             frmPairingManual.colBlack.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Schwarz");
             this.iPairingPlayerCntAvailable = db.GetPlayerList_Available(ref this.pPairingPlayerList, currRunde);
-            for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
+            for (int i = 0; i < this.iPairingPlayerCntAvailable; ++i)
             {
-                if (this.pPairingPlayerList[index].State == SqliteInterface.PlayerState.Available)
-                    frmPairingManual.lstNames.Items.Add((object)this.pPairingPlayerList[index].Name);
+                if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Available)
+                    frmPairingManual.lstNames.Items.Add(this.pPairingPlayerList[i].Name);
             }
-            for (int index = 0; index < frmPairingManual.lstNames.Items.Count; index += 2)
+            for (int i = 0; i < frmPairingManual.lstNames.Items.Count; i += 2)
                 frmPairingManual.grdPaarungen.Rows.Add();
             this.iPairingPlayerCntAll = db.GetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             if (frmPairingManual.ShowDialog() == DialogResult.OK)
@@ -827,7 +827,7 @@ for determining the first round pairings.";
                         }
                     }
                 }
-                this.fPairingInsertNoPlaying();
+                this.PairingInsertNoPlaying();
             }
             this.LoadPairingList();
             return true;
