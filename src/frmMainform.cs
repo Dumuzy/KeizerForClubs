@@ -100,21 +100,21 @@ namespace KeizerForClubs
                 return;
             string fileName = dlgOpenTournament.FileName;
             OpenTournament(fileName);
-            db.fSetConfigText("TournamentFile", fileName);
+            db.SetConfigText("TournamentFile", fileName);
         }
 
         private void OpenTournament(string fileName)
         {
             if (File.Exists(fileName))
-                db.fOpenTournament(fileName);
+                db.OpenTournament(fileName);
             else
-                db.fOpenTournament(fileName);
+                db.OpenTournament(fileName);
             sTurniername = Path.GetFileName(fileName);
             dlgOpenTournament.FileName = sTurniername;
             dlgOpenTournament.InitialDirectory = Path.GetDirectoryName(fileName);
             sTurniername = sTurniername.Replace(".s3db", "");
             Text = "KeizerForClubs " + sTurniername;
-            if (db.cLangCode == "")
+            if (db.LangCode == "")
                 fSelectLanguage();
             ApplyLanguageText();
             tabMainWindow.Enabled = true;
@@ -124,17 +124,17 @@ namespace KeizerForClubs
             LoadPlayerlist();
             LoadPairingList();
 
-            tbBonusClub.Value = db.fGetConfigInt("BONUS.Clubgame");
-            tbBonusExcused.Value = db.fGetConfigInt("BONUS.Excused");
-            tbBonusUnexcused.Value = db.fGetConfigInt("BONUS.Unexcused");
-            tbBonusRetired.Value = db.fGetConfigInt("BONUS.Retired");
-            tbBonusFreilos.Value = db.fGetConfigInt("BONUS.Freilos", 50);
+            tbBonusClub.Value = db.GetConfigInt("BONUS.Clubgame");
+            tbBonusExcused.Value = db.GetConfigInt("BONUS.Excused");
+            tbBonusUnexcused.Value = db.GetConfigInt("BONUS.Unexcused");
+            tbBonusRetired.Value = db.GetConfigInt("BONUS.Retired");
+            tbBonusFreilos.Value = db.GetConfigInt("BONUS.Freilos", 50);
 
-            chkFreilosVerteilen.Checked = db.fGetConfigBool("OPTION.DistBye");
-            chkPairingOnlyPlayed.Checked = db.fGetConfigBool("OPTION.ShowOnlyPlayed");
-            numRoundsGameRepeat.Value = (Decimal)db.fGetConfigInt("OPTION.GameRepeat");
+            chkFreilosVerteilen.Checked = db.GetConfigBool("OPTION.DistBye");
+            chkPairingOnlyPlayed.Checked = db.GetConfigBool("OPTION.ShowOnlyPlayed");
+            numRoundsGameRepeat.Value = (Decimal)db.GetConfigInt("OPTION.GameRepeat");
 
-            var ratio = db.fGetConfigFloat("OPTION.RatioFirst2Last", 3);
+            var ratio = db.GetConfigFloat("OPTION.RatioFirst2Last", 3);
             var idx = (ddlRatioFirst2Last.DataSource as List<float>).IndexOf(ratio);
             ddlRatioFirst2Last.CreateControl();  // Without this CreateControl, the following SelectedIndex= crashes. God knows why. 
             if (idx != ddlRatioFirst2Last.SelectedIndex)
@@ -150,7 +150,7 @@ lower this number, the closer are Keizer system and Swiss system.
             this.tooltip.AutomaticDelay = 2000;
             this.tooltip.InitialDelay = 200;
 
-            var firstRoundRandom = db.fGetConfigInt("OPTION.FirstRoundRandom", 0);
+            var firstRoundRandom = db.GetConfigInt("OPTION.FirstRoundRandom", 0);
             var idxf = (ddlFirstRoundRandom.DataSource as List<int>).IndexOf(firstRoundRandom);
             ddlFirstRoundRandom.CreateControl();  // Without this CreateControl, the following SelectedIndex= crashes. God knows why. 
             if (idxf != ddlFirstRoundRandom.SelectedIndex)
@@ -162,11 +162,11 @@ for determining the first round pairings.";
             this.tooltip.SetToolTip(this.ddlFirstRoundRandom, ttddlf);
             this.tooltip.SetToolTip(this.lblFirstRoundRandom, ttddlf);
 
-            chkHtml.Checked = db.fGetConfigBool("OPTION.Html");
-            chkXml.Checked = db.fGetConfigBool("OPTION.Xml");
-            chkTxt.Checked = db.fGetConfigBool("OPTION.Txt");
-            chkCsv.Checked = db.fGetConfigBool("OPTION.Csv");
-            numClicks = db.fGetConfigInt("INTERNAL.NumClicks");
+            chkHtml.Checked = db.GetConfigBool("OPTION.Html");
+            chkXml.Checked = db.GetConfigBool("OPTION.Xml");
+            chkTxt.Checked = db.GetConfigBool("OPTION.Txt");
+            chkCsv.Checked = db.GetConfigBool("OPTION.Csv");
+            numClicks = db.GetConfigInt("INTERNAL.NumClicks");
             numRoundSelect.Value = (Decimal)db.GetMaxRound();
             // Der Name des db-Files ist einem ini-File gemerkt, alle anderen Settings in 
             // der Config-Datenbank. Weil die Config-Db nur schwer geöffnet werden kann ohne die 
@@ -183,12 +183,12 @@ for determining the first round pairings.";
 
         private void fSelectLanguage()
         {
-            frmLangSelect frmLangSelect = new frmLangSelect(db.cLangCode);
+            frmLangSelect frmLangSelect = new frmLangSelect(db.LangCode);
             int num1 = (int)frmLangSelect.ShowDialog();
-            db.cLangCode = frmLangSelect.radEnglisch.Checked ? "EN" :
+            db.LangCode = frmLangSelect.radEnglisch.Checked ? "EN" :
                 frmLangSelect.radDeutsch.Checked ? "DE" : 
                 frmLangSelect.radHollaendisch.Checked ? "NL" : "FR";
-            db.fSetConfigText("LANGCODE", db.cLangCode);
+            db.SetConfigText("LANGCODE", db.LangCode);
         }
 
         void fShowAboutBox()
@@ -203,7 +203,7 @@ for determining the first round pairings.";
             donateButton1?.SetState();
             donateButton2?.SetState();
             if (numClicks % 3 == 0 || num >= 7)
-                db.fSetConfigInt("INTERNAL.NumClicks", numClicks);
+                db.SetConfigInt("INTERNAL.NumClicks", numClicks);
         }
 
         private void MnuProgQuitClick(object sender, EventArgs e) => this.Close();
@@ -228,7 +228,7 @@ for determining the first round pairings.";
         void OpenWithDefaultAppByLanguage(string pathWithPlaceholder)
         {
             IncNumClicks();
-            var lngs = new string[] { db.cLangCode, "en", "de" };
+            var lngs = new string[] { db.LangCode, "en", "de" };
             foreach (var lng in lngs)
             {
                 var pp = pathWithPlaceholder.Replace("%LNG%", lng);
@@ -312,7 +312,7 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             this.LoadPairingList();
-            db.fSetConfigBool("OPTION.ShowOnlyPlayed", chkPairingOnlyPlayed.Checked);
+            db.SetConfigBool("OPTION.ShowOnlyPlayed", chkPairingOnlyPlayed.Checked);
         }
 
         private void FrmMainformFormClosing(object sender, FormClosingEventArgs e)
@@ -327,20 +327,20 @@ for determining the first round pairings.";
         {
             if (this.tabMainWindow.Enabled)
             {
-                db.fSetConfigInt("BONUS.Clubgame", this.tbBonusClub.Value);
-                db.fSetConfigInt("BONUS.Excused", this.tbBonusExcused.Value);
-                db.fSetConfigInt("BONUS.Unexcused", this.tbBonusUnexcused.Value);
-                db.fSetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
-                db.fSetConfigInt("BONUS.Freilos", this.tbBonusFreilos.Value);
+                db.SetConfigInt("BONUS.Clubgame", this.tbBonusClub.Value);
+                db.SetConfigInt("BONUS.Excused", this.tbBonusExcused.Value);
+                db.SetConfigInt("BONUS.Unexcused", this.tbBonusUnexcused.Value);
+                db.SetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
+                db.SetConfigInt("BONUS.Freilos", this.tbBonusFreilos.Value);
 
-                db.fSetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
-                db.fSetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
-                db.fSetConfigFloat("OPTION.RatioFirst2Last", Helper.ToSingle(ddlRatioFirst2Last.SelectedValue));
-                db.fSetConfigInt("OPTION.FirstRoundRandom", Helper.ToInt(ddlFirstRoundRandom.SelectedValue));
-                db.fSetConfigBool("OPTION.Html", this.chkHtml.Checked);
-                db.fSetConfigBool("OPTION.Xml", this.chkXml.Checked);
-                db.fSetConfigBool("OPTION.Txt", this.chkTxt.Checked);
-                db.fSetConfigBool("OPTION.Csv", this.chkCsv.Checked);
+                db.SetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
+                db.SetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
+                db.SetConfigFloat("OPTION.RatioFirst2Last", Helper.ToSingle(ddlRatioFirst2Last.SelectedValue));
+                db.SetConfigInt("OPTION.FirstRoundRandom", Helper.ToInt(ddlFirstRoundRandom.SelectedValue));
+                db.SetConfigBool("OPTION.Html", this.chkHtml.Checked);
+                db.SetConfigBool("OPTION.Xml", this.chkXml.Checked);
+                db.SetConfigBool("OPTION.Txt", this.chkTxt.Checked);
+                db.SetConfigBool("OPTION.Csv", this.chkCsv.Checked);
             }
         }
 
@@ -622,7 +622,7 @@ for determining the first round pairings.";
         {
             if (currRunde != 1)
                 return;
-            var firstRoundRandom = db.fGetConfigInt("OPTION.FirstRoundRandom", 0);
+            var firstRoundRandom = db.GetConfigInt("OPTION.FirstRoundRandom", 0);
             for (int rwd = 0, index = 0; index < this.iPairingPlayerCntAvailable; ++index)
             {
                 if (firstRoundRandom == 0)
@@ -716,7 +716,7 @@ for determining the first round pairings.";
                                 if (nplayed % 2 == 0)
                                 {
                                     // falls erste Runde und FirstRoundRandom, wird die Farbe ausgelost, 
-                                    if (currRunde == 1 && db.fGetConfigInt("OPTION.FirstRoundRandom") != 0)
+                                    if (currRunde == 1 && db.GetConfigInt("OPTION.FirstRoundRandom") != 0)
                                     {
                                         if (random.NextSingle() > 0.5f)
                                             fSetPairing2List(brett, player2, player1);

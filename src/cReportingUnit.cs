@@ -31,14 +31,14 @@ namespace KeizerForClubs
             {
                 var table = fReportPaarungenTable(runde);
                 var fileBase = GetPaarungenBasename(runde);
-                if (db.fGetConfigBool("OPTION.Xml"))
+                if (db.GetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_pairing", "board", "nr w b res".Split());
-                if (db.fGetConfigBool("OPTION.Html"))
+                if (db.GetConfigBool("OPTION.Html"))
                 {
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
-                if (db.fGetConfigBool("OPTION.Txt"))
+                if (db.GetConfigBool("OPTION.Txt"))
                     ExportAsTxt(table, fileBase, new int[] { 4, -20, -20, 0 });
             }
             catch (Exception ex)
@@ -85,16 +85,16 @@ namespace KeizerForClubs
                     db.ReadTableWHeadersFromDb(TableType.Stand, runde) : fReportTabellenstandTable();
                 var fileBase = GetFileTabellenstandBasename(runde);
 
-                if (db.fGetConfigBool("OPTION.Xml"))
+                if (db.GetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
-                if (db.fGetConfigBool("OPTION.Csv"))
+                if (db.GetConfigBool("OPTION.Csv"))
                     ExportAsCsv(table, fileBase);
-                if (db.fGetConfigBool("OPTION.Html"))
+                if (db.GetConfigBool("OPTION.Html"))
                 {
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
-                if (db.fGetConfigBool("OPTION.Txt"))
+                if (db.GetConfigBool("OPTION.Txt"))
                     ExportAsTxt(table, fileBase, new int[] { 4, -25, 6, 6 });
             }
             catch (Exception ex)
@@ -145,9 +145,9 @@ namespace KeizerForClubs
 
                 var fileBaseVoll = GetFileTabellenstandExBasename(runde);
 
-                if (db.fGetConfigBool("OPTION.Csv"))
+                if (db.GetConfigBool("OPTION.Csv"))
                     ExportAsCsv(tableVoll, fileBaseVoll);
-                if (db.fGetConfigBool("OPTION.Html"))
+                if (db.GetConfigBool("OPTION.Html"))
                 {
                     var file = ExportAsHtml(tableVoll, fileBaseVoll, true);
                     frmMainform.OpenWithDefaultApp(file);
@@ -248,11 +248,11 @@ namespace KeizerForClubs
                 TableW2Headers table = fReportTeilnehmerTable(runde);
 
                 var fileBase = GetTeilnehmerBasename(db, runde);
-                if (db.fGetConfigBool("OPTION.Xml"))
+                if (db.GetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_player", "player", "nr name rating state".Split());
-                if (db.fGetConfigBool("OPTION.Txt"))
+                if (db.GetConfigBool("OPTION.Txt"))
                     ExportAsTxt(table, fileBase, new int[] { 4, -25, 5, 25 });
-                if (db.fGetConfigBool("OPTION.Html"))
+                if (db.GetConfigBool("OPTION.Html"))
                 {
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);

@@ -42,7 +42,7 @@
             // ratioFirst2Last = 3 ist das was üblicherweise beim Keizersystem empfohlen wird. 
             // Kleinere Zahlen scheinen mir angemessener.
             // Verwendet in fRanking_Init und fRankingCalcRanks.
-            var ratioFirst2Last = db.fGetConfigFloat("OPTION.RatioFirst2Last", 3);
+            var ratioFirst2Last = db.GetConfigFloat("OPTION.RatioFirst2Last", 3);
             double firstStartPtsFaktor = ratioFirst2Last / (ratioFirst2Last - 1);
             return Convert.ToInt32((playerCount - 1) * firstStartPtsFaktor);
         }
@@ -51,7 +51,7 @@
         /// <param name="currRunde"> Momentan auszulosende Runde, 1-basiert. </param>
         private void AllPlayersSetInitialStartPts(int currRunde)
         {
-            var firstRoundRandom = currRunde != 1 ? 0 : db.fGetConfigInt("OPTION.FirstRoundRandom", 0);
+            var firstRoundRandom = currRunde != 1 ? 0 : db.GetConfigInt("OPTION.FirstRoundRandom", 0);
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
             int playerCount = db.GetPlayerList(ref pList, " ", $" ORDER BY {order} desc ", currRunde);

@@ -7,7 +7,7 @@ namespace KeizerForClubs
 {
     public class SqliteInterface
     {
-        public string cLangCode = "";
+        public string LangCode = "";
         private SQLiteConnection SQLiteMyDB;
         private SQLiteTransaction SQLiteMyTrans;
         private SQLiteCommand sqlCommand;
@@ -100,7 +100,7 @@ namespace KeizerForClubs
                 SQLiteMyTrans.Rollback();
         }
 
-        public bool fOpenTournament(string sDatei)
+        public bool OpenTournament(string sDatei)
         {
             SQLiteMyDB.Close();
             SQLiteMyDB.ConnectionString = "Data Source=" + sDatei;
@@ -133,14 +133,14 @@ namespace KeizerForClubs
 
             sqlCommand.CommandText = " ATTACH 'cfg\\KeizerForClubs.config.s3db' AS config_db ";
             sqlCommand.ExecuteNonQuery();
-            fCreateConfigTab();
-            cLangCode = fGetConfigText("LANGCODE");
+            CreateConfigTab();
+            LangCode = GetConfigText("LANGCODE");
             this.AddRatingWDeltaColIfNeeded();
             return true;
         }
 
         #region Config
-        public int fSetConfigText(string key, string text)
+        public int SetConfigText(string key, string text)
         {
             sqlCommand.CommandText = $" UPDATE {getTable(key)} SET CfgText= @pCfgTxt  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
@@ -149,32 +149,32 @@ namespace KeizerForClubs
             return sqlCommand.ExecuteNonQuery();
         }
 
-        public int fSetConfigFloat(string key, float wert)
+        public int SetConfigFloat(string key, float wert)
         {
             sqlCommand.CommandText = $" UPDATE {getTable(key)}  SET CfgValue= @pCfgValue  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgValue", wert);
             sqlCommand.Prepare();
             var res = sqlCommand.ExecuteNonQuery();
-            res = fInsertConfigNumberIfNeeded(key, res);
+            res = InsertConfigNumberIfNeeded(key, res);
             return res;
         }
 
-        public int fSetConfigInt(string key, int wert)
+        public int SetConfigInt(string key, int wert)
         {
             sqlCommand.CommandText = $" UPDATE {getTable(key)} SET CfgValue= @pCfgValue  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgValue", wert);
             sqlCommand.Prepare();
             var res = sqlCommand.ExecuteNonQuery();
-            res = fInsertConfigNumberIfNeeded(key, res);
+            res = InsertConfigNumberIfNeeded(key, res);
             return res;
         }
 
         private string getTable(string key) => key.StartsWith("INTERNAL.") ? "config_db.ConfigTab" : "ConfigTab";
 
 
-        private int fInsertConfigNumberIfNeeded(string key, int res)
+        private int InsertConfigNumberIfNeeded(string key, int res)
         {
             if (res == 0)
             {
@@ -185,9 +185,9 @@ namespace KeizerForClubs
             return res;
         }
 
-        public float fSetConfigBool(string key, bool wert) => fSetConfigInt(key, wert ? 1 : 0);
+        public float SetConfigBool(string key, bool wert) => SetConfigInt(key, wert ? 1 : 0);
 
-        public string fGetConfigText(string key)
+        public string GetConfigText(string key)
         {
             sqlCommand.CommandText = $" SELECT CfgText FROM {getTable(key)}  WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
@@ -195,7 +195,7 @@ namespace KeizerForClubs
             return Convert.ToString(sqlCommand.ExecuteScalar());
         }
 
-        public int fGetConfigInt(string key, int? defaultVal = null)
+        public int GetConfigInt(string key, int? defaultVal = null)
         {
             sqlCommand.CommandText = $" SELECT CfgValue FROM {getTable(key)} WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
@@ -205,9 +205,9 @@ namespace KeizerForClubs
             return val;
         }
 
-        public bool fGetConfigBool(string key) => fGetConfigInt(key) != 0;
+        public bool GetConfigBool(string key) => GetConfigInt(key) != 0;
 
-        public float fGetConfigFloat(string key, float defaultVal)
+        public float GetConfigFloat(string key, float defaultVal)
         {
             sqlCommand.CommandText = $" SELECT CfgValue FROM {getTable(key)} WHERE CfgKey= @pKey ";
             sqlCommand.Parameters.AddWithValue("pKey", key);
@@ -217,7 +217,7 @@ namespace KeizerForClubs
             return val;
         }
 
-        private void fCreateConfigTab()
+        private void CreateConfigTab()
         {
             sqlCommand.CommandText = @"CREATE TABLE IF NOT EXISTS ConfigTab (
 	                CfgKey VARCHAR(20) NOT NULL PRIMARY KEY,
@@ -746,7 +746,7 @@ namespace KeizerForClubs
             try
             {
                 sqlCommand.CommandText = " SELECT text FROM config_db.LangText  WHERE code= @pCode  AND topic=@pTopic  AND key=@pKey ";
-                sqlCommand.Parameters.AddWithValue("pCode", (object)cLangCode);
+                sqlCommand.Parameters.AddWithValue("pCode", (object)LangCode);
                 sqlCommand.Parameters.AddWithValue("pTopic", (object)topic);
                 sqlCommand.Parameters.AddWithValue("pKey", (object)key);
                 sqlCommand.Prepare();
@@ -763,7 +763,7 @@ namespace KeizerForClubs
         public string Locl_FindKey(string topic, string pvalue)
         {
             sqlCommand.CommandText = " SELECT key FROM config_db.LangText  WHERE code= @pCode  AND topic=@pTopic  AND text=@pValue ";
-            sqlCommand.Parameters.AddWithValue("pCode", (object)cLangCode);
+            sqlCommand.Parameters.AddWithValue("pCode", (object)LangCode);
             sqlCommand.Parameters.AddWithValue("pTopic", (object)topic);
             sqlCommand.Parameters.AddWithValue("pValue", (object)pvalue);
             sqlCommand.Prepare();
@@ -814,7 +814,7 @@ namespace KeizerForClubs
         {
             int topicTexte = 0;
             sqlCommand.CommandText = " SELECT text FROM config_db.LangText  WHERE code= @pCode  AND topic=@pTopic " + sWhereAdd + " ORDER BY key ";
-            sqlCommand.Parameters.AddWithValue("pCode", (object)cLangCode);
+            sqlCommand.Parameters.AddWithValue("pCode", (object)LangCode);
             sqlCommand.Parameters.AddWithValue("pTopic", (object)topic);
             sqlCommand.Prepare();
             using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
