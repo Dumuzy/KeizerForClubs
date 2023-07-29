@@ -60,12 +60,11 @@ namespace KeizerForClubs
             public int RatingWDelta;  // Original Rating plus delta, if FirstRoundRandom.
             public int Rank;
             public PlayerState State;
-            public float KeizerStartPts;
-            public float KeizerSumPts;
+            public float KeizerStartPts, KeizerSumPts, KeizerPrevPts;
             public int FreeCnt;	// Anzahl Freilose; nur für Auslosung aufgenommen      
             public override string ToString()
             {
-                return $"{Id} {Name} rank:{Rank} state:{State} frei:{FreeCnt} kStart {KeizerStartPts} kSum {KeizerSumPts}";
+                return $"{Id} {Name} rank:{Rank} state:{State} frei:{FreeCnt} kPrev {KeizerPrevPts} kSum {KeizerSumPts}";
             }
         };
 
@@ -279,7 +278,7 @@ namespace KeizerForClubs
 
         public bool UpdPlayer_SetRankAndStartPts(int id, int rang, float pkte)
         {
-            sqlCommand.CommandText = " UPDATE Player  SET Rank = @pRang, Keizer_StartPts=@pPts  WHERE ID=@pID ";
+            sqlCommand.CommandText = " UPDATE Player  SET Rank = @pRang, Keizer_PrevPts=Keizer_StartPts, Keizer_StartPts=@pPts  WHERE ID=@pID ";
             sqlCommand.Parameters.AddWithValue("pRang", rang);
             sqlCommand.Parameters.AddWithValue("pPts", pkte);
             sqlCommand.Parameters.AddWithValue("pID", id);
@@ -622,7 +621,7 @@ namespace KeizerForClubs
                                 WHERE result in (4,5,6,7) GROUP BY pid_w) f on f.PID_W = p.id ";
             int playerCount = 0;
             sqlCommand.CommandText = @" SELECT p.id, p.name, p.rating, p.state, p.Keizer_StartPts, p.Keizer_SumPts, 
-                                p.rank, f.frei, p.ratingWDelta FROM Player p 
+                                p.Keizer_PrevPts, p.rank, f.frei, p.ratingWDelta FROM Player p 
                                 " + sFrei + sWhere + sSortorder;
             using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
             {
@@ -639,9 +638,10 @@ namespace KeizerForClubs
                             pList[playerCount].State = (PlayerState)num;
                             pList[playerCount].KeizerStartPts = sqLiteDataReader.IsDBNull(4) ? 0.0f : sqLiteDataReader.GetFloat(4);
                             pList[playerCount].KeizerSumPts = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
-                            pList[playerCount].Rank = sqLiteDataReader.IsDBNull(6) ? 0 : (int)sqLiteDataReader.GetInt16(6);
-                            pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
-                            pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
+                            pList[playerCount].KeizerPrevPts = sqLiteDataReader.IsDBNull(6) ? 0.0f : sqLiteDataReader.GetFloat(6);
+                            pList[playerCount].Rank = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
+                            pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
+                            pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(9) ? 0 : (int)sqLiteDataReader.GetInt16(9);
                             ++playerCount;
                         }
                         else
