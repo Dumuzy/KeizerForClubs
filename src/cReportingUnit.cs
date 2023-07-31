@@ -149,7 +149,8 @@ namespace KeizerForClubs
                     ExportAsCsv(tableVoll, fileBaseVoll);
                 if (db.GetConfigBool("OPTION.Html"))
                 {
-                    var file = ExportAsHtml(tableVoll, fileBaseVoll, true);
+                    var file = ExportAsHtml(tableVoll, fileBaseVoll, true,
+                        $",,Keizer rank points before round {runde}.,Keizer sum points after round {runde}.".Split(','));
                     frmMainform.OpenWithDefaultApp(file);
                 }
             }
@@ -173,8 +174,8 @@ namespace KeizerForClubs
 
             string strr = db.Locl_GetText("GUI_LABEL", "Runde") + " " + db.GetMaxRound();
             t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
-            // var thead = new Li<string>("Platz Name Rating Keizer-P Keizer-Sum GamePts".Split());
-            var thead = new Li<string>("Platz Name Keizer-P Keizer-&#8721; GamePts".Split());
+            // var thead = new Li<string>("Platz Name Rating Rank-P Keizer-Sum GamePts".Split());
+            var thead = new Li<string>("Platz Name Rank-Pb Keizer-&#8721; GamePts".Split());
             for (int i = 0; i < maxRound; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);

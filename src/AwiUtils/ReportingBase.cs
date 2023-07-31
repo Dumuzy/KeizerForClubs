@@ -63,7 +63,8 @@ namespace AwiUtils
             return sb;
         }
 
-        public string ExportAsHtml(TableW2Headers t, string fileBase, bool isExWrapper = false)
+        public string ExportAsHtml(TableW2Headers t, string fileBase, bool isExWrapper = false, 
+            IList<string> headerTitles = null)
         {
             string fileName = fileBase + ".html";
             using (var swExport = new StreamWriter(fileName))
@@ -76,8 +77,13 @@ namespace AwiUtils
                 {
                     var row = t[i];
                     swExport.Write("<tr>");
-                    foreach (var c in row)
-                        swExport.Write("<td>" + c + "</td>");
+                    for(int j = 0; j < row.Count; ++j)
+                    {
+                        var td = "<td>";
+                        if (i == 0 && headerTitles != null && headerTitles.Count > j && headerTitles[j] != "")
+                            td = $"<td title=\"{headerTitles[j]}\">";
+                        swExport.Write(td + row[j] + "</td>");
+                    }
                     swExport.WriteLine("</tr>");
                 }
                 var f = KfcFooterHtml.Replace("Footer0", t.Footer[0]).Replace("Footer1", t.Footer[1]);
