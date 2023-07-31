@@ -94,6 +94,12 @@ namespace KeizerForClubs
             IncNumClicks();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            RestoreWindowSettings();
+        }
+
         private void OpenStartTournamentToolStripMenuItemClick(object sender, EventArgs e)
         {
             if (dlgOpenTournament.ShowDialog() != DialogResult.OK)
@@ -342,6 +348,65 @@ for determining the first round pairings.";
                 db.SetConfigBool("OPTION.Txt", this.chkTxt.Checked);
                 db.SetConfigBool("OPTION.Csv", this.chkCsv.Checked);
             }
+            SaveWindowSettings();
+        }
+
+        private void SaveWindowSettings()
+        {
+            Point loc = RestoreBounds.Location;
+            Size sz = RestoreBounds.Size; 
+            bool isMax = false, isMin = false;
+            if (WindowState == FormWindowState.Maximized)
+                isMax = true; 
+            else if (WindowState == FormWindowState.Normal)
+            {
+                loc = Location;
+                sz = Size;
+            }
+            else
+                isMin = true;
+            db.SetConfigBool("Win.isMax", isMax);
+            db.SetConfigBool("Win.isMin", isMin);
+            db.SetConfigInt("WIN.locX", loc.X );
+            db.SetConfigInt("WIN.locY", loc.Y);
+            db.SetConfigInt("WIN.szWid", sz.Width);
+            db.SetConfigInt("WIN.szHei", sz.Height);
+
+            db.SetConfigInt("WIN.colPairingNameWhite.wid", colPairingNameWhite.Width);
+            db.SetConfigInt("WIN.colPairingNameBlack.wid", colPairingNameBlack.Width);
+            db.SetConfigInt("WIN.colPlayerName.wid", colPlayerName.Width);
+            db.SetConfigInt("WIN.chkPairingOnlyPlayed.locX", chkPairingOnlyPlayed.Location.X);
+        }
+
+        private void RestoreWindowSettings()
+        {
+            try
+            {
+                var loc = new Point(db.GetConfigInt("WIN.locX"), db.GetConfigInt("WIN.locY"));
+                var sz = new Size(db.GetConfigInt("WIN.szWid"), db.GetConfigInt("WIN.szHei"));
+                if (IsWindowPartVisible(loc, sz))
+                {
+                    Location = loc;
+                    Size = sz;
+                }
+                if (db.GetConfigBool("Win.isMax"))
+                    WindowState = FormWindowState.Maximized;
+                else if (db.GetConfigBool("Win.isMin"))
+                    WindowState = FormWindowState.Minimized;
+
+                colPairingNameWhite.Width = db.GetConfigInt("WIN.colPairingNameWhite.wid");
+                colPairingNameBlack.Width = db.GetConfigInt("WIN.colPairingNameBlack.wid");
+                colPlayerName.Width = db.GetConfigInt("WIN.colPlayerName.wid");
+                chkPairingOnlyPlayed.Location = new Point(db.GetConfigInt("WIN.chkPairingOnlyPlayed.locX"),
+                        chkPairingOnlyPlayed.Location.Y);
+            }
+            catch (Exception) {  /* For first start - there'll be no saved values. */ }
+        }
+
+        private bool IsWindowPartVisible(Point loc, Size sz)
+        {
+            Rectangle rect = new Rectangle(loc, sz);
+            return Screen.AllScreens.Any(scr => scr.Bounds.IntersectsWith(rect));
         }
 
         int SelectedRound => Helper.ToInt(numRoundSelect.Value);
@@ -1053,7 +1118,7 @@ for determining the first round pairings.";
             this.pnlPairingPanel.TabIndex = 1;
             this.chkPairingOnlyPlayed.Checked = true;
             this.chkPairingOnlyPlayed.CheckState = CheckState.Checked;
-            this.chkPairingOnlyPlayed.Location = new Point(480, 18);
+            this.chkPairingOnlyPlayed.Location = new Point(380, 18);
             this.chkPairingOnlyPlayed.Name = "chkPairingOnlyPlayed";
             this.chkPairingOnlyPlayed.Size = new Size(164, 24);
             this.chkPairingOnlyPlayed.TabIndex = 2;
