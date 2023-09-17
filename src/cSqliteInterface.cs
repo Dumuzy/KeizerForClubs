@@ -1,7 +1,11 @@
 ﻿using System.Data;
+using System.Data.Common;
 using System.Data.SQLite;
 using System.Drawing.Drawing2D;
+using System.Net.NetworkInformation;
+using System.Security.Policy;
 using AwiUtils;
+using Microsoft.VisualBasic.Logging;
 
 namespace KeizerForClubs
 {
@@ -24,7 +28,7 @@ namespace KeizerForClubs
             Hindered = 5,
             Excused = 6,
             Unexcused = 7,
-            
+
             Freilos = 8,
             Retired = 9,
             Deleted = 10,
@@ -113,9 +117,26 @@ namespace KeizerForClubs
                             " rank INTEGER(3) NOT NULL, " +
                             " state INTEGER(2), " +
                             " Keizer_StartPts FLOAT, " +
-                            " Keizer_SumPts FLOAT " +
-                            ");";
+                            " Keizer_SumPts FLOAT" +
+            ");";
             sqlCommand.ExecuteNonQuery();
+
+            // Adding these two columns in a try catch, as they might already be there. SQLite seems not to
+            // have ALTER .. IF. One workaround is to just create the columns and catch the exception
+            // that arise if the column already exist. 
+            Li<string> addColumnSql = new Li<string>
+            {
+                    "ALTER TABLE Player ADD COLUMN RatingWDelta INTEGER NOT NULL DEFAULT 0",
+                    "ALTER TABLE Player ADD COLUMN Keizer_PrevPts FLOAT"
+            };
+            foreach (var cmd in addColumnSql)
+                try
+                {
+                    sqlCommand.CommandText = cmd;
+                    sqlCommand.ExecuteNonQuery();
+                }
+                catch (Exception) { }
+
 
             sqlCommand.CommandText =
                     " CREATE TABLE IF NOT EXISTS Pairing ( " +
@@ -348,7 +369,7 @@ namespace KeizerForClubs
             sqlCommand.CommandText = " Select ID from player  where name=:pName ";
             sqlCommand.Parameters.AddWithValue("pName", sName);
             var res = sqlCommand.ExecuteScalar();
-            return res != null ? Convert.ToInt16(res) : -1; 
+            return res != null ? Convert.ToInt16(res) : -1;
         }
 
         public int CntPlayerNames(string sName)
@@ -715,7 +736,7 @@ namespace KeizerForClubs
         public int GetPlayerList_Available(ref stPlayer[] pList, string sSortorder, int runde)
         {
             string sWhere = " WHERE state IN (1) ";
-            if(string.IsNullOrEmpty(sSortorder))
+            if (string.IsNullOrEmpty(sSortorder))
                 sSortorder = " ORDER BY ID ";
             return GetPlayerList(ref pList, sWhere, sSortorder, runde);
         }
