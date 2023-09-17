@@ -16,7 +16,7 @@
             int maxRound = db.GetMaxRound();
 
             db.UpdPairing_AllPairingsAndAllKeizerSumsResetValues();
-            this.AllPlayersSetInitialStartPts(maxRound); // Keizer_StartPts in die DB setzen.
+            this.AllPlayersSetInitialStartPts(maxRound + 1); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPts();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
             // If nExtraRecursions is > 0, at the end of the calculation, that many
