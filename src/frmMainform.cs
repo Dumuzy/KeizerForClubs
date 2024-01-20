@@ -88,7 +88,7 @@ namespace KeizerForClubs
             Args = args;
             CopyCfgDocsExport();
             InitializeComponent();
-            ranking = new RankingCalculator(db, this);
+            ranking = new RankingCalculator(db, this, false);
             donateButton1 = new DonateButton(btDonate1, ReadDonated(), () => numClicks, 50, () => true, 20);
             donateButton2 = new DonateButton(btDonate2, ReadDonated(), () => numClicks, 120, () => true, 20);
             IncNumClicks();
@@ -424,11 +424,7 @@ for determining the first round pairings.";
         private void RecalcIfNeeded()
         {
             if (SelectedRound >= db.GetMaxRound())
-            {
-                db.BeginTransaction();
-                this.ranking.AllPlayersAllRoundsCalculate();
-                db.EndTransaction();
-            }
+                this.ranking.AllPlayersAllRoundsCalculateTa();
         }
 
         private void MnuListenPairingClick(object sender, EventArgs e)
@@ -711,7 +707,7 @@ for determining the first round pairings.";
             }
             fSetFirstRoundRandomRating(currRunde, iPairingPlayerCntAvailable);
             db.BeginTransaction();
-            this.ranking.AllPlayersAllRoundsCalculate();
+            this.ranking.AllPlayersAllRoundsCalculateTa();
             this.iPairingPlayerCntAll = db.GetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             this.iPairingRekursionCnt = 0;
             if (this.RunPairingRecursion(0, currRunde))

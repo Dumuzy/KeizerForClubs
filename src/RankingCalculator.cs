@@ -1,21 +1,25 @@
-﻿namespace KeizerForClubs
+﻿using System.Diagnostics;
+using AwiUtils;
+
+namespace KeizerForClubs
 {
     internal class RankingCalculator
     {
-        public RankingCalculator(SqliteInterface db, frmMainform mainform)
+        public RankingCalculator(SqliteInterface db, frmMainform mainform, bool shallUseReporting)
         {
             this.db = db;
             this.form = mainform;
+            cReportingUnit = shallUseReporting ? new ReportingUnit("qwert", db) : null;
         }
 
         /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>
-        internal void AllPlayersAllRoundsCalculate()
+        internal void AllPlayersAllRoundsCalculateTa()
         {
-            ReportingUnit cReportingUnit = null; //  new cReportingUnit(sTurniername, db);
             cReportingUnit?.DeleteDump();
             int maxRound = db.GetMaxRound();
 
-            db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
+            //Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0.
+            db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa(); 
             this.AllPlayersSetInitialStartPtsTa(maxRound + 1); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPtsTa();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
@@ -24,9 +28,10 @@
             int nExtraRecursions = 0;
             for (int runde1 = 1; runde1 <= maxRound; ++runde1)
             {
+                Debug.WriteLine($"=========  ER={runde1} ===========");
                 db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
                 for (int runde2 = 1; runde2 <= runde1; ++runde2)
-                    this.OneRoundAllPairingsSetKeizerPtsTa(runde2);
+                    this.OneRoundAllPairingsSetKeizerPtsTa(runde2, runde1);
                 this.AllPlayersSetKeizerSumPtsTa();
                 this.AllPlayersSetRankAndStartPtsTa();
                 cReportingUnit?.DebugPairingsAndStandings(runde1);
@@ -88,6 +93,7 @@
         /// Keizer_StartPts into the DB. </summary>
         private void AllPlayersSetRankAndStartPtsTa()
         {
+            db.BeginTransaction();
             var players = db.GetPlayerLi(" Where state != 9 ", " ORDER BY Keizer_SumPts desc, rating desc ", db.GetMaxRound());
             int firstStartPts = FirstStartPts(players.Count);
             for (int i = 0; i < players.Count; ++i)
@@ -97,12 +103,13 @@
                 db.UpdPlayer_SetRankAndStartPts(players[i].Id, i + 1, firstStartPts);
                 --firstStartPts;
             }
+            db.EndTransaction();
         }
 
         /// <summary> Setzt für eine Runde für alle Bretter die KeizerPts in die DB. </summary>
         /// <returns>false, wenn keine Runden da sind, true sonst. </returns>
         /// <remarks> Die Punkte sind bei Sieg gleich der momentanen Keizer_StartPts der Gegner. </remarks>
-        private bool OneRoundAllPairingsSetKeizerPtsTa(int runde)
+        private bool OneRoundAllPairingsSetKeizerPtsTa(int runde, int endRundeWhichIsCalculated)
         {
             db.BeginTransaction();
             var pairings = db.GetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
@@ -155,10 +162,64 @@
                 db.UpdPairingValues(runde, pair.Board, erg_w, erg_s);
             }
             db.EndTransaction();
+            CheckPairingsValuesTa(runde, endRundeWhichIsCalculated);
             return true;
+        }
+
+        /// <summary> Prüft, ob ein Sieg gegen X auch in jeder Runde dasselbe zählt, wenn die
+        /// endRundeWhichIsCalculated gerade berechnet wird und wir grade bei Runde maxRunde sind. </summary>
+        void CheckPairingsValuesTa(int maxRunde, int endRundeWhichIsCalculated)
+        {
+            var er = endRundeWhichIsCalculated;
+            // player -> valueOfWinAgainst
+            var valueOfWinAgainstPlayerDict = new Dictionary<int, double>();
+            // Ein Sieg gg Player X muß immer gleich viel wert sein, nach dem eine Runde durchgerechnet
+            // wurde. Nach der nächsten Runde kann und wird der Sieg anders bewertet. 
+            // Aber, wenn ich zB den Stand nach Runde 5 berechne, muß ein Sieg über X in Runde 1
+            // genausoviel wert sein, wie ein Sieg über X in Runde 5. Entsprechend ein Remis halb so viel. 
+            for (int runde = 1; runde <= maxRunde; ++runde)
+            {
+                var pairings = db.GetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+                if (pairings.Count == 0)
+                    throw new Exception("pairings.Count == 0");
+                foreach (var p in pairings)
+                {
+                    if (p.Result == SqliteInterface.Results.WinWhite)
+                    {
+                        CheckValueOfWinAgainst(p, runde, p.IdB, p.PtsW, valueOfWinAgainstPlayerDict, er);
+                    }
+                    else if (p.Result == SqliteInterface.Results.WinBlack)
+                    {
+                        CheckValueOfWinAgainst(p, runde, p.IdW, p.PtsB, valueOfWinAgainstPlayerDict, er);
+                    }
+                    else if (p.Result == SqliteInterface.Results.Draw)
+                    {
+                        CheckValueOfWinAgainst(p, runde, p.IdW, 2 * p.PtsB, valueOfWinAgainstPlayerDict, er);
+                        CheckValueOfWinAgainst(p, runde, p.IdB, 2 * p.PtsW, valueOfWinAgainstPlayerDict, er);
+                    }
+                }
+            }
+        }
+
+        void CheckValueOfWinAgainst(SqliteInterface.stPairing p, int runde, int playerId, double valueOfWin,
+                Dictionary<int, double> valueOfWinAgainstPlayerDict, int endRundeWhichIsCalculated)
+        {
+            int er = endRundeWhichIsCalculated;
+            // Debug.WriteLine($"ER={er} Runde={runde} {p.IdW}-{p.IdB} = {Ext.ToDebug(p.PtsW)}:{Ext.ToDebug(p.PtsB)}");
+            if (!valueOfWinAgainstPlayerDict.TryGetValue(playerId, out double prevValue))
+                valueOfWinAgainstPlayerDict[playerId] = valueOfWin;
+            else
+            {
+                if (Math.Abs(prevValue-valueOfWin) > 0.01)
+                {
+                    Debug.WriteLine($"Win against {playerId} differs from before in round {runde}.");
+                    throw new Exception($"Win against {playerId} differs from before in round {runde}.");
+                }
+            }
         }
 
         readonly SqliteInterface db;
         readonly frmMainform form;
+        readonly ReportingUnit cReportingUnit;
     }
 }
