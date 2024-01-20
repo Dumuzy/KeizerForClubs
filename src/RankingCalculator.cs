@@ -26,9 +26,9 @@
             {
                 db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
                 for (int runde2 = 1; runde2 <= runde1; ++runde2)
-                    this.OneRoundAllPairingsSetKeizerPts(runde2);
+                    this.OneRoundAllPairingsSetKeizerPtsTa(runde2);
                 this.AllPlayersSetKeizerSumPtsTa();
-                this.AllPlayersSetRankAndStartPts();
+                this.AllPlayersSetRankAndStartPtsTa();
                 cReportingUnit?.DebugPairingsAndStandings(runde1);
                 if (runde1 == maxRound && nExtraRecursions-- > 0)
                     --runde1;
@@ -86,7 +86,7 @@
 
         /// <summary> For all players: calc his current rank and set the rank and the resulting 
         /// Keizer_StartPts into the DB. </summary>
-        private void AllPlayersSetRankAndStartPts()
+        private void AllPlayersSetRankAndStartPtsTa()
         {
             var players = db.GetPlayerLi(" Where state != 9 ", " ORDER BY Keizer_SumPts desc, rating desc ", db.GetMaxRound());
             int firstStartPts = FirstStartPts(players.Count);
@@ -102,8 +102,9 @@
         /// <summary> Setzt für eine Runde für alle Bretter die KeizerPts in die DB. </summary>
         /// <returns>false, wenn keine Runden da sind, true sonst. </returns>
         /// <remarks> Die Punkte sind bei Sieg gleich der momentanen Keizer_StartPts der Gegner. </remarks>
-        private bool OneRoundAllPairingsSetKeizerPts(int runde)
+        private bool OneRoundAllPairingsSetKeizerPtsTa(int runde)
         {
+            db.BeginTransaction();
             var pairings = db.GetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
             if (pairings.Count == 0)
                 return false;
@@ -153,6 +154,7 @@
                 }
                 db.UpdPairingValues(runde, pair.Board, erg_w, erg_s);
             }
+            db.EndTransaction();
             return true;
         }
 
