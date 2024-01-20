@@ -425,9 +425,9 @@ for determining the first round pairings.";
         {
             if (SelectedRound >= db.GetMaxRound())
             {
-                db.BeginnTransaktion();
+                db.BeginTransaction();
                 this.ranking.AllPlayersAllRoundsCalculate();
-                db.EndeTransaktion();
+                db.EndTransaction();
             }
         }
 
@@ -710,7 +710,7 @@ for determining the first round pairings.";
                     this.iPairingMinFreeCnt = this.pPairingPlayerList[index].FreeCnt;
             }
             fSetFirstRoundRandomRating(currRunde, iPairingPlayerCntAvailable);
-            db.BeginnTransaktion();
+            db.BeginTransaction();
             this.ranking.AllPlayersAllRoundsCalculate();
             this.iPairingPlayerCntAll = db.GetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             this.iPairingRekursionCnt = 0;
@@ -720,11 +720,11 @@ for determining the first round pairings.";
                 for (int index = 0; index < this.iPairingPlayerCntAvailable / 2; ++index)
                     db.InsPairingNew(currRunde, index + 1, this.pPairingList[index].IdW, this.pPairingList[index].IdB);
                 this.PairingInsertNoPlaying();
-                db.EndeTransaktion();
+                db.EndTransaction();
                 this.LoadPairingList();
                 return true;
             }
-            db.EndeTransaktion();
+            db.EndTransaction();
             int num = (int)MessageBox.Show("No success; adjust options or try manually", "Error");
             return false;
         }

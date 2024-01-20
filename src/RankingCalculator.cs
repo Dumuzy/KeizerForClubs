@@ -15,19 +15,19 @@
             cReportingUnit?.DeleteDump();
             int maxRound = db.GetMaxRound();
 
-            db.UpdPairing_AllPairingsAndAllKeizerSumsResetValues();
-            this.AllPlayersSetInitialStartPts(maxRound + 1); // Keizer_StartPts in die DB setzen.
-            this.AllPlayersSetKeizerSumPts();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
+            db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
+            this.AllPlayersSetInitialStartPtsTa(maxRound + 1); // Keizer_StartPts in die DB setzen.
+            this.AllPlayersSetKeizerSumPtsTa();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
             // If nExtraRecursions is > 0, at the end of the calculation, that many
             // extra rounds of calculation are appended. Only for testing stuff, currently. 
             int nExtraRecursions = 0;
             for (int runde1 = 1; runde1 <= maxRound; ++runde1)
             {
-                db.UpdPairing_AllPairingsAndAllKeizerSumsResetValues();
+                db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
                 for (int runde2 = 1; runde2 <= runde1; ++runde2)
                     this.OneRoundAllPairingsSetKeizerPts(runde2);
-                this.AllPlayersSetKeizerSumPts();
+                this.AllPlayersSetKeizerSumPtsTa();
                 this.AllPlayersSetRankAndStartPts();
                 cReportingUnit?.DebugPairingsAndStandings(runde1);
                 if (runde1 == maxRound && nExtraRecursions-- > 0)
@@ -49,8 +49,9 @@
 
         /// <summary> Das ist die Funktion, die die anfänglichen Keizer-Punkte verteilt. </summary>
         /// <param name="currRunde"> Momentan auszulosende Runde, 1-basiert. </param>
-        private void AllPlayersSetInitialStartPts(int currRunde)
+        private void AllPlayersSetInitialStartPtsTa(int currRunde)
         {
+            db.BeginTransaction();
             var firstRoundRandom = currRunde != 1 ? 0 : db.GetConfigInt("OPTION.FirstRoundRandom", 0);
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
@@ -66,18 +67,21 @@
                 else
                     db.UpdPlayer_SetRankAndStartPts(pList[index].Id, index + 1, 0);
             }
+            db.EndTransaction();
         }
 
         /// <summary> Berechnet die Keizer-Punkt-Summe aller Spieler anhand der in der DB stehende Punkte 
         /// für die Spiele und schreibt die Summen in die DB. </summary>
-        private void AllPlayersSetKeizerSumPts()
+        private void AllPlayersSetKeizerSumPtsTa()
         {
+            db.BeginTransaction();
             SqliteInterface.stPlayer[] players = new SqliteInterface.stPlayer[100];
             int playerCount = db.GetPlayerList(ref players, "", " ", db.GetMaxRound());
             for (int index = 0; index < playerCount; ++index)
                 players[index].KeizerSumPts = db.GetPlayer_PunktSumme(players[index].Id);
             for (int index = 0; index < playerCount; ++index)
                 db.UpdPlayer_KeizerSumPts(players[index].Id, players[index].KeizerSumPts);
+            db.EndTransaction();
         }
 
         /// <summary> For all players: calc his current rank and set the rank and the resulting 

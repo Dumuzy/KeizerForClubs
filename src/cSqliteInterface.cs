@@ -11,12 +11,6 @@ namespace KeizerForClubs
 {
     public class SqliteInterface
     {
-        public string LangCode = "";
-        private SQLiteConnection SQLiteMyDB;
-        private SQLiteTransaction SQLiteMyTrans;
-        private SQLiteCommand sqlCommand;
-
-
         public enum PlayerState
         {
             ErrUndefined = -1,
@@ -93,14 +87,20 @@ namespace KeizerForClubs
             sqlCommand = new SQLiteCommand(SQLiteMyDB);
         }
 
-        public void BeginnTransaktion() => SQLiteMyTrans = SQLiteMyDB.BeginTransaction();
+        public void BeginTransaction()
+        {
+            if (SQLiteMyTrans != null)
+                throw new Exception("Transaction already started.");
+            SQLiteMyTrans = SQLiteMyDB.BeginTransaction();
+        }
 
-        public void EndeTransaktion(bool bCommit = true)
+        public void EndTransaction(bool bCommit = true)
         {
             if (bCommit)
                 SQLiteMyTrans.Commit();
             else
                 SQLiteMyTrans.Rollback();
+            SQLiteMyTrans = null;
         }
 
         public bool OpenTournament(string sDatei)
@@ -535,14 +535,16 @@ namespace KeizerForClubs
         }
 
         /// <summary> Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0. </summary>
-        public void UpdPairing_AllPairingsAndAllKeizerSumsResetValues()
+        public void UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa()
         {
+            BeginTransaction();
             sqlCommand.CommandText = " UPDATE Pairing  SET PTS_W=0, PTS_B=0 ";
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
             sqlCommand.CommandText = " UPDATE Player  SET Keizer_SumPts=0 ";
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
+            EndTransaction();
         }
 
         /// <summary> Setzt die KeizerPts für eine Runde für ein Brett in die DB. </summary>
@@ -915,6 +917,11 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
         }
         #endregion Tabelle
+
+        public string LangCode = "";
+        private SQLiteConnection SQLiteMyDB;
+        private SQLiteTransaction SQLiteMyTrans;
+        private SQLiteCommand sqlCommand;
 
     }
 }
