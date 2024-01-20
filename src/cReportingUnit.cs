@@ -182,6 +182,9 @@ namespace KeizerForClubs
             for (int index1 = 0, numPlayer = 1; index1 < players.Count; ++index1)
             {
                 var player = players[index1];
+
+                if (player.State == SqliteInterface.PlayerState.Retired && db.CntPlayersPlayedGames(player.Id) == 0)
+                    continue;
                 var line = new Li<string>();
                 if (player.State != SqliteInterface.PlayerState.Retired)
                     line.Add(numPlayer++.ToString("00"));

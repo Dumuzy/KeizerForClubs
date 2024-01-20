@@ -335,6 +335,15 @@ namespace KeizerForClubs
             return true;
         }
 
+        /// <summary> Gibt die Anzahl der gespielten Spiele (mit Ergebnis gewonnen, verloren oder remis)
+        /// des Spielers mit der id zurück. </summary>
+        public int CntPlayersPlayedGames(int id)
+        {
+            var sWhere = $" where ((PID_W={id} or PID_B={id}) AND Result in (1,2,3)) ";
+            var li = GetPairingLi(sWhere, "");
+            return li.Count;
+        }
+
         // Farbverteilung eines Spieler abfragen:
         //  Gibt die Differenz aus Weiß- und Schwarzpartien des Spielers zurück. 
         public int GetPlayerWeissUeberschuss(int ID)
