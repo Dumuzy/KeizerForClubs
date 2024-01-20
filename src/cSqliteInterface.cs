@@ -749,6 +749,13 @@ namespace KeizerForClubs
             return GetPlayerList(ref pList, sWhere, sOrder, runde);
         }
 
+        public int GetPlayerCount_NotDropped(int runde)
+        {
+            string sWhere = " WHERE state NOT IN (9) ";
+            var li = GetPlayerLi(sWhere, "", runde);
+            return li.Count;
+        }
+
         public int GetPlayerCount()
         {
             sqlCommand.CommandText = @" SELECT Count(1) FROM Player p ";

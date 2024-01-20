@@ -60,8 +60,10 @@ namespace KeizerForClubs
             var firstRoundRandom = currRunde != 1 ? 0 : db.GetConfigInt("OPTION.FirstRoundRandom", 0);
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
+            var playerCountNotDropped = db.GetPlayerCount_NotDropped(currRunde);
+            int firstStartPts = FirstStartPts(playerCountNotDropped);
             int playerCount = db.GetPlayerList(ref pList, " ", $" ORDER BY {order} desc ", currRunde);
-            int firstStartPts = FirstStartPts(playerCount);
+            Debug.WriteLine($"FirstStartPts = {firstStartPts}");
             for (int index = 0; index < playerCount; ++index)
             {
                 if (pList[index].State != SqliteInterface.PlayerState.Retired)
