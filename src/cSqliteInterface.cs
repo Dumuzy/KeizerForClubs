@@ -1,11 +1,6 @@
 ﻿using System.Data;
-using System.Data.Common;
 using System.Data.SQLite;
-using System.Drawing.Drawing2D;
-using System.Net.NetworkInformation;
-using System.Security.Policy;
 using AwiUtils;
-using Microsoft.VisualBasic.Logging;
 
 namespace KeizerForClubs
 {
@@ -257,12 +252,24 @@ namespace KeizerForClubs
         #region Player
         public bool InsPlayerNew(string name, int rtg)
         {
-            sqlCommand.CommandText = " INSERT INTO Player (Name,Rating, Rank)  VALUES (@pName, @pRtg, 99) ";
+            BeginTransaction();
+            sqlCommand.CommandText = " INSERT INTO Player (Name, Rating, Rank, state)  VALUES (@pName, @pRtg, 99, 1)";
             sqlCommand.Parameters.AddWithValue("pName", name);
             sqlCommand.Parameters.AddWithValue("pRtg", rtg);
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
+            EndTransaction();
             return true;
+        }
+
+        /// <summary> Setzt die automatisch vergebene Player-Id auf 0. D.h. der nächste Spieler, der erzeugt wird, 
+        /// erhält die Spieler-Id 1. </summary>
+        public void ResetPlayerBaseId()
+        {
+            BeginTransaction();
+            sqlCommand.CommandText = "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'Player'";
+            sqlCommand.ExecuteNonQuery();
+            EndTransaction();
         }
 
         public bool UpdPlayer(int id, string name, int rtg, int status)
@@ -388,6 +395,12 @@ namespace KeizerForClubs
             return (int)Convert.ToInt16(sqlCommand.ExecuteScalar());
         }
 
+        public int CntPlayers()
+        {
+            sqlCommand.CommandText = " Select Count(1) from player";
+            return Helper.ToInt(sqlCommand.ExecuteScalar());
+        }
+
         /// <summary> Keizer-PunkteSumme des Spielers mit der ID aus der DB berechnen. So wie sie sich 
         /// momentan aus der DB ergibt. Das ist zu Anfang der Berechnung des Tabellenstands einer Runde 
         /// ein anderer Wert als am Ende. </summary>
@@ -464,6 +477,15 @@ namespace KeizerForClubs
                 }
             }
             return nDeleted;
+        }
+
+        public void DeleteAllPlayers()
+        {
+            if (GetMaxRound() == 0)
+            {
+                sqlCommand.CommandText = " DELETE from player;";
+                sqlCommand.ExecuteScalar();
+            }
         }
         #endregion Player
 

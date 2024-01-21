@@ -1,12 +1,8 @@
 ﻿using System.ComponentModel;
-using System.Data.SqlTypes;
 using System.Diagnostics;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using AwiUtils;
 using PuzzleKnocker;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static KeizerForClubs.SqliteInterface;
 using Button = System.Windows.Forms.Button;
 using ComboBox = System.Windows.Forms.ComboBox;
@@ -42,6 +38,7 @@ namespace KeizerForClubs
         private CheckBox chkFreilosVerteilen;
         private CheckBox chkHtml, chkXml, chkTxt, chkCsv;
         private ToolStripMenuItem mnuStartLanguage;
+        private ToolStripMenuItem mnuPlayers, mnuPlayersImport, mnuPlayersDeleteAll, mnuPlayersRebaseIds;
         private CheckBox chkPairingOnlyPlayed;
         private ToolStripMenuItem mnuPaarungDropLast;
         private ToolStripSeparator toolStripMenuItem3;
@@ -125,8 +122,7 @@ namespace KeizerForClubs
             ApplyLanguageText();
             tabMainWindow.Enabled = true;
             mnuListen.Enabled = true;
-            mnuHelp.Enabled = true;
-            mnuStartLanguage.Enabled = true;
+            mnuHelp.Enabled = mnuStartLanguage.Enabled = true;
             LoadPlayerlist();
             LoadPairingList();
 
@@ -192,7 +188,7 @@ for determining the first round pairings.";
             frmLangSelect frmLangSelect = new frmLangSelect(db.LangCode);
             int num1 = (int)frmLangSelect.ShowDialog();
             db.LangCode = frmLangSelect.radEnglisch.Checked ? "EN" :
-                frmLangSelect.radDeutsch.Checked ? "DE" : 
+                frmLangSelect.radDeutsch.Checked ? "DE" :
                 frmLangSelect.radHollaendisch.Checked ? "NL" : "FR";
             db.SetConfigText("LANGCODE", db.LangCode);
         }
@@ -312,6 +308,78 @@ for determining the first round pairings.";
             this.LoadPairingList();
         }
 
+        void MnuPlayersImportClick(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.CheckFileExists = false;
+            ofd.DefaultExt = "*.csv";
+            ofd.FileName = "turnier_1";
+            ofd.Filter = "CSV|*.csv";
+            ofd.Title = "Import Players";
+            ofd.InitialDirectory = Path.GetDirectoryName(dlgOpenTournament.FileName);
+
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+            string fileName = ofd.FileName;
+            var lines = File.ReadAllLines(fileName).ToLi();
+            var pl = new Li<Tuple<string, int>>();
+            foreach (var li in lines)
+            {
+                var parts = li.Split(';').ToLi();
+                var name = parts[4];
+                var rating = Helper.ToInt(parts[6]);
+                pl.Add(new Tuple<string, int>(name, rating));
+            }
+
+            if (db.CntPlayers() == 0)
+                db.ResetPlayerBaseId();
+
+            Li<string> alreadyExistingAndChanged = new Li<string>();
+            pl = pl.OrderByDescending(p => p.Item2).ToLi();
+            foreach (var p in pl)
+            {
+                (string name, int rating) = p;
+                int playerId = db.GetPlayerID(name);
+                while (playerId != -1)
+                {
+                    name = "++" + name;
+                    playerId = db.GetPlayerID(name);
+                }
+                if (name != p.Item1)
+                    alreadyExistingAndChanged.Add($"{p.Item1} ({rating}) -> {name}");
+                db.InsPlayerNew(name, rating);
+            }
+            LoadPlayerlist();
+            if (alreadyExistingAndChanged.Any())
+            {
+                
+                string t = db.Locl_GetText("GUI_TEXT", "NamesChanged") + "\n\n"; 
+                t += string.Join('\n', alreadyExistingAndChanged);
+                MessageBox.Show(t, Text);
+            }
+        }
+
+        void MnuPlayersDeleteAllClick(object sender, EventArgs e)
+        {
+            if (db.GetMaxRound() == 0)
+            {
+                var t = db.Locl_GetText("GUI_TEXT", "ReallyDeleteAll");
+                var res = MessageBox.Show(t, Text, MessageBoxButtons.OKCancel);
+                if (res == DialogResult.OK)
+                {
+                    db.DeleteAllPlayers();
+                    db.ResetPlayerBaseId();
+                    LoadPlayerlist();
+                }
+            }
+            else
+                MessageBox.Show(db.Locl_GetText("GUI_TEXT", "OnlyBefore1"), Text);
+        }
+
+        void MnuPlayersRebaseIdsClick(object sender, EventArgs e)
+        { 
+        }
+
         private void GrdPlayersDataError(object sender, DataGridViewDataErrorEventArgs e) => e.Cancel = false;
 
         private void ChkPairingOnlyPlayedCheckedChanged(object sender, EventArgs e)
@@ -354,10 +422,10 @@ for determining the first round pairings.";
         private void SaveWindowSettings()
         {
             Point loc = RestoreBounds.Location;
-            Size sz = RestoreBounds.Size; 
+            Size sz = RestoreBounds.Size;
             bool isMax = false, isMin = false;
             if (WindowState == FormWindowState.Maximized)
-                isMax = true; 
+                isMax = true;
             else if (WindowState == FormWindowState.Normal)
             {
                 loc = Location;
@@ -367,7 +435,7 @@ for determining the first round pairings.";
                 isMin = true;
             db.SetConfigBool("Win.isMax", isMax);
             db.SetConfigBool("Win.isMin", isMin);
-            db.SetConfigInt("WIN.locX", loc.X );
+            db.SetConfigInt("WIN.locX", loc.X);
             db.SetConfigInt("WIN.locY", loc.Y);
             db.SetConfigInt("WIN.szWid", sz.Width);
             db.SetConfigInt("WIN.szHei", sz.Height);
@@ -443,7 +511,7 @@ for determining the first round pairings.";
                 new ReportingUnit(sTurniername, db).fReport_TabellenstandVoll(SelectedRound);
         }
 
-        private void MnuListenParticipantsClick(object sender, EventArgs e) => 
+        private void MnuListenParticipantsClick(object sender, EventArgs e) =>
             new ReportingUnit(sTurniername, db).fReport_Teilnehmer(SelectedRound);
 
         private void TbBonusValueChanged(object sender, EventArgs e)
@@ -485,8 +553,8 @@ for determining the first round pairings.";
                     grdPlayers.Rows[e.RowIndex].ErrorText = db.Locl_GetText("GUI_TEXT", "Hinweis.InvalidRating");
                 }
             }
-            if(e.Cancel)
-                MessageBox.Show(grdPlayers.Rows[e.RowIndex].ErrorText, this.Text, 
+            if (e.Cancel)
+                MessageBox.Show(grdPlayers.Rows[e.RowIndex].ErrorText, this.Text,
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
         }
 
@@ -603,6 +671,11 @@ for determining the first round pairings.";
             colPairingNameBlack.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Schwarz");
             colPairingAddInfoB.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.SchwarzAdd");
             colPairingResult.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Ergebnis");
+            mnuPlayers.Text = db.Locl_GetText("GUI_MENU", "PlayersMenu");
+            mnuPlayersImport.Text = db.Locl_GetText("GUI_MENU", "ImportPlayers");
+            mnuPlayersDeleteAll.Text = db.Locl_GetText("GUI_MENU", "DeletePlayers");
+            mnuPlayersRebaseIds.Text = db.Locl_GetText("GUI_MENU", "RebasePlayerIds");
+
             mnuPaarungen.Text = db.Locl_GetText("GUI_MENU", "Paarungen");
             mnuPaarungNext.Text = db.Locl_GetText("GUI_MENU", "Paarung.Next");
             mnuPaarungManuell.Text = db.Locl_GetText("GUI_MENU", "Paarung.NextMan");
@@ -647,7 +720,7 @@ for determining the first round pairings.";
         /// <summary> Erzeugt die Spielerliste auf dem Spieler-Tab.</summary>
         private void LoadPlayerlist()
         {
-            var players = db.GetPlayerLi( "", " ORDER BY ID ", db.GetMaxRound() + 1);
+            var players = db.GetPlayerLi("", " ORDER BY ID ", db.GetMaxRound() + 1);
             this.grdPlayers.Rows.Clear();
             for (int i = 0; i < players.Count; ++i)
             {
@@ -706,8 +779,8 @@ for determining the first round pairings.";
                     this.iPairingMinFreeCnt = this.pPairingPlayerList[index].FreeCnt;
             }
             fSetFirstRoundRandomRating(currRunde, iPairingPlayerCntAvailable);
-            db.BeginTransaction();
             this.ranking.AllPlayersAllRoundsCalculateTa();
+            db.BeginTransaction();
             this.iPairingPlayerCntAll = db.GetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             this.iPairingRekursionCnt = 0;
             if (this.RunPairingRecursion(0, currRunde))
@@ -894,7 +967,7 @@ for determining the first round pairings.";
                 {
                     int pid = db.GetPlayerID((string)name);
                     var idx = Array.FindIndex(this.pPairingPlayerList, p => p.Id == pid);
-                    if(idx >= 0 && idx < iPairingPlayerCntAll)
+                    if (idx >= 0 && idx < iPairingPlayerCntAll)
                         this.pPairingPlayerList[idx].State = SqliteInterface.PlayerState.Freilos;
                 }
 
@@ -1015,6 +1088,11 @@ for determining the first round pairings.";
             this.mnuStartStart = new ToolStripMenuItem();
             this.toolStripMenuItem1 = new ToolStripSeparator();
             this.mnuStartLanguage = new ToolStripMenuItem();
+
+            this.mnuPlayers = new ToolStripMenuItem();
+            this.mnuPlayersImport = new ToolStripMenuItem();
+            this.mnuPlayersDeleteAll = new ToolStripMenuItem();
+            this.mnuPlayersRebaseIds = new ToolStripMenuItem();
             this.mnuPaarungen = new ToolStripMenuItem();
             this.mnuPaarungNext = new ToolStripMenuItem();
             this.toolStripMenuItem2 = new ToolStripSeparator();
@@ -1296,24 +1374,15 @@ for determining the first round pairings.";
             this.btDonate1.TabIndex = 30;
             this.btDonate1.Click += new EventHandler(this.BtDonateClick);
 
-            this.mnuMainmenu.Items.AddRange(new ToolStripItem[4]
-            {
-        (ToolStripItem) this.mnuTurnierstart,
-        (ToolStripItem) this.mnuPaarungen,
-        (ToolStripItem) this.mnuListen,
-        (ToolStripItem) this.mnuHelp
-            });
+            this.mnuMainmenu.Items.AddRange(new ToolStripItem[]
+                { this.mnuTurnierstart, this.mnuPaarungen, this.mnuListen, this.mnuPlayers, this.mnuHelp });
             this.mnuMainmenu.Location = new Point(0, 0);
             this.mnuMainmenu.Name = "mnuMainmenu";
             this.mnuMainmenu.Size = new Size(704, 24);
             this.mnuMainmenu.TabIndex = 1;
             this.mnuMainmenu.Text = "Program";
-            this.mnuTurnierstart.DropDownItems.AddRange(new ToolStripItem[3]
-            {
-        (ToolStripItem) this.mnuStartStart,
-        (ToolStripItem) this.toolStripMenuItem1,
-        (ToolStripItem) this.mnuStartLanguage
-            });
+            this.mnuTurnierstart.DropDownItems.AddRange(new ToolStripItem[]
+                { this.mnuStartStart, this.toolStripMenuItem1, this.mnuStartLanguage, this.mnuPlayersImport });
             this.mnuTurnierstart.Name = "mnuTurnierstart";
             this.mnuTurnierstart.Size = new Size(52, 20);
             this.mnuTurnierstart.Text = "Start...";
@@ -1328,14 +1397,22 @@ for determining the first round pairings.";
             this.mnuStartLanguage.Size = new Size(218, 22);
             this.mnuStartLanguage.Text = "Language, Sprache, Spraak, Langue...";
             this.mnuStartLanguage.Click += new EventHandler(this.MnuStartLanguageClick);
-            this.mnuPaarungen.DropDownItems.AddRange(new ToolStripItem[5]
-            {
-        (ToolStripItem) this.mnuPaarungNext,
-        (ToolStripItem) this.toolStripMenuItem2,
-        (ToolStripItem) this.mnuPaarungManuell,
-        (ToolStripItem) this.toolStripMenuItem3,
-        (ToolStripItem) this.mnuPaarungDropLast
-            });
+
+            this.mnuPlayersImport.Size = new Size(218, 22);
+            this.mnuPlayersImport.Click += new EventHandler(this.MnuPlayersImportClick);
+
+            this.mnuPlayersDeleteAll.Size = new Size(218, 22);
+            this.mnuPlayersDeleteAll.Click += new EventHandler(this.MnuPlayersDeleteAllClick);
+
+            this.mnuPlayersRebaseIds.Size = new Size(218, 22);
+            this.mnuPlayersRebaseIds.Click += new EventHandler(this.MnuPlayersRebaseIdsClick);
+
+            this.mnuPlayers.DropDownItems.AddRange(new ToolStripItem[]
+                    { mnuPlayersImport, mnuPlayersDeleteAll, mnuPlayersRebaseIds});
+
+
+            this.mnuPaarungen.DropDownItems.AddRange(new ToolStripItem[]
+                { mnuPaarungNext, toolStripMenuItem2, mnuPaarungManuell, toolStripMenuItem3, mnuPaarungDropLast });
             this.mnuPaarungen.Enabled = false;
             this.mnuPaarungen.Name = "mnuPaarungen";
             this.mnuPaarungen.Size = new Size(56, 20);
@@ -1357,13 +1434,7 @@ for determining the first round pairings.";
             this.mnuPaarungDropLast.Text = "Drop last round";
             this.mnuPaarungDropLast.Click += new EventHandler(this.MnuPairingDropLastClick);
             this.mnuListen.DropDownItems.AddRange(new ToolStripItem[]
-            {
-                mnuListenAll,
-                mnuListenPairing,
-                mnuListenStanding,
-                mnuListenStandingFull,
-                mnuListenParticipants
-            });
+                 {  mnuListenAll, mnuListenPairing, mnuListenStanding, mnuListenStandingFull, mnuListenParticipants });
             this.mnuListen.Enabled = false;
             this.mnuListen.Name = "mnuListen";
             this.mnuListen.Size = new Size(42, 20);
@@ -1389,11 +1460,7 @@ for determining the first round pairings.";
             this.mnuListenParticipants.Text = "Participants";
             this.mnuListenParticipants.Click += new EventHandler(this.MnuListenParticipantsClick);
             this.mnuHelp.DropDownItems.AddRange(new ToolStripItem[]
-            {
-        (ToolStripItem) this.mnuHelpDocumentation,
-        (ToolStripItem) this.mnuHelpFaq,
-        (ToolStripItem) this.mnuHelpAbout,
-            });
+                { mnuHelpDocumentation, mnuHelpFaq, mnuHelpAbout, });
             this.mnuHelp.Name = "mnuHelp";
             this.mnuHelp.Size = new Size(44, 20);
             this.mnuHelp.Text = "Help";
