@@ -158,6 +158,17 @@ is the default. The higher the number, the more the better players stay
 separated from the others. I recommend lower values for tournaments with
 less than 20 players.</p>
 <p><br /></p>
+<h3 id="players-menu">Players menu</h3>
+<h4 id="import-players">Import players</h4>
+<p>You can import a list of players in csv format. The name and rating
+of the players are imported. The format of the csv file is determined by
+the first line of the file. In the first line separators (semicolon,
+colon or comma), the text <em>Name</em> and the text <em>Rating</em> are
+searched for. The rest of the file is read according to the format of
+the first line. Example: The first line of the csv file is</p>
+<pre><code>x;x;;xxx;Name;;Rating</code></pre>
+<p>Then the separator is the semicolon, the player names are in the 5th
+column, the ratings of the players in the 7th.</p>
 <h3 id="acknowledgements">Acknowledgements</h3>
 <ul>
 <li>The program originally was developed with SharpDevelop, now I’m

@@ -187,6 +187,18 @@ höher die Zahl ist, desto mehr bleiben die besseren Spieler unter sich.
 Ich empfehle niedrigere Werte für Turniere mit weniger als 20
 Spielern.</p>
 <p><br /></p>
+<h3 id="menü-spieler">Menü Spieler</h3>
+<h4 id="spieler-importieren">Spieler importieren</h4>
+<p>Man kann eine Liste mit Spielern im csv-Format importieren.
+Importiert werden der Name und das Rating des Spielers. Das Format der
+csv-Datei wird bestimmt durch die erste Zeile der Datei. In der ersten
+Zeile werden Trennzeichen (Strichpunkt, Doppelpunkt oder Komma), der
+Text <em>Name</em> und der Text <em>Rating</em> gesucht. Entsprechend
+dem Format der ersten Zeile wird der Rest der Datei eingelesen.
+Beispiel: Die erste Zeile der csv-Datei ist</p>
+<pre><code>x;x;;xxx;Name;;Rating</code></pre>
+<p>Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der
+5. Spalte, die Ratings der Spieler sind in der 7. Spalte.</p>
 <h3 id="danksagungen">Danksagungen</h3>
 <ul>
 <li>Das Programm wurde ursprünglich mit SharpDevelop entwickelt, jetzt

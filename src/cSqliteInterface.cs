@@ -262,12 +262,14 @@ namespace KeizerForClubs
             return true;
         }
 
-        /// <summary> Setzt die automatisch vergebene Player-Id auf 0. D.h. der nächste Spieler, der erzeugt wird, 
-        /// erhält die Spieler-Id 1. </summary>
-        public void ResetPlayerBaseId()
+        /// <summary> Setzt die automatisch vergebene Player-Id auf die Anzahl der Spieler n. 
+        /// D.h. der nächste Spieler, der erzeugt wird, erhält die Spieler-Id n+1. </summary>
+        /// <remarks> Darf nur nach ResetPlayerIds oder DeleteAllPlayers durchgeführt werden. </remarks>
+        public void ResetPlayerBaseIdTa()
         {
+            int cnt = CntPlayers();
             BeginTransaction();
-            sqlCommand.CommandText = "UPDATE sqlite_sequence SET seq = 0 WHERE name = 'Player'";
+            sqlCommand.CommandText = $"UPDATE sqlite_sequence SET seq = {cnt} WHERE name = 'Player'";
             sqlCommand.ExecuteNonQuery();
             EndTransaction();
         }
@@ -376,7 +378,7 @@ namespace KeizerForClubs
                 return "NN";
             sqlCommand.CommandText = " Select name from player  where ID=:pID ";
             sqlCommand.Parameters.AddWithValue("pID", (object)ID);
-            return sqlCommand.ExecuteScalar().ToString();
+            return sqlCommand.ExecuteScalar()?.ToString() ?? null;
         }
 
         /// <summary> Gibt die PlayerId des Spielers mit dem Namen zurück oder -1, falls keiner gefunden. </summary>
@@ -479,12 +481,38 @@ namespace KeizerForClubs
             return nDeleted;
         }
 
-        public void DeleteAllPlayers()
+        public void DeleteAllPlayersTa()
         {
             if (GetMaxRound() == 0)
             {
+                BeginTransaction();
                 sqlCommand.CommandText = " DELETE from player;";
                 sqlCommand.ExecuteScalar();
+                EndTransaction();
+            }
+        }
+
+        public void RebasePlayerIdsTa()
+        {
+            if (GetMaxRound() == 0)
+            {
+                var li = GetPlayerLi("", "order by id desc", 0);
+                BeginTransaction();
+                for (int i = 0; i < li.Count; ++i)
+                {
+                    sqlCommand.CommandText = $"UPDATE PLAYER set id={li[i].Id+1000} WHERE id={li[i].Id}";
+                    sqlCommand.ExecuteNonQuery();
+                }
+
+
+                li = GetPlayerLi("", "order by rating desc", 0);
+                for (int i = 0; i < li.Count; ++i)
+                {
+                    sqlCommand.CommandText = $"UPDATE PLAYER set id={i+1} WHERE id={li[i].Id}";
+                    sqlCommand.ExecuteNonQuery();
+                }
+                EndTransaction();
+
             }
         }
         #endregion Player

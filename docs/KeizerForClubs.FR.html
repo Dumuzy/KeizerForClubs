@@ -198,6 +198,19 @@ suisse sont proches. 3 est la valeur par défaut. Plus le chiffre est
 autres. Je recommande des valeurs plus basses pour les tournois de moins
 de 20 joueurs.</p>
 <p><br /></p>
+<h3 id="menu-joueurs">Menu Joueurs</h3>
+<h4 id="importer-des-joueurs">Importer des joueurs</h4>
+<p>Il est possible d’importer une liste de joueurs au format csv. Le nom
+et le classement du joueur sont importés. Le format du fichier csv est
+déterminé par la première ligne du fichier. Dans la première ligne, les
+séparateurs (point-virgule, deux-points ou virgule), le texte
+<em>Name</em> et le texte <em>Rating</em>. Le reste du fichier est lu en
+fonction du format de la première ligne. Exemple : la première ligne du
+fichier csv est</p>
+<pre><code>x;x;;xxx;Name;;Rating</code></pre>
+<p>Ensuite, le séparateur est le point-virgule, les noms des joueurs
+sont dans la 5e colonne, les ratings des joueurs sont dans la 7e
+colonne.</p>
 <h3 id="remerciements">Remerciements</h3>
 <ul>
 <li>Le programme a été développé à l’origine avec SharpDevelop, mais

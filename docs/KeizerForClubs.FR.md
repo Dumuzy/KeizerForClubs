@@ -124,6 +124,19 @@ Cette valeur correspond aux points que vous obtiendriez pour une victoire contre
 
 <br />
 
+### Menu Joueurs
+
+#### Importer des joueurs
+Il est possible d'importer une liste de joueurs au format csv. Le nom et le classement du joueur sont importés. 
+Le format du fichier csv est déterminé par la première ligne du fichier. Dans la première ligne, les séparateurs (point-virgule, deux-points ou virgule), 
+le texte _Name_ et le texte _Rating_. Le reste du fichier est lu en fonction du format de la première ligne. 
+Exemple : la première ligne du fichier csv est 
+```
+x;x;;xxx;Name;;Rating
+``` 
+Ensuite, le séparateur est le point-virgule, les noms des joueurs sont dans la 5e colonne, les ratings des joueurs sont dans la 7e colonne. 
+
+
 ### Remerciements
 
 *   Le programme a été développé à l'origine avec SharpDevelop, mais j'utilise à présent Microsoft Visual Studio Community 2022. 

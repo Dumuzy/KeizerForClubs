@@ -175,6 +175,19 @@ weniger als 20 Spielern.
 
 <br />
 
+### Menü Spieler
+
+#### Spieler importieren
+Man kann eine Liste mit Spielern im csv-Format importieren. Importiert werden Namen und Ratings der Spieler. 
+Das Format der csv-Datei wird bestimmt durch die erste Zeile der Datei. In der ersten Zeile werden Trennzeichen (Strichpunkt, Doppelpunkt oder Komma), 
+der Text _Name_ und der Text _Rating_ gesucht. Entsprechend dem Format der ersten Zeile wird der Rest der Datei eingelesen. 
+Beispiel: Die erste Zeile der csv-Datei ist 
+```
+x;x;;xxx;Name;;Rating
+``` 
+Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der 5. Spalte, die Ratings der Spieler sind in der 7. Spalte. 
+
+
 ### Danksagungen
 
 *   Das Programm wurde ursprünglich mit SharpDevelop entwickelt, jetzt verwende ich Microsoft Visual Studio Community 2022. 

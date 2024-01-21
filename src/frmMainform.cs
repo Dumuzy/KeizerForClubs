@@ -322,44 +322,59 @@ for determining the first round pairings.";
                 return;
             string fileName = ofd.FileName;
             var lines = File.ReadAllLines(fileName).ToLi();
-            var pl = new Li<Tuple<string, int>>();
-            foreach (var li in lines)
+            var first = lines.FirstOrDefault();
+            if (first != null)
             {
-                var parts = li.Split(';').ToLi();
-                var name = parts[4];
-                var rating = Helper.ToInt(parts[6]);
-                pl.Add(new Tuple<string, int>(name, rating));
-            }
-
-            if (db.CntPlayers() == 0)
-                db.ResetPlayerBaseId();
-
-            Li<string> alreadyExistingAndChanged = new Li<string>();
-            pl = pl.OrderByDescending(p => p.Item2).ToLi();
-            foreach (var p in pl)
-            {
-                (string name, int rating) = p;
-                int playerId = db.GetPlayerID(name);
-                while (playerId != -1)
+                var idxSplitter = first.IndexOfAny(";:,".ToCharArray());
+                var splitter = idxSplitter != -1 ? first[idxSplitter] : '+';
+                var firstParts = first.Split(splitter).ToLi();
+                var idxName = firstParts.FindIndex(0, p => p.ToUpperInvariant() == "NAME");
+                var idxRating = firstParts.FindIndex(0, p => p.ToUpperInvariant() == "RATING");
+                if (idxRating != -1 && idxName != -1)
                 {
-                    name = "++" + name;
-                    playerId = db.GetPlayerID(name);
+                    lines = lines.Skip(1).ToLi();
+                    var players = new Li<Tuple<string, int>>();
+                    foreach (var li in lines)
+                    {
+                        var parts = li.Split(splitter).ToLi();
+                        var name = parts[idxName].Trim();
+                        var rating = Helper.ToInt(parts[idxRating].Trim());
+                        players.Add(new Tuple<string, int>(name, rating));
+                    }
+
+                    if (db.CntPlayers() == 0)
+                        db.ResetPlayerBaseIdTa();
+
+                    Li<string> alreadyExistingAndChanged = new Li<string>();
+                    players = players.OrderByDescending(p => p.Item2).ToLi();
+                    foreach (var p in players)
+                    {
+                        (string name, int rating) = p;
+                        int playerId = db.GetPlayerID(name);
+                        while (playerId != -1)
+                        {
+                            name = "++" + name;
+                            playerId = db.GetPlayerID(name);
+                        }
+                        if (name != p.Item1)
+                            alreadyExistingAndChanged.Add($"{p.Item1} ({rating}) -> {name}");
+                        db.InsPlayerNew(name, rating);
+                    }
+                    LoadPlayerlist();
+                    if (alreadyExistingAndChanged.Any())
+                    {
+
+                        string t = db.Locl_GetText("GUI_TEXT", "NamesChanged") + "\n\n";
+                        t += string.Join('\n', alreadyExistingAndChanged);
+                        MessageBox.Show(t, Text);
+                    }
                 }
-                if (name != p.Item1)
-                    alreadyExistingAndChanged.Add($"{p.Item1} ({rating}) -> {name}");
-                db.InsPlayerNew(name, rating);
-            }
-            LoadPlayerlist();
-            if (alreadyExistingAndChanged.Any())
-            {
-                
-                string t = db.Locl_GetText("GUI_TEXT", "NamesChanged") + "\n\n"; 
-                t += string.Join('\n', alreadyExistingAndChanged);
-                MessageBox.Show(t, Text);
+                else
+                    MessageBox.Show(db.Locl_GetText("GUI_TEXT", "WrongCsvFileFormat"), Text);
             }
         }
 
-        void MnuPlayersDeleteAllClick(object sender, EventArgs e)
+        void MnuPlayersDeleteAllClickTa(object sender, EventArgs e)
         {
             if (db.GetMaxRound() == 0)
             {
@@ -367,8 +382,8 @@ for determining the first round pairings.";
                 var res = MessageBox.Show(t, Text, MessageBoxButtons.OKCancel);
                 if (res == DialogResult.OK)
                 {
-                    db.DeleteAllPlayers();
-                    db.ResetPlayerBaseId();
+                    db.DeleteAllPlayersTa();
+                    db.ResetPlayerBaseIdTa();
                     LoadPlayerlist();
                 }
             }
@@ -376,8 +391,16 @@ for determining the first round pairings.";
                 MessageBox.Show(db.Locl_GetText("GUI_TEXT", "OnlyBefore1"), Text);
         }
 
-        void MnuPlayersRebaseIdsClick(object sender, EventArgs e)
-        { 
+        void MnuPlayersRebaseIdsClickTa(object sender, EventArgs e)
+        {
+            if (db.GetMaxRound() == 0)
+            {
+                db.RebasePlayerIdsTa();
+                db.ResetPlayerBaseIdTa();
+                LoadPlayerlist();
+            }
+            else 
+                MessageBox.Show(db.Locl_GetText("GUI_TEXT", "OnlyBefore1"), Text);
         }
 
         private void GrdPlayersDataError(object sender, DataGridViewDataErrorEventArgs e) => e.Cancel = false;
@@ -1402,10 +1425,10 @@ for determining the first round pairings.";
             this.mnuPlayersImport.Click += new EventHandler(this.MnuPlayersImportClick);
 
             this.mnuPlayersDeleteAll.Size = new Size(218, 22);
-            this.mnuPlayersDeleteAll.Click += new EventHandler(this.MnuPlayersDeleteAllClick);
+            this.mnuPlayersDeleteAll.Click += new EventHandler(this.MnuPlayersDeleteAllClickTa);
 
             this.mnuPlayersRebaseIds.Size = new Size(218, 22);
-            this.mnuPlayersRebaseIds.Click += new EventHandler(this.MnuPlayersRebaseIdsClick);
+            this.mnuPlayersRebaseIds.Click += new EventHandler(this.MnuPlayersRebaseIdsClickTa);
 
             this.mnuPlayers.DropDownItems.AddRange(new ToolStripItem[]
                     { mnuPlayersImport, mnuPlayersDeleteAll, mnuPlayersRebaseIds});

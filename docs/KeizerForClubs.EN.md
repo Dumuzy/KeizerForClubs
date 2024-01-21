@@ -185,6 +185,18 @@ less than 20 players.
 
 <br />
 
+### Players menu
+
+#### Import players
+You can import a list of players in csv format. The name and rating of the players are imported. 
+The format of the csv file is determined by the first line of the file. In the first line separators (semicolon, colon or comma), 
+the text _Name_ and the text _Rating_ are searched for. The rest of the file is read according to the format of the first line. 
+Example: The first line of the csv file is 
+```
+x;x;;xxx;Name;;Rating
+``` 
+Then the separator is the semicolon, the player names are in the 5th column, the ratings of the players in the 7th.
+
 ### Acknowledgements
 
 *   The program originally was developed with SharpDevelop, now I'm using Microsoft Visual Studio Community 2022. 
