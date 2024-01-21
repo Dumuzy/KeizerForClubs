@@ -1382,7 +1382,7 @@ for determining the first round pairings.";
             this.mnuMainmenu.TabIndex = 1;
             this.mnuMainmenu.Text = "Program";
             this.mnuTurnierstart.DropDownItems.AddRange(new ToolStripItem[]
-                { this.mnuStartStart, this.toolStripMenuItem1, this.mnuStartLanguage, this.mnuPlayersImport });
+                { this.mnuStartStart, this.toolStripMenuItem1, this.mnuStartLanguage });
             this.mnuTurnierstart.Name = "mnuTurnierstart";
             this.mnuTurnierstart.Size = new Size(52, 20);
             this.mnuTurnierstart.Text = "Start...";
