@@ -206,6 +206,9 @@ namespace KeizerForClubs
         void CheckValueOfWinAgainst(SqliteInterface.stPairing p, int runde, int playerId, double valueOfWin,
                 Dictionary<int, double> valueOfWinAgainstPlayerDict, int endRundeWhichIsCalculated)
         {
+
+            if (Math.Abs(valueOfWin) < 0.01)
+                return;  // this is the case for retired players and not a real problem.
             int er = endRundeWhichIsCalculated;
             // Debug.WriteLine($"ER={er} Runde={runde} {p.IdW}-{p.IdB} = {Ext.ToDebug(p.PtsW)}:{Ext.ToDebug(p.PtsB)}");
             if (!valueOfWinAgainstPlayerDict.TryGetValue(playerId, out double prevValue))
@@ -214,8 +217,10 @@ namespace KeizerForClubs
             {
                 if (Math.Abs(prevValue-valueOfWin) > 0.01)
                 {
-                    Debug.WriteLine($"Win against {playerId} differs from before in round {runde}.");
-                    throw new Exception($"Win against {playerId} differs from before in round {runde}.");
+                    var name = db.GetPlayerName(playerId);
+                    var s = $"Win against Id={playerId} Name={name} differs from before in round {runde}. Previous={prevValue} Now={valueOfWin}";
+                    Debug.WriteLine(s);
+                    throw new Exception(s);
                 }
             }
         }
