@@ -392,6 +392,19 @@ namespace KeizerForClubs
             return res != null ? Convert.ToInt16(res) : -1;
         }
 
+        /// <summary> Returns the first player that matches the query. New empty player with state 
+        /// unknown and id -1, if none found. </summary>
+        public stPlayer GetPlayer(string sWhere, string sSortorder, int runde)
+        {
+            var arr = new stPlayer[1];
+            int n = GetPlayerList(ref arr, sWhere, sSortorder, runde);
+            return n == 0 ? new stPlayer { Id = -1 } : arr[0];
+        }
+
+        /// <summary> Returns the player with the given Id.  New empty player with state 
+        /// unknown and id -1, if none found.</summary>
+        public stPlayer GetPlayerById(int id, int runde) => GetPlayer($" WHERE id = {id} ", "", runde);
+
         public int CntPlayerNames(string sName)
         {
             sqlCommand.CommandText = " Select Count(*) from player  where name=:pName ";
@@ -873,15 +886,6 @@ namespace KeizerForClubs
             sqlCommand.CommandText = @" SELECT Count(1) FROM Player p ";
             int playerCount = Convert.ToInt32(sqlCommand.ExecuteScalar());
             return playerCount;
-        }
-
-        /// <summary> Returns the first player that matches the query. New empty player wiht state 
-        /// unknown and id -1, if none found. </summary>
-        public stPlayer GetPlayer(string sWhere, string sSortorder, int runde)
-        {
-            var arr = new stPlayer[1];
-            int n = GetPlayerList(ref arr, sWhere, sSortorder, runde);
-            return n == 0 ? new stPlayer { Id = -1 } : arr[0];
         }
         #endregion Playerlist
 

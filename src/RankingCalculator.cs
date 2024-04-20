@@ -121,8 +121,8 @@ namespace KeizerForClubs
             {
                 var pair = pairings[index];
                 float erg_w = 0.0f, erg_s = 0.0f;
-                var pWhite = db.GetPlayer(" WHERE ID=" + (object)pair.IdW, " ", runde);
-                var pBlack = db.GetPlayer(" WHERE ID=" + (object)pair.IdB, " ", runde);
+                var pWhite = db.GetPlayerById(pair.IdW, runde);
+                var pBlack = db.GetPlayerById(pair.IdB, runde);
 
                 if (pair.Result == SqliteInterface.Results.WinWhite)
                     erg_w = pBlack.KeizerStartPts;
@@ -209,6 +209,9 @@ namespace KeizerForClubs
 
             if (Math.Abs(valueOfWin) < 0.01)
                 return;  // this is the case for retired players and not a real problem.
+            var pl = db.GetPlayerById(playerId, runde);
+            if (pl.State == SqliteInterface.PlayerState.Retired)
+                return;
             int er = endRundeWhichIsCalculated;
             // Debug.WriteLine($"ER={er} Runde={runde} {p.IdW}-{p.IdB} = {Ext.ToDebug(p.PtsW)}:{Ext.ToDebug(p.PtsB)}");
             if (!valueOfWinAgainstPlayerDict.TryGetValue(playerId, out double prevValue))
