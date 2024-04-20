@@ -175,7 +175,7 @@ namespace KeizerForClubs
             string strr = db.Locl_GetText("GUI_LABEL", "Runde") + " " + db.GetMaxRound();
             t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
             // var thead = new Li<string>("Platz Name Rating Rank-P Keizer-Sum GamePts".Split());
-            var thead = new Li<string>("Platz Name Rank-Pb Keizer-&#8721; GamePts".Split());
+            var thead = new Li<string>(db.Locl_GetText("GUI_LABEL", "Kreuztab.Header").Split());
             for (int i = 0; i < maxRound; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
