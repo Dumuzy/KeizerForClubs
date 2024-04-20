@@ -500,7 +500,7 @@ namespace KeizerForClubs
                 BeginTransaction();
                 for (int i = 0; i < li.Count; ++i)
                 {
-                    sqlCommand.CommandText = $"UPDATE PLAYER set id={li[i].Id+1000} WHERE id={li[i].Id}";
+                    sqlCommand.CommandText = $"UPDATE PLAYER set id={li[i].Id + 1000} WHERE id={li[i].Id}";
                     sqlCommand.ExecuteNonQuery();
                 }
 
@@ -508,7 +508,7 @@ namespace KeizerForClubs
                 li = GetPlayerLi("", "order by rating desc", 0);
                 for (int i = 0; i < li.Count; ++i)
                 {
-                    sqlCommand.CommandText = $"UPDATE PLAYER set id={i+1} WHERE id={li[i].Id}";
+                    sqlCommand.CommandText = $"UPDATE PLAYER set id={i + 1} WHERE id={li[i].Id}";
                     sqlCommand.ExecuteNonQuery();
                 }
                 EndTransaction();
@@ -526,6 +526,50 @@ namespace KeizerForClubs
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
             return true;
+        }
+
+        // Alle Paarungen einer Runde löschen, in denen player1 oder player2 vorkommt. 
+        public void DelPairings(int runde, int playerId1, int playerId2 = -3678)
+        {
+            sqlCommand.CommandText = @" DELETE FROM Pairing  WHERE Rnd=@pRunde AND 
+                            (PID_W in (@p1, @p2) OR PID_B in (@p1, @p2)) ";
+            sqlCommand.Parameters.AddWithValue("pRunde", runde);
+            sqlCommand.Parameters.AddWithValue("p1", playerId1);
+            sqlCommand.Parameters.AddWithValue("p2", playerId2);
+            sqlCommand.Prepare();
+            sqlCommand.ExecuteNonQuery();
+        }
+
+        // Gibt das nächste freie Brett der Runde zurück. 
+        public int GetNextFreeBrettOfRound(int runde, bool isBoardWithoutOpponent)
+        {
+            var extra = isBoardWithoutOpponent ? " AND board >= 100" : " AND board < 100";
+            sqlCommand.CommandText = @" SELECT board FROM Pairing WHERE Rnd=@pRunde" + extra;
+            sqlCommand.Parameters.AddWithValue("pRunde", runde);
+            sqlCommand.Prepare();
+            Li<int> boards = new Li<int>();
+            using (var reader = sqlCommand.ExecuteReader())
+                if (reader.HasRows)
+                    while (reader.Read())
+                        if (!reader.IsDBNull(0))
+                            boards.Add((int)reader.GetInt16(0));
+            boards.Sort();
+            int free = -1;
+            int minBoardNum = isBoardWithoutOpponent ? 100 : 1;
+            while (free == -1)
+            {
+                if (boards.IsEmpty)
+                    free = minBoardNum;
+                else
+                {
+                    var min = boards.Min();
+                    if (min > minBoardNum)
+                        free = minBoardNum;
+                    else
+                        boards.Remove(minBoardNum++);
+                }
+            }
+            return free;
         }
 
         // Anzahl Paarungen ohne Ergebnis (=Runde nicht beendet?)
@@ -793,6 +837,12 @@ namespace KeizerForClubs
             return new Li<stPlayer>(players.Take(count).Where(p => p.State != PlayerState.NotYetStarted));
         }
 
+        public Li<stPlayer> GetPlayerLi_Available(string sSortorder, int runde)
+        {
+            SqliteInterface.stPlayer[] arr = new stPlayer[100];
+            int playerCount = GetPlayerList_Available(ref arr, sSortorder, runde);
+            return new Li<stPlayer>(arr.Take(playerCount));
+        }
 
         public int GetPlayerList_Available(ref stPlayer[] pList, string sSortorder, int runde)
         {

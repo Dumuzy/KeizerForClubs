@@ -42,7 +42,7 @@ namespace KeizerForClubs
         private CheckBox chkPairingOnlyPlayed;
         private ToolStripMenuItem mnuPaarungDropLast;
         private ToolStripSeparator toolStripMenuItem3;
-        private ToolStripMenuItem mnuPaarungManuell;
+        private ToolStripMenuItem mnuPaarungManuell, mnuPaarungThisMan;
         private ToolStripSeparator toolStripMenuItem2;
         private ToolStripMenuItem mnuPaarungNext;
         private DataGridViewTextBoxColumn colPairgBoard;
@@ -272,11 +272,22 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             DelDeletedPlayers();
+            int maxRound = db.GetMaxRound();
             new ReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
-            if (db.GetPairings_NoResult() == 0)
-                ExecutePairingManual();
+            if (sender == mnuPaarungManuell)
+            {
+                if (db.GetPairings_NoResult() == 0)
+                    ExecutePairingManual(maxRound + 1);
+                else
+                    MessageBox.Show(db.Locl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
+            }
             else
-                MessageBox.Show(db.Locl_GetText("GUI_TEXT", "Hinweis.RundeUnv"), "No....", MessageBoxButtons.OK);
+            {
+                if (SelectedRound != maxRound)
+                    MessageBox.Show(db.Locl_GetText("GUI_TEXT", "Hinweis.EdLetzteRd"), "No....", MessageBoxButtons.OK);
+                else
+                    ExecutePairingManual(maxRound);
+            }
             ApplyPlayerStateTexte();
         }
 
@@ -399,7 +410,7 @@ for determining the first round pairings.";
                 db.ResetPlayerBaseIdTa();
                 LoadPlayerlist();
             }
-            else 
+            else
                 MessageBox.Show(db.Locl_GetText("GUI_TEXT", "OnlyBefore1"), Text);
         }
 
@@ -702,6 +713,7 @@ for determining the first round pairings.";
             mnuPaarungen.Text = db.Locl_GetText("GUI_MENU", "Paarungen");
             mnuPaarungNext.Text = db.Locl_GetText("GUI_MENU", "Paarung.Next");
             mnuPaarungManuell.Text = db.Locl_GetText("GUI_MENU", "Paarung.NextMan");
+            mnuPaarungThisMan.Text = db.Locl_GetText("GUI_MENU", "Paarung.ThisMan");
             mnuPaarungDropLast.Text = db.Locl_GetText("GUI_MENU", "Paarung.Drop");
             mnuListen.Text = db.Locl_GetText("GUI_MENU", "Listen");
             mnuListenStanding.Text = db.Locl_GetText("GUI_MENU", "Listen.Calc");
@@ -923,52 +935,65 @@ for determining the first round pairings.";
             int num = 100;
             for (int i = 0; i < this.iPairingPlayerCntAll; ++i)
             {
-                if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Freilos)
+                if (this.pPairingPlayerList[i].State.IsContainedIn(new PlayerState[] { SqliteInterface.PlayerState.Freilos,
+                        SqliteInterface.PlayerState.Hindered, SqliteInterface.PlayerState.Excused,
+                        SqliteInterface.PlayerState.Unexcused }))
                 {
+                    db.DelPairings(maxRound, this.pPairingPlayerList[i].Id);
                     db.InsPairingNew(maxRound, num++, this.pPairingPlayerList[i].Id, -1);
-                    db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.FreeWin);
-                }
-                if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Hindered)
-                {
-                    db.InsPairingNew(maxRound, num++, this.pPairingPlayerList[i].Id, -1);
-                    db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Hindered);
-                }
-                if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Excused)
-                {
-                    db.InsPairingNew(maxRound, num++, this.pPairingPlayerList[i].Id, -1);
-                    db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Excused);
-                }
-                if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Unexcused)
-                {
-                    db.InsPairingNew(maxRound, num++, this.pPairingPlayerList[i].Id, -1);
-                    db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Unexcused);
+
+                    if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Freilos)
+                        db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.FreeWin);
+                    else if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Hindered)
+                        db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Hindered);
+                    else if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Excused)
+                        db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Excused);
+                    else if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Unexcused)
+                        db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Unexcused);
                 }
             }
             return true;
         }
 
-        private bool ExecutePairingManual()
+        private bool ExecutePairingManual(int currRunde)
         {
-            var currRunde = db.GetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
+            bool isAlreadyExistingRound = currRunde != db.GetMaxRound() + 1;
+            // Falls isAlreadyExistingRound, ist currRunde die nächste, noch nicht ausgeloste Runde. 
+            // Andernfalls ist currRunde eine aktuell bereits ausgeloste, möglicherweise auch schon gespielte Runde. 
+
             frmPairingManual frmPairingManual = new frmPairingManual();
             frmPairingManual.btnCancel.Text = db.Locl_GetText("GUI_TEXT", "Abbruch");
             frmPairingManual.colWhite.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Weiss");
             frmPairingManual.colBlack.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Schwarz");
-            this.iPairingPlayerCntAvailable = db.GetPlayerList_Available(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
-            for (int i = 0; i < this.iPairingPlayerCntAvailable; ++i)
+            var currPairings = db.GetPairingLi($" WHERE Rnd={currRunde} ", " ORDER BY board");
+            var availPlayers = db.GetPlayerLi_Available(" ORDER BY rank ", currRunde);
+            if (isAlreadyExistingRound)
             {
-                if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Available)
-                    frmPairingManual.lstNames.Items.Add(this.pPairingPlayerList[i].Name);
+                for (int i = 0; i < currPairings.Count; ++i)
+                {
+                    var p = currPairings[i];
+                    frmPairingManual.grdPaarungen.Rows.Add();
+                    var row = frmPairingManual.grdPaarungen.Rows[i];
+                    row.Cells[0].Value = db.GetPlayerName(p.IdW);
+                    row.Cells[1].Value = db.GetPlayerName(p.IdB);
+                    availPlayers.RemoveAll(pla => pla.Id == p.IdW || pla.Id == p.IdB);
+                }
             }
 
+            foreach(var player in availPlayers)
+                if (player.State == SqliteInterface.PlayerState.Available)
+                    frmPairingManual.lstNames.Items.Add(player.Name);
             for (int i = 0; i < frmPairingManual.lstNames.Items.Count; i += 2)
                 frmPairingManual.grdPaarungen.Rows.Add();
+
+
+
             this.iPairingPlayerCntAll = db.GetPlayerList_NotDropped(ref this.pPairingPlayerList, " ORDER BY rank ", currRunde);
             if (frmPairingManual.ShowDialog() == DialogResult.OK)
             {
-                int runde = db.GetMaxRound() + 1;
+                int runde = currRunde;
                 this.numRoundSelect.Value = (Decimal)runde;
-                int num = 1;
+                int brett = 1;
                 for (int i = 0; i < frmPairingManual.grdPaarungen.Rows.Count; ++i)
                 {
                     if (frmPairingManual.grdPaarungen.Rows[i].Cells[0].Value != null && frmPairingManual.grdPaarungen.Rows[i].Cells[1].Value != null)
@@ -977,11 +1002,22 @@ for determining the first round pairings.";
                         string sName2 = frmPairingManual.grdPaarungen.Rows[i].Cells[1].Value.ToString();
                         int playerId1 = db.GetPlayerID(sName1);
                         int playerId2 = db.GetPlayerID(sName2);
-                        db.InsPairingNew(runde, num++, playerId1, playerId2);
-                        for (int j = 0; j < this.iPairingPlayerCntAll; ++j)
+                        bool shallInsert = !isAlreadyExistingRound ||
+                            !currPairings.Any(pp => pp.IdW == playerId1 && pp.IdB == playerId2);
+                        if (shallInsert)
                         {
-                            if (this.pPairingPlayerList[j].Id == playerId1 || this.pPairingPlayerList[j].Id == playerId2)
-                                this.pPairingPlayerList[j].State = SqliteInterface.PlayerState.Paired;
+                            if (isAlreadyExistingRound)
+                            {
+                                db.DelPairings(currRunde, playerId1, playerId2);
+                                brett = db.GetNextFreeBrettOfRound(currRunde, false);
+                            }
+                            else ++brett;
+                            db.InsPairingNew(runde, brett, playerId1, playerId2);
+                            for (int j = 0; j < this.iPairingPlayerCntAll; ++j)
+                            {
+                                if (this.pPairingPlayerList[j].Id == playerId1 || this.pPairingPlayerList[j].Id == playerId2)
+                                    this.pPairingPlayerList[j].State = SqliteInterface.PlayerState.Paired;
+                            }
                         }
                     }
                 }
@@ -1120,6 +1156,7 @@ for determining the first round pairings.";
             this.mnuPaarungNext = new ToolStripMenuItem();
             this.toolStripMenuItem2 = new ToolStripSeparator();
             this.mnuPaarungManuell = new ToolStripMenuItem();
+            this.mnuPaarungThisMan = new ToolStripMenuItem();
             this.toolStripMenuItem3 = new ToolStripSeparator();
             this.mnuPaarungDropLast = new ToolStripMenuItem();
             this.mnuListen = new ToolStripMenuItem();
@@ -1435,7 +1472,7 @@ for determining the first round pairings.";
 
 
             this.mnuPaarungen.DropDownItems.AddRange(new ToolStripItem[]
-                { mnuPaarungNext, toolStripMenuItem2, mnuPaarungManuell, toolStripMenuItem3, mnuPaarungDropLast });
+                { mnuPaarungNext, toolStripMenuItem2, mnuPaarungManuell, mnuPaarungThisMan, toolStripMenuItem3, mnuPaarungDropLast });
             this.mnuPaarungen.Enabled = false;
             this.mnuPaarungen.Name = "mnuPaarungen";
             this.mnuPaarungen.Size = new Size(56, 20);
@@ -1448,8 +1485,10 @@ for determining the first round pairings.";
             this.toolStripMenuItem2.Size = new Size(180, 6);
             this.mnuPaarungManuell.Name = "mnuPaarungManuell";
             this.mnuPaarungManuell.Size = new Size(183, 22);
-            this.mnuPaarungManuell.Text = "Manual next round...";
             this.mnuPaarungManuell.Click += new EventHandler(this.MnuPairingManualClick);
+            this.mnuPaarungThisMan.Name = "mnuPaarungManuell";
+            this.mnuPaarungThisMan.Size = new Size(183, 22);
+            this.mnuPaarungThisMan.Click += new EventHandler(this.MnuPairingManualClick);
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new Size(180, 6);
             this.mnuPaarungDropLast.Name = "mnuPaarungDropLast";
