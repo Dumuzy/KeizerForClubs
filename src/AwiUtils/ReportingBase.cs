@@ -139,7 +139,7 @@ namespace AwiUtils
         protected void AddHtmlHeader(StreamWriter sw, bool isEx = false)
         {
             var ex = isEx ? "ex" : "";
-            sw.WriteLine($@"<!DOCTYPE html><html><head>
+            sw.WriteLine($@"<!DOCTYPE html><html><head><meta charset='UTF-8'>
                 <style>
                 {GetCss()}
                 </style></head><body><div id=""{ex}wrapper"">");
