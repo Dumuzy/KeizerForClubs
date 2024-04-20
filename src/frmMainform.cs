@@ -774,7 +774,7 @@ for determining the first round pairings.";
             this.grdPairings.Rows.Clear();
             for (int index = 0; index < pairingList; ++index)
             {
-                if (!this.chkPairingOnlyPlayed.Checked || pList[index].Board < 100)
+                if (!this.chkPairingOnlyPlayed.Checked || pList[index].Board < stPairing.FirstNonPlayingBoard)
                 {
                     this.grdPairings.Rows.Add();
                     this.grdPairings.Rows[index].Cells[0].Value = (object)pList[index].Board.ToString();
@@ -932,7 +932,7 @@ for determining the first round pairings.";
         private bool PairingInsertNoPlaying()
         {
             int maxRound = db.GetMaxRound();
-            int num = 100;
+            int num = stPairing.FirstNonPlayingBoard;
             for (int i = 0; i < this.iPairingPlayerCntAll; ++i)
             {
                 if (this.pPairingPlayerList[i].State.IsContainedIn(new PlayerState[] { SqliteInterface.PlayerState.Freilos,
@@ -961,7 +961,7 @@ for determining the first round pairings.";
             // Falls isAlreadyExistingRound, ist currRunde die nächste, noch nicht ausgeloste Runde. 
             // Andernfalls ist currRunde eine aktuell bereits ausgeloste, möglicherweise auch schon gespielte Runde. 
 
-            frmPairingManual frmPairingManual = new frmPairingManual();
+            frmPairingManual frmPairingManual = new frmPairingManual(db, currRunde);
             frmPairingManual.btnCancel.Text = db.Locl_GetText("GUI_TEXT", "Abbruch");
             frmPairingManual.colWhite.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Weiss");
             frmPairingManual.colBlack.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Schwarz");
@@ -972,11 +972,18 @@ for determining the first round pairings.";
                 for (int i = 0; i < currPairings.Count; ++i)
                 {
                     var p = currPairings[i];
-                    frmPairingManual.grdPaarungen.Rows.Add();
-                    var row = frmPairingManual.grdPaarungen.Rows[i];
-                    row.Cells[0].Value = db.GetPlayerName(p.IdW);
-                    row.Cells[1].Value = db.GetPlayerName(p.IdB);
-                    availPlayers.RemoveAll(pla => pla.Id == p.IdW || pla.Id == p.IdB);
+                    if (p.Board < stPairing.FirstNonPlayingBoard)
+                    {
+                        if (availPlayers.Any(pla => pla.Id == p.IdW) &&
+                            availPlayers.Any(pla => pla.Id == p.IdB))
+                        {
+                            var iRow = frmPairingManual.grdPaarungen.Rows.Add();
+                            var row = frmPairingManual.grdPaarungen.Rows[iRow];
+                            row.Cells[0].Value = db.GetPlayerName(p.IdW);
+                            row.Cells[1].Value = db.GetPlayerName(p.IdB);
+                            availPlayers.RemoveAll(pla => pla.Id == p.IdW || pla.Id == p.IdB);
+                        }
+                    }
                 }
             }
 

@@ -74,6 +74,8 @@ namespace KeizerForClubs
             {
                 return $"{Round} {Board} W:{IdW} B:{IdB} res:{Result} pts_w {PtsW} pts_b {PtsB}";
             }
+            public const int FirstNonPlayingBoard = 100;
+            public bool IsNonPlayingBoard => Board >= FirstNonPlayingBoard;
         };
 
         public SqliteInterface()
@@ -541,9 +543,10 @@ namespace KeizerForClubs
         }
 
         // Gibt das nächste freie Brett der Runde zurück. 
-        public int GetNextFreeBrettOfRound(int runde, bool isBoardWithoutOpponent)
+        public int GetNextFreeBrettOfRound(int runde, bool isNonPlayingBoard)
         {
-            var extra = isBoardWithoutOpponent ? " AND board >= 100" : " AND board < 100";
+            var extra = isNonPlayingBoard ? $" AND board >= {stPairing.FirstNonPlayingBoard}" 
+                : $" AND board < {stPairing.FirstNonPlayingBoard}";
             sqlCommand.CommandText = @" SELECT board FROM Pairing WHERE Rnd=@pRunde" + extra;
             sqlCommand.Parameters.AddWithValue("pRunde", runde);
             sqlCommand.Prepare();
@@ -555,7 +558,7 @@ namespace KeizerForClubs
                             boards.Add((int)reader.GetInt16(0));
             boards.Sort();
             int free = -1;
-            int minBoardNum = isBoardWithoutOpponent ? 100 : 1;
+            int minBoardNum = isNonPlayingBoard ? stPairing.FirstNonPlayingBoard : 1;
             while (free == -1)
             {
                 if (boards.IsEmpty)
