@@ -122,6 +122,26 @@ Dans le système Keizer, une victoire contre le joueur classé premier du tourno
 
 Cette valeur correspond aux points que vous obtiendriez pour une victoire contre le joueur le mieux classé du tournoi, divisés par les points que vous obtiendriez contre le joueur le moins bien classé du tournoi. Plus ce chiffre est petit, plus le système Keizer et le système suisse sont proches. 3 est la valeur par défaut. Plus le chiffre est élevé, plus les joueurs les mieux classés du tournoi se distinguent des autres. Je recommande des valeurs plus basses pour les tournois de moins de 20 joueurs.
 
+
+<br />
+
+### Menu Listes
+En sélectionnant une entrée dans le menu des listes, des listes de sorties seront générées dans le dossier _export_. Le type de sorties à générer peut être sélectionné 
+être sélectionné dans l'onglet _Paramètres_. 
+
+#### Sortie Html
+La sortie html se compose d'un code css général qui est le même pour chaque tableau et d'un code html qui contient les données réelles. 
+Les css proviennent du fichier _export/keizer.css_. Vous pouvez modifier les css pour les adapter à vos besoins si vous le souhaitez. 
+
+Les tableaux de données reçoivent les balises suivantes, où les éléments dans _{}_ sont remplacés par de vraies données :
+```
+id='kfc-{tournament name}-{table type}-{current round}'
+class='my-wrapper kfx-wrapper kfc-wrapper-{number of columns}'
+/* The cross table can get very wide, so it gets the different css classes: */
+class='my-exwrapper kfx-exwrapper kfc-exwrapper-{number of columns}'
+```
+
+
 <br />
 
 ### Menu Joueurs

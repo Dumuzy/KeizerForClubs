@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using KeizerForClubs;
 
@@ -69,7 +70,7 @@ namespace AwiUtils
             string fileName = fileBase + ".html";
             using (var swExport = new StreamWriter(fileName))
             {
-                AddHtmlHeader(swExport, isExWrapper);
+                AddHtmlHeader(swExport, t, isExWrapper);
                 swExport.WriteLine($"<h1>{t.Header1}</h1>");
                 swExport.WriteLine($"<h2>{t.Header2}</h2>");
                 swExport.WriteLine("<table>");
@@ -135,17 +136,35 @@ namespace AwiUtils
         }
         static string css = null;
 
+        protected string RemoveProblematicChars(string s) => Regex.Replace(s, "[^-_A-Za-z0-9]", "");
 
-        protected void AddHtmlHeader(StreamWriter sw, bool isEx = false)
+        static readonly Dictionary<string, string> TableType2Id = Helper.ToDictionary(@"None none 
+            Stand stand Kreuz cross Spieler player Paarungen pairs");
+
+        protected string GetHtmlId(TableW2Headers t)
         {
-            var ex = isEx ? "ex" : "";
-            sw.WriteLine($@"<!DOCTYPE html><html><head><meta charset='UTF-8'>
-                <style>
-                {GetCss()}
-                </style></head><body><div id=""{ex}wrapper"">");
+            var tt = TableType2Id[t.TableType.ToString()];
+            var s = RemoveProblematicChars($"kfc-{t.Header1}-{tt}-{t.Runde}");
+            return s;
         }
 
-        protected void AddHtmlFooter(StreamWriter sw) => sw.WriteLine(@"</div></body></html>");
+        protected void AddHtmlHeader(StreamWriter sw, TableW2Headers t, bool isEx = false)
+        {
+            var ex = isEx ? "ex" : "";
+
+            sw.WriteLine($@"
+<!DOCTYPE html><html><head><meta charset='UTF-8'>
+<style>
+{GetCss()}
+</style></head>
+<body>
+
+<div id='{GetHtmlId(t)}' class='my-{ex}wrapper kfc-{ex}wrapper kfc-{ex}wrapper-{t.ColsCount:00}'>");
+        }
+
+        protected void AddHtmlFooter(StreamWriter sw) => sw.WriteLine(@"</div>
+
+</body></html>");
 
     }
 
@@ -158,13 +177,21 @@ namespace AwiUtils
 
     public class TableW2Headers : ISimpleTable
     {
-        public TableW2Headers(string header1) => Header1 = header1;
+        public TableW2Headers(string header1, TableType  tt, int runde) {
+            Header1 = header1;
+            TableType = tt;
+            Runde = runde;
+        }
         public string Header1, Header2;
+        public readonly TableType TableType;
+        public readonly int Runde;
         public Li<string> Footer;
         public void AddRow(Li<string> row) => rows.Add(row);
         public int Count => rows.Count;
         public Li<string> this[int i] { get { return rows[i]; } }
+        public int ColsCount => rows.FirstOrDefault()?.Count ?? 0;
 
         Li<Li<string>> rows = new Li<Li<string>>();
     }
+
 }

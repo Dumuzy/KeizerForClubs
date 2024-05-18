@@ -158,6 +158,22 @@ is the default. The higher the number, the more the better players stay
 separated from the others. I recommend lower values for tournaments with
 less than 20 players.</p>
 <p><br /></p>
+<h3 id="lists-menu">Lists menu</h3>
+<p>By selecting an entry in the lists menu, output lists will be
+generated in the folder <em>export</em>. The type of outputs to be
+generated can be selected on the <em>Settings</em> tab.</p>
+<h4 id="html-output">Html Output</h4>
+<p>The html output consists of general css which is the same for every
+table and html which contains the real data. The css is taken from the
+file <em>export/keizer.css</em>. You can change the css to match your
+own needs if you want to.</p>
+<p>The data tables get the following tags, where the stuff in
+<em>{}</em> is replaced by real data:</p>
+<pre><code>id=&#39;kfc-{tournament name}-{table type}-{current round}&#39;
+class=&#39;my-wrapper kfc-wrapper kfc-wrapper-{number of columns}&#39;
+/* The cross table can get very wide, so it gets the different css classes: */
+class=&#39;my-exwrapper kfc-exwrapper kfc-exwrapper-{number of columns}&#39;</code></pre>
+<p><br /></p>
 <h3 id="players-menu">Players menu</h3>
 <h4 id="import-players">Import players</h4>
 <p>You can import a list of players in csv format. The name and rating

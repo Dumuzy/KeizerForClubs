@@ -199,6 +199,22 @@ Beispiel: Die erste Zeile der csv-Datei ist</p>
 <pre><code>x;x;;xxx;Name;;Rating</code></pre>
 <p>Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der
 5. Spalte, die Ratings der Spieler sind in der 7. Spalte.</p>
+<p><br /></p>
+<h3 id="menü-listen">Menü Listen</h3>
+<p>Durch Auswahl eines Eintrags im Listenmenü werden Ausgabelisten im
+Ordner <em>export</em> erzeugt. Die Art der zu erzeugenden Ausgaben kann
+auf der Registerkarte <em>Einstellungen</em> ausgewählt werden.</p>
+<h4 id="html-ausgabe">Html Ausgabe</h4>
+<p>Die Html-Ausgabe besteht aus allgemeinem Css, das für jede Tabelle
+gleich ist, und Html, das die eigentlichen Daten enthält. Das Css wird
+aus der Datei <em>export/keizer.css</em> übernommen. Wenn Sie möchten,
+können Sie das Css an Ihre eigenen Bedürfnisse anpassen.</p>
+<p>Die Datentabellen erhalten die folgenden Tags, wobei die Angaben in
+<em>{}</em> durch echte Daten ersetzt werden.</p>
+<pre><code>id=&#39;kfc-{tournament name}-{table type}-{current round}&#39;
+class=&#39;my-wrapper kfx-wrapper kfc-wrapper-{number of columns}&#39;
+/* The cross table can get very wide, so it gets the different css classes: */
+class=&#39;my-exwrapper kfx-exwrapper kfc-exwrapper-{number of columns}&#39;</code></pre>
 <h3 id="danksagungen">Danksagungen</h3>
 <ul>
 <li>Das Programm wurde ursprünglich mit SharpDevelop entwickelt, jetzt

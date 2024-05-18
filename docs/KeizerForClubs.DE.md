@@ -187,6 +187,25 @@ x;x;;xxx;Name;;Rating
 ``` 
 Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der 5. Spalte, die Ratings der Spieler sind in der 7. Spalte. 
 
+<br />
+
+### Menü Listen
+Durch Auswahl eines Eintrags im Listenmenü werden Ausgabelisten im Ordner _export_ erzeugt. Die Art der zu erzeugenden Ausgaben kann 
+auf der Registerkarte _Einstellungen_ ausgewählt werden.
+
+#### Html Ausgabe
+Die Html-Ausgabe besteht aus allgemeinem Css, das für jede Tabelle gleich ist, und Html, das die eigentlichen Daten enthält. 
+Das Css wird aus der Datei _export/keizer.css_ übernommen. Wenn Sie möchten, können Sie das Css an Ihre eigenen Bedürfnisse anpassen. 
+
+Die Datentabellen erhalten die folgenden Tags, wobei die Angaben in _{}_ durch echte Daten ersetzt werden.
+```
+id='kfc-{tournament name}-{table type}-{current round}'
+class='my-wrapper kfx-wrapper kfc-wrapper-{number of columns}'
+/* The cross table can get very wide, so it gets the different css classes: */
+class='my-exwrapper kfx-exwrapper kfc-exwrapper-{number of columns}'
+```
+
+
 
 ### Danksagungen
 

@@ -51,7 +51,7 @@ namespace KeizerForClubs
 
         TableW2Headers fReportPaarungenTable(int runde)
         {
-            var t = new TableW2Headers(sTurnier);
+            var t = new TableW2Headers(sTurnier, TableType.Paarungen, runde);
             t.Header2 = db.Locl_GetText("GUI_MENU", "Paarungen") + " " + 
                 db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
             t.AddRow("Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis".Split().
@@ -107,12 +107,11 @@ namespace KeizerForClubs
 
         TableW2Headers fReportTabellenstandTable()
         {
-            var t = new TableW2Headers(sTurnier);
-            var runde = db.GetMaxRound();
-            string str2 = db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
+            var t = new TableW2Headers(sTurnier, TableType.Stand, db.GetMaxRound());
+            string str2 = db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde;
             t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
-            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc ", runde);
+            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc ", t.Runde);
             var lih = new Li<string>(new string[] { "", db.Locl_GetText("GUI_TEXT", "Name"),
                 db.Locl_GetText("GUI_TEXT", "Keizer-Punkte"), db.Locl_GetText("GUI_TEXT", "Spiel-Punkte") });
             t.AddRow(lih);
@@ -167,16 +166,15 @@ namespace KeizerForClubs
 
         TableW2Headers fReportTabellenstandVollTable()
         {
-            var t = new TableW2Headers(sTurnier);
-            int maxRound = db.GetMaxRound();
+            var t = new TableW2Headers(sTurnier, TableType.Kreuz, db.GetMaxRound());
             SqliteInterface.stPairing[] pList4 = new SqliteInterface.stPairing[1];
-            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", maxRound);
+            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", t.Runde);
 
             string strr = db.Locl_GetText("GUI_LABEL", "Runde") + " " + db.GetMaxRound();
             t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
             // var thead = new Li<string>("Platz Name Rating Rank-P Keizer-Sum GamePts".Split());
             var thead = new Li<string>(db.Locl_GetText("GUI_LABEL", "Kreuztab.Header").Split());
-            for (int i = 0; i < maxRound; ++i)
+            for (int i = 0; i < t.Runde; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
             for (int index1 = 0, numPlayer = 1; index1 < players.Count; ++index1)
@@ -196,15 +194,15 @@ namespace KeizerForClubs
                 line.Add(player.KeizerSumPts.ToString("0.00"));
                 line.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
 
-                for (int runde = 1; runde <= maxRound; ++runde)
+                for (int runde = 1; runde <= t.Runde; ++runde)
                 {
                     string sWhere = $" WHERE (PID_W={player.Id} OR PID_B={player.Id}) AND rnd={runde} ";
                     string str3;
                     if (db.GetPairingList(ref pList4, sWhere, "  ") > 0)
                     {
                         var pair = pList4[0];
-                        var pWhite = db.GetPlayerById(pair.IdW, maxRound);
-                        var pBlack = db.GetPlayerById(pair.IdB, maxRound);
+                        var pWhite = db.GetPlayerById(pair.IdW, t.Runde);
+                        var pBlack = db.GetPlayerById(pair.IdB, t.Runde);
                         string str4 = db.Locl_GetGameResultShort(pair.Result) + " ";
                         if (pair.Result > SqliteInterface.Results.WinBlack)
                         {
@@ -271,12 +269,11 @@ namespace KeizerForClubs
 
         TableW2Headers fReportTeilnehmerTable(int runde)
         {
-            var maxRound = db.GetMaxRound();
-            var t = new TableW2Headers(sTurnier);
+            var t = new TableW2Headers(sTurnier, TableType.Spieler, db.GetMaxRound());
             t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
-                db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
+                db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde;
 
-            var players = db.GetPreviousPlayerLi("", " ORDER BY ID ",  runde);
+            var players = db.GetPreviousPlayerLi("", " ORDER BY ID ", t.Runde);
             // players.Sort(p => p.id);  // TODO
             for (int index = 0; index < players.Count; ++index)
             {
@@ -294,12 +291,11 @@ namespace KeizerForClubs
 
         TableW2Headers fReportTeilnehmerTableOld(SqliteInterface sqlintf)
         {
-            var runde = db.GetMaxRound();
-            var t = new TableW2Headers(sTurnier);
+            var t = new TableW2Headers(sTurnier, TableType.Spieler, db.GetMaxRound());
             t.Header2 = sqlintf.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
-                db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde; 
+                db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde; 
 
-            var players = sqlintf.GetPlayerLi("", " ORDER BY ID ", runde);
+            var players = sqlintf.GetPlayerLi("", " ORDER BY ID ", t.Runde);
             for (int index = 0; index < players.Count; ++index)
             {
                 var player = players[index];

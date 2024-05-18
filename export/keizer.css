@@ -30,10 +30,31 @@ th {
   color: white;
 }
 
-#wrapper {
+.kfc-wrapper {
   margin: 20px auto;
   padding: 10px 15px 15px 15px;
-  width: clamp(350px, 50%, 700px);
-  background-color: #fbfbfb; 
+  width: clamp(350px, 80%, 700px);
 }
+
+
+.kfc-exwrapper-01 { font-size: 12pt; }
+.kfc-exwrapper-02 { font-size: 12pt; }
+.kfc-exwrapper-03 { font-size: 12pt; }
+.kfc-exwrapper-04 { font-size: 12pt; }
+.kfc-exwrapper-05 { font-size: 12pt; }
+.kfc-exwrapper-06 { font-size: 12pt; }
+.kfc-exwrapper-07 { font-size: 12pt; }
+.kfc-exwrapper-08 { font-size: 11pt; }
+.kfc-exwrapper-09 { font-size: 11pt; }
+.kfc-exwrapper-10 { font-size: 11pt; }
+.kfc-exwrapper-11 { font-size: 10pt; }
+.kfc-exwrapper-12 { font-size: 10pt; }
+.kfc-exwrapper-13 { font-size: 10pt; }
+.kfc-exwrapper-14 { font-size: 9pt; }
+.kfc-exwrapper-15 { font-size: 9pt; }
+.kfc-exwrapper-16 { font-size: 9pt; }
+.kfc-exwrapper-17 { font-size: 8pt; }
+.kfc-exwrapper-18 { font-size: 8pt; }
+.kfc-exwrapper-19 { font-size: 8pt; }
+.kfc-exwrapper-20 { font-size: 7pt; }
 

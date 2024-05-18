@@ -4,6 +4,12 @@ using AwiUtils;
 
 namespace KeizerForClubs
 {
+    public enum TableType
+    {
+        None = 0, Stand, Kreuz, Spieler, Paarungen
+    }
+
+
     public class SqliteInterface
     {
         public enum PlayerState
@@ -39,11 +45,6 @@ namespace KeizerForClubs
             Excused = 6,
             Unexcused = 7,
         };
-
-        public enum TableType
-        {
-            None = 0, Stand, Kreuz, Spieler
-        }
 
         public struct stPlayer
         {
@@ -1006,7 +1007,7 @@ namespace KeizerForClubs
         public TableW2Headers ReadTableWHeadersFromDb(TableType tt, int runde)
         {
             var tn = TabWHName(tt, runde);
-            var table = new TableW2Headers("");
+            var table = new TableW2Headers("", tt, runde);
             sqlCommand.CommandText = $"SELECT line FROM {tn} ORDER BY id;";
             using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
                 if (sqLiteDataReader.HasRows)

@@ -185,6 +185,24 @@ less than 20 players.
 
 <br />
 
+### Lists menu
+By selecting an entry in the lists menu, output lists will be generated in the folder _export_. The type of outputs to be generated can be 
+selected on the _Settings_ tab. 
+
+#### Html Output
+The html output consists of general css which is the same for every table and html which contains the real data. 
+The css is taken from the file _export/keizer.css_. You can change the css to match your own needs if you want to. 
+
+The data tables get the following tags, where the stuff in _{}_ is replaced by real data:
+```
+id='kfc-{tournament name}-{table type}-{current round}'
+class='my-wrapper kfc-wrapper kfc-wrapper-{number of columns}'
+/* The cross table can get very wide, so it gets the different css classes: */
+class='my-exwrapper kfc-exwrapper kfc-exwrapper-{number of columns}'
+```
+
+<br />
+
 ### Players menu
 
 #### Import players
