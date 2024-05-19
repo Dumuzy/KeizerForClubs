@@ -208,7 +208,7 @@ The column _Rank-Pb_ stands for "Keizer-*Rank*-*P*oints *b*efore the current rou
 
 I'll try to explain.
 
-The Keizer points a player A gets for a victory against Player B is just this value, Rank-Pb.    I've introduced the column for purposes of manually recalculating the Keizer points.  There were questions by my club mates....
+The Keizer points a player A gets for a victory against Player B is just this value, Rank-Pb.    I've introduced the column for purposes of manually recalculating the Keizer points.  There were questions by club mates...
 
 Cf. the screenshot below, which is a part of a table of an example tournament.
 
