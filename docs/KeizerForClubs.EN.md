@@ -232,6 +232,17 @@ x;x;;xxx;Name;;Rating
 ``` 
 Then the separator is the semicolon, the player names are in the 5th column, the ratings of the players in the 7th.
 
+#### Delete All
+Deletes all players. This is useful if you want to create a tournament B which shall have exactly the same settings as previous tournament A. 
+In this case, copy A.s3db to B.s3db, then delete all played rounds, then delete all players. 
+To make sure that you don't accidentally delete your current tournament, deleting all players is only possible without any games in the database.   
+
+#### Rebase player ids
+After importing a list of players, e.g. the club members, and then deleting those not playing in the tournament, the player list 
+in KeizerForClubs may have a lot of holes in the sequence of player ids. This is a bit annoying. Especially as you can't see from the 
+highest player id the number of participants in the tournament.  
+You can use _Rebase player ids_ to remove the holes in the sequence of ids. 
+
 ### Acknowledgements
 
 *   The program originally was developed with SharpDevelop, now I'm using Microsoft Visual Studio Community 2022. 

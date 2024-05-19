@@ -187,19 +187,6 @@ höher die Zahl ist, desto mehr bleiben die besseren Spieler unter sich.
 Ich empfehle niedrigere Werte für Turniere mit weniger als 20
 Spielern.</p>
 <p><br /></p>
-<h3 id="menü-spieler">Menü Spieler</h3>
-<h4 id="spieler-importieren">Spieler importieren</h4>
-<p>Man kann eine Liste mit Spielern im csv-Format importieren.
-Importiert werden Namen und Ratings der Spieler. Das Format der
-csv-Datei wird bestimmt durch die erste Zeile der Datei. In der ersten
-Zeile werden Trennzeichen (Strichpunkt, Doppelpunkt oder Komma), der
-Text <em>Name</em> und der Text <em>Rating</em> gesucht. Entsprechend
-dem Format der ersten Zeile wird der Rest der Datei eingelesen.
-Beispiel: Die erste Zeile der csv-Datei ist</p>
-<pre><code>x;x;;xxx;Name;;Rating</code></pre>
-<p>Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der
-5. Spalte, die Ratings der Spieler sind in der 7. Spalte.</p>
-<p><br /></p>
 <h3 id="menü-listen">Menü Listen</h3>
 <p>Durch Auswahl eines Eintrags im Listenmenü werden Ausgabelisten im
 Ordner <em>export</em> erzeugt. Die Art der zu erzeugenden Ausgaben kann
@@ -242,6 +229,38 @@ der in Runde 2 gegen Andreas unentschieden gespielt hat, hat dafür 11,5
 <img src="./Rank-Pb.png" alt="Example Tournament" />
 <figcaption aria-hidden="true">Example Tournament</figcaption>
 </figure>
+<p><br /></p>
+<h3 id="menü-spieler">Menü Spieler</h3>
+<h4 id="spieler-importieren">Spieler importieren</h4>
+<p>Man kann eine Liste mit Spielern im csv-Format importieren.
+Importiert werden Namen und Ratings der Spieler. Das Format der
+csv-Datei wird bestimmt durch die erste Zeile der Datei. In der ersten
+Zeile werden Trennzeichen (Strichpunkt, Doppelpunkt oder Komma), der
+Text <em>Name</em> und der Text <em>Rating</em> gesucht. Entsprechend
+dem Format der ersten Zeile wird der Rest der Datei eingelesen.
+Beispiel: Die erste Zeile der csv-Datei ist</p>
+<pre><code>x;x;;xxx;Name;;Rating</code></pre>
+<p>Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der
+5. Spalte, die Ratings der Spieler sind in der 7. Spalte.</p>
+<h4 id="alle-löschen">Alle löschen</h4>
+<p>Löscht alle Spieler. Dies ist nützlich, wenn Sie ein Turnier B
+erstellen möchten, das genau die gleichen Einstellungen wie das
+vorherige Turnier A haben soll. Kopieren Sie in diesem Fall A.s3db nach
+B.s3db, löschen Sie dann alle gespielten Runden und anschließend alle
+Spieler. Um sicherzustellen, dass Sie nicht versehentlich Ihr aktuelles
+Turnier löschen, ist das Löschen aller Spieler nur möglich, wenn keine
+Partien in der Datenbank vorhanden sind.</p>
+<h4 id="spieler-ids-neu-vergeben">Spieler-IDs neu vergeben</h4>
+<p>Nach dem Importieren einer Spielerliste, z. B. der Vereinsmitglieder,
+und dem anschließenden Löschen der Spieler, die nicht am Turnier
+teilnehmen, kann die Spielerliste in KeizerForClubs viele Löcher in der
+Reihenfolge der Spielernummern haben. Das ist ein bisschen ärgerlich.
+Zumal man an der höchsten Spieler-ID nicht erkennen kann, wie viele
+Teilnehmer am Turnier teilnehmen.<br />
+Sie können <em>Spieler-IDs neu vergeben</em> verwenden, um die Löcher in
+der Reihenfolge der IDs zu entfernen. Nur möglich am Anfang eines
+Turniers.</p>
+<p><br /></p>
 <h3 id="danksagungen">Danksagungen</h3>
 <ul>
 <li>Das Programm wurde ursprünglich mit SharpDevelop entwickelt, jetzt

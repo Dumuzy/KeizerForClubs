@@ -175,21 +175,8 @@ weniger als 20 Spielern.
 
 <br />
 
-### Menü Spieler
-
-#### Spieler importieren
-Man kann eine Liste mit Spielern im csv-Format importieren. Importiert werden Namen und Ratings der Spieler. 
-Das Format der csv-Datei wird bestimmt durch die erste Zeile der Datei. In der ersten Zeile werden Trennzeichen (Strichpunkt, Doppelpunkt oder Komma), 
-der Text _Name_ und der Text _Rating_ gesucht. Entsprechend dem Format der ersten Zeile wird der Rest der Datei eingelesen. 
-Beispiel: Die erste Zeile der csv-Datei ist 
-```
-x;x;;xxx;Name;;Rating
-``` 
-Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der 5. Spalte, die Ratings der Spieler sind in der 7. Spalte. 
-
-<br />
-
 ### Menü Listen
+
 Durch Auswahl eines Eintrags im Listenmenü werden Ausgabelisten im Ordner _export_ erzeugt. Die Art der zu erzeugenden Ausgaben kann 
 auf der Registerkarte _Einstellungen_ ausgewählt werden.
 
@@ -222,6 +209,33 @@ Sie sehen zum Beispiel, dass der Rank-Pb von Spieler 4 (Sascha) 22 ist. Das bede
 Noch einer: Rank-Pb von Spieler 2 (Andreas) ist 23. Deshalb: Axel, der in Runde 2 gegen Andreas unentschieden gespielt hat, hat dafür 11,5 (11,5 = 23 / 2) Keizer-Punkte bekommen.  
 
 ![Example Tournament](./Rank-Pb.png)
+
+<br />
+
+### Menü Spieler
+
+#### Spieler importieren
+Man kann eine Liste mit Spielern im csv-Format importieren. Importiert werden Namen und Ratings der Spieler. 
+Das Format der csv-Datei wird bestimmt durch die erste Zeile der Datei. In der ersten Zeile werden Trennzeichen (Strichpunkt, Doppelpunkt oder Komma), 
+der Text _Name_ und der Text _Rating_ gesucht. Entsprechend dem Format der ersten Zeile wird der Rest der Datei eingelesen. 
+Beispiel: Die erste Zeile der csv-Datei ist 
+```
+x;x;;xxx;Name;;Rating
+``` 
+Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der 5. Spalte, die Ratings der Spieler sind in der 7. Spalte. 
+
+
+#### Alle löschen
+Löscht alle Spieler. Dies ist nützlich, wenn Sie ein Turnier B erstellen möchten, das genau die gleichen Einstellungen wie das vorherige Turnier A haben soll. 
+Kopieren Sie in diesem Fall A.s3db nach B.s3db, löschen Sie dann alle gespielten Runden und anschließend alle Spieler. 
+Um sicherzustellen, dass Sie nicht versehentlich Ihr aktuelles Turnier löschen, ist das Löschen aller Spieler nur möglich, wenn keine Partien in der Datenbank vorhanden sind.   
+
+#### Spieler-IDs neu vergeben
+Nach dem Importieren einer Spielerliste, z. B. der Vereinsmitglieder, und dem anschließenden Löschen der Spieler, die nicht am Turnier teilnehmen, kann die Spielerliste 
+in KeizerForClubs viele Löcher in der Reihenfolge der Spielernummern haben. Das ist ein bisschen ärgerlich. Zumal man an der höchsten Spieler-ID nicht erkennen kann, wie viele Teilnehmer am Turnier teilnehmen.  
+Sie können _Spieler-IDs neu vergeben_ verwenden, um die Löcher in der Reihenfolge der IDs zu entfernen. Nur möglich am Anfang eines Turniers. 
+
+<br />
 
 
 ### Danksagungen

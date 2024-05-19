@@ -211,6 +211,21 @@ the first line. Example: The first line of the csv file is</p>
 <pre><code>x;x;;xxx;Name;;Rating</code></pre>
 <p>Then the separator is the semicolon, the player names are in the 5th
 column, the ratings of the players in the 7th.</p>
+<h4 id="delete-all">Delete All</h4>
+<p>Deletes all players. This is useful if you want to create a
+tournament B which shall have exactly the same settings as previous
+tournament A. In this case, copy A.s3db to B.s3db, then delete all
+played rounds, then delete all players. To make sure that you don’t
+accidentally delete your current tournament, deleting all players is
+only possible without any games in the database.</p>
+<h4 id="rebase-player-ids">Rebase player ids</h4>
+<p>After importing a list of players, e.g. the club members, and then
+deleting those not playing in the tournament, the player list in
+KeizerForClubs may have a lot of holes in the sequence of player ids.
+This is a bit annoying. Especially as you can’t see from the highest
+player id the number of participants in the tournament.<br />
+You can use <em>Rebase player ids</em> to remove the holes in the
+sequence of ids.</p>
 <h3 id="acknowledgements">Acknowledgements</h3>
 <ul>
 <li>The program originally was developed with SharpDevelop, now I’m

@@ -173,6 +173,16 @@ x;x;;xxx;Name;;Rating
 ``` 
 Ensuite, le séparateur est le point-virgule, les noms des joueurs sont dans la 5e colonne, les ratings des joueurs sont dans la 7e colonne. 
 
+#### Effacer tous
+Supprime tous les joueurs. Ceci est utile si vous voulez créer un tournoi B qui aura exactement les mêmes paramètres que le tournoi A précédent. 
+Dans ce cas, copiez A.s3db vers B.s3db, puis effacez toutes les rondes jouées, puis effacez tous les joueurs. 
+Pour s'assurer que vous ne supprimez pas accidentellement votre tournoi actuel, la suppression de tous les joueurs n'est possible que s'il n'y a pas de parties dans la base de données.   
+
+#### Joueur Ids réattrribué
+Après avoir importé une liste de joueurs, par exemple les membres du club, puis supprimé les joueurs qui ne participent pas au tournoi, la liste des joueurs peut être 
+dans KeizerForClubs présente de nombreux trous dans l'ordre des numéros de joueurs. C'est un peu agaçant. 
+D'autant plus que l'Id de joueur le plus élevé ne permet pas de savoir combien de participants participent au tournoi.  
+Vous pouvez utiliser _Joueur Ids réattrribué_ pour supprimer les trous dans l'ordre des Id. Possible uniquement au début d'un tournoi. 
 
 ### Remerciements
 
