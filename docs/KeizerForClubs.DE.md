@@ -219,7 +219,8 @@ Vgl. den Screenshot unten, der einen Teil einer Tabelle eines Beispielturniers z
 
 Sie sehen zum Beispiel, dass der Rank-Pb von Spieler 4 (Sascha) 22 ist. Das bedeutet, dass Sascha in der Runde vor dieser Runde so in der Tabelle platziert war, dass sein "Wert" 22 Keizer-Rang-Punkte beträgt. Das bedeutet, dass du für jeden Sieg gegen Sascha 22 Punkte bekommst. Und weil Andreas in Runde 1 gegen Sascha gewonnen hat, hat er dafür 22 Keizer-Punkte bekommen. Das können Sie in der Tabelle unter R1 sehen.
 
-Noch einer: Rank-Pb von Spieler 2 (Andreas) ist 23. Deshalb: Axel, der in Runde 2 gegen Andreas unentschieden gespielt hat, hat dafür 11,5 Keizer-Punkte bekommen.  
+Noch einer: Rank-Pb von Spieler 2 (Andreas) ist 23. Deshalb: Axel, der in Runde 2 gegen Andreas unentschieden gespielt hat, hat dafür 11,5 (11,5 = 23 / 2) Keizer-Punkte bekommen.  
+
 ![Example Tournament](./Rank-Pb.png)
 
 

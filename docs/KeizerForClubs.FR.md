@@ -140,6 +140,24 @@ class='my-wrapper kfc-wrapper kfc-wrapper-{number of columns}'
 class='my-exwrapper kfc-exwrapper kfc-exwrapper-{number of columns}'
 ```
 
+#### Détails du grille américaine 
+
+##### Rank-Pb
+
+La colonne _Rank-Pb_ signifie « Keizer-*Rank*-*P*oints *b*efore la ronde actuelle ». Si vous passez la souris sur l'en-tête de la colonne du fichier HTML, vous verrez une infobulle.
+
+Je vais essayer d'expliquer.
+
+Les points Keizer qu'un joueur A obtient pour une victoire contre le joueur B correspondent à cette valeur Rank-Pb. J'ai introduit cette colonne pour permettre de recalculer manuellement les points Keizer. Des questions ont en effet été posées par mes camarades de club...
+
+Cf. la capture d'écran ci-dessous, qui est une partie d'un tableau d'un tournoi.
+
+Vous voyez par exemple que le Rank-Pb du joueur 4 (Sascha) est de 22. Cela signifie que dans la ronde précédente, la position occupée par Sascha dans le tableau correspondait à une valeur de 22 Keizer-Rank-Points. Cela signifie que vous obtenez 22 points pour chaque victoire contre Sascha. Et comme Andreas a gagné contre Sascha lors de la première ronde, il a obtenu 22 Keizer-Points pour cette victoire. Ce que vous pouvez voir dans le tableau sous R1.
+
+Un autre exemple : Le Rank-Pb du joueur 2 (Andreas) est de 23. Par conséquent Axel (le joueur 6), qui a fait match nul lors de la 2e ronde contre Andreas, 
+a obtenu 11,5 points Keizer pour ce match nul (11,5 = 23 / 2).
+
+![Example Tournament](./Rank-Pb.png)
 
 <br />
 

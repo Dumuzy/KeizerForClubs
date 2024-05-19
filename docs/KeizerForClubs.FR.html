@@ -216,6 +216,34 @@ vous le souhaitez.</p>
 class=&#39;my-wrapper kfc-wrapper kfc-wrapper-{number of columns}&#39;
 /* La grille américaine peut devenir très large, c&#39;est pourquoi elle est construite avec des styles CSS différents: */ 
 class=&#39;my-exwrapper kfc-exwrapper kfc-exwrapper-{number of columns}&#39;</code></pre>
+<h4 id="détails-du-grille-américaine">Détails du grille américaine</h4>
+<h5 id="rank-pb">Rank-Pb</h5>
+<p>La colonne <em>Rank-Pb</em> signifie «
+Keizer-<em>Rank</em>-<em>P</em>oints <em>b</em>efore la ronde actuelle
+». Si vous passez la souris sur l’en-tête de la colonne du fichier HTML,
+vous verrez une infobulle.</p>
+<p>Je vais essayer d’expliquer.</p>
+<p>Les points Keizer qu’un joueur A obtient pour une victoire contre le
+joueur B correspondent à cette valeur Rank-Pb. J’ai introduit cette
+colonne pour permettre de recalculer manuellement les points Keizer. Des
+questions ont en effet été posées par mes camarades de club…</p>
+<p>Cf. la capture d’écran ci-dessous, qui est une partie d’un tableau
+d’un tournoi.</p>
+<p>Vous voyez par exemple que le Rank-Pb du joueur 4 (Sascha) est de 22.
+Cela signifie que dans la ronde précédente, la position occupée par
+Sascha dans le tableau correspondait à une valeur de 22
+Keizer-Rank-Points. Cela signifie que vous obtenez 22 points pour chaque
+victoire contre Sascha. Et comme Andreas a gagné contre Sascha lors de
+la première ronde, il a obtenu 22 Keizer-Points pour cette victoire. Ce
+que vous pouvez voir dans le tableau sous R1.</p>
+<p>Un autre exemple : Le Rank-Pb du joueur 2 (Andreas) est de 23. Par
+conséquent Axel (le joueur 6), qui a fait match nul lors de la 2e ronde
+contre Andreas, a obtenu 11,5 points Keizer pour ce match nul (11,5 = 23
+/ 2).</p>
+<figure>
+<img src="./Rank-Pb.png" alt="Example Tournament" />
+<figcaption aria-hidden="true">Example Tournament</figcaption>
+</figure>
 <p><br /></p>
 <h3 id="menu-joueurs">Menu Joueurs</h3>
 <h4 id="importer-des-joueurs">Importer des joueurs</h4>
