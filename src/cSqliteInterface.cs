@@ -44,6 +44,12 @@ namespace KeizerForClubs
             Hindered = 5,
             Excused = 6,
             Unexcused = 7,
+
+            //  TODO for T51.
+            //WinWhiteForfeit = 8, 
+            //WinBlackForfeit = 9, 
+            //ForfeitForfeit = 10, 
+            //Adjourned = 11,
         };
 
         public struct stPlayer
@@ -964,7 +970,9 @@ namespace KeizerForClubs
         public int Locl_GetTopicTexte(string topic, string sWhereAdd, ref string[] texte)
         {
             int topicTexte = 0;
-            sqlCommand.CommandText = " SELECT text FROM config_db.LangText  WHERE code= @pCode  AND topic=@pTopic " + sWhereAdd + " ORDER BY key ";
+            sqlCommand.CommandText = @" SELECT text FROM config_db.LangText  WHERE code= @pCode  
+                        AND key < 8  AND topic=@pTopic " + sWhereAdd + " ORDER BY (0 + key)";
+            // TODO Remove ^^^^^^^^^for T51.
             sqlCommand.Parameters.AddWithValue("pCode", (object)LangCode);
             sqlCommand.Parameters.AddWithValue("pTopic", (object)topic);
             sqlCommand.Prepare();
