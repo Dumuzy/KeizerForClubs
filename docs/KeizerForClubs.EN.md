@@ -201,6 +201,22 @@ class='my-wrapper kfc-wrapper kfc-wrapper-{number of columns}'
 class='my-exwrapper kfc-exwrapper kfc-exwrapper-{number of columns}'
 ```
 
+#### Cross table details
+
+##### Rank-Pb
+The column _Rank-Pb_ stands for "Keizer-*Rank*-*P*oints *b*efore the current round". If you hover over the column header of the html with a mouse, you'll see a tooltip. 
+
+I'll try to explain.
+
+The Keizer points a player A gets for a victory against Player B is just this value, Rank-Pb.    I've introduced the column for purposes of manually recalculating the Keizer points.  There were questions by my club mates....
+
+Cf. the screenshot below, which is a part of a table of an example tournament.
+
+You see for example Rank-Pb of player 4 (Sascha) is 22. This means, in the round before this one, Sascha was placed such in the table, that his "value" is 22 Keizer-Rank-Points. Which means, that you get 22 points for every victory against Sascha. And, because Andreas has won against Sascha in round 1, he's got 22 Keizer-points for that. Which you can see in the table under R1.
+
+Another one: Rank-Pb of player 2 (Andreas) is 23. Therefore: Axel, who drew in round 2 against Andreas, got 11.5 Keizer points for that draw.  
+![Example Tournament](./Rank-Pb.png)
+
 <br />
 
 ### Players menu

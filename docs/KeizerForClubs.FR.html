@@ -199,22 +199,23 @@ autres. Je recommande des valeurs plus basses pour les tournois de moins
 de 20 joueurs.</p>
 <p><br /></p>
 <h3 id="menu-listes">Menu Listes</h3>
-<p>En sélectionnant une entrée dans le menu des listes, des listes de
-sorties seront générées dans le dossier <em>export</em>. Le type de
-sorties à générer peut être sélectionné être sélectionné dans l’onglet
+<p>En sélectionnant une entrée dans le menu des listes, des fichiers de
+sortie seront générés dans le dossier <em>export</em>. Le type de
+sorties à générer peut être sélectionné dans l’onglet
 <em>Paramètres</em>.</p>
-<h4 id="sortie-html">Sortie Html</h4>
-<p>La sortie html se compose d’un code css général qui est le même pour
-chaque tableau et d’un code html qui contient les données réelles. Les
-css proviennent du fichier <em>export/keizer.css</em>. Vous pouvez
-modifier les css pour les adapter à vos besoins si vous le
-souhaitez.</p>
-<p>Les tableaux de données reçoivent les balises suivantes, où les
-éléments dans <em>{}</em> sont remplacés par de vraies données :</p>
+<h4 id="sortie-html">Sortie HTML</h4>
+<p>Le fichier HTML se compose de styles CSS généraux qui sont les mêmes
+pour tous les tableaux et de code HTML qui contient les données réelles.
+Les styles CSS se trouvent dans le fichier <em>export/keizer.css</em>.
+Vous pouvez modifier les styles CSS pour les adapter à vos besoins si
+vous le souhaitez.</p>
+<p>Les tableaux de données contiennent les balises suivantes, où les
+éléments entre <em>{}</em> seront remplacés par les données réelles
+:</p>
 <pre><code>id=&#39;kfc-{tournament name}-{table type}-{current round}&#39;
-class=&#39;my-wrapper kfx-wrapper kfc-wrapper-{number of columns}&#39;
-/* The cross table can get very wide, so it gets the different css classes: */
-class=&#39;my-exwrapper kfx-exwrapper kfc-exwrapper-{number of columns}&#39;</code></pre>
+class=&#39;my-wrapper kfc-wrapper kfc-wrapper-{number of columns}&#39;
+/* La grille américaine peut devenir très large, c&#39;est pourquoi elle est construite avec des styles CSS différents: */ 
+class=&#39;my-exwrapper kfc-exwrapper kfc-exwrapper-{number of columns}&#39;</code></pre>
 <p><br /></p>
 <h3 id="menu-joueurs">Menu Joueurs</h3>
 <h4 id="importer-des-joueurs">Importer des joueurs</h4>

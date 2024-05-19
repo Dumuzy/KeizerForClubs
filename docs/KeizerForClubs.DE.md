@@ -200,11 +200,27 @@ Das Css wird aus der Datei _export/keizer.css_ übernommen. Wenn Sie möchten, kön
 Die Datentabellen erhalten die folgenden Tags, wobei die Angaben in _{}_ durch echte Daten ersetzt werden.
 ```
 id='kfc-{tournament name}-{table type}-{current round}'
-class='my-wrapper kfx-wrapper kfc-wrapper-{number of columns}'
+class='my-wrapper kfc-wrapper kfc-wrapper-{number of columns}'
 /* The cross table can get very wide, so it gets the different css classes: */
-class='my-exwrapper kfx-exwrapper kfc-exwrapper-{number of columns}'
+class='my-exwrapper kfc-exwrapper kfc-exwrapper-{number of columns}'
 ```
 
+#### Kreuztabelle Details
+
+##### Rank-Pb
+
+Die Spalte _Rank-Pb_ steht für "Keizer-*Rank*-*P*oints *b*efore der aktuellen Runde". Wenn Sie mit der Maus über die Spaltenüberschrift fahren, sehen Sie einen Tooltip. 
+
+Ich werde versuchen, das zu erklären.
+
+Die Keizer-Punkte, die ein Spieler A für einen Sieg gegen Spieler B erhält, sind genau dieser Wert, Rank-Pb.    Ich habe die Spalte eingeführt, um die Keizer-Punkte manuell nachrechnen zu können.  Es gab Fragen von Vereinskameraden....
+
+Vgl. den Screenshot unten, der einen Teil einer Tabelle eines Beispielturniers zeigt.
+
+Sie sehen zum Beispiel, dass der Rank-Pb von Spieler 4 (Sascha) 22 ist. Das bedeutet, dass Sascha in der Runde vor dieser Runde so in der Tabelle platziert war, dass sein "Wert" 22 Keizer-Rang-Punkte beträgt. Das bedeutet, dass du für jeden Sieg gegen Sascha 22 Punkte bekommst. Und weil Andreas in Runde 1 gegen Sascha gewonnen hat, hat er dafür 22 Keizer-Punkte bekommen. Das können Sie in der Tabelle unter R1 sehen.
+
+Noch einer: Rank-Pb von Spieler 2 (Andreas) ist 23. Deshalb: Axel, der in Runde 2 gegen Andreas unentschieden gespielt hat, hat dafür 11,5 Keizer-Punkte bekommen.  
+![Example Tournament](./Rank-Pb.png)
 
 
 ### Danksagungen
