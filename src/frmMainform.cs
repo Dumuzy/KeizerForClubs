@@ -987,7 +987,7 @@ for determining the first round pairings.";
                 }
             }
 
-            foreach(var player in availPlayers)
+            foreach (var player in availPlayers)
                 if (player.State == SqliteInterface.PlayerState.Available)
                     frmPairingManual.lstNames.Items.Add(player.Name);
             for (int i = 0; i < frmPairingManual.lstNames.Items.Count; i += 2)
@@ -1268,13 +1268,7 @@ for determining the first round pairings.";
             this.chkPairingOnlyPlayed.CheckedChanged += new EventHandler(this.ChkPairingOnlyPlayedCheckedChanged);
             this.numRoundSelect.Font = new Font("Microsoft Sans Serif", 12f, FontStyle.Bold, GraphicsUnit.Point, (byte)0);
             this.numRoundSelect.Location = new Point(237, 16);
-            this.numRoundSelect.Maximum = new Decimal(new int[4]
-            {
-        20,
-        0,
-        0,
-        0
-            });
+            this.numRoundSelect.Maximum = new Decimal(new int[4] { 99, 0, 0, 0 });
             this.numRoundSelect.Name = "numRoundSelect";
             this.numRoundSelect.Size = new Size(59, 26);
             this.numRoundSelect.TabIndex = 1;
