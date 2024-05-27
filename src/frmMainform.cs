@@ -693,7 +693,9 @@ for determining the first round pairings.";
             ApplyPlayerStateTexte();
             string[] texte = new string[20];
             colPairingResult.Items.Clear();
-            int topicTexte2 = db.Locl_GetTopicTexte("GAMERESULT", " ", ref texte);
+            int topicTexte2 = db.Locl_GetTopicTexte("GAMERESULT", " AND key < '8' ", ref texte);
+            // TODO T51                                       Remove ^^^^^^^^^for T51.
+
             for (int index = 0; index < topicTexte2; ++index)
                 colPairingResult.Items.Add((object)texte[index]);
             colPlayerState.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Status");

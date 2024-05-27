@@ -971,8 +971,7 @@ namespace KeizerForClubs
         {
             int topicTexte = 0;
             sqlCommand.CommandText = @" SELECT text FROM config_db.LangText  WHERE code= @pCode  
-                        AND key < 8  AND topic=@pTopic " + sWhereAdd + " ORDER BY (0 + key)";
-            // TODO Remove ^^^^^^^^^for T51.
+                        AND topic=@pTopic " + sWhereAdd + " ORDER BY (0 + key)";
             sqlCommand.Parameters.AddWithValue("pCode", (object)LangCode);
             sqlCommand.Parameters.AddWithValue("pTopic", (object)topic);
             sqlCommand.Prepare();
