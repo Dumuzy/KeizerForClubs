@@ -232,8 +232,10 @@ namespace KeizerForClubs
             Stopwatches.Start("CheckValueOfWinAgainst-1");
             if (!playerStateDict.TryGetValue(playerId, out SqliteInterface.PlayerState plst))
             {
+                Stopwatches.Start("CheckValueOfWinAgainst-2");
                 plst = db.GetPlayerState(playerId);
                 playerStateDict[playerId] = plst;
+                Stopwatches.Stop("CheckValueOfWinAgainst-2");
             }
             Stopwatches.Stop("CheckValueOfWinAgainst-1");
             if (plst == SqliteInterface.PlayerState.Retired)
