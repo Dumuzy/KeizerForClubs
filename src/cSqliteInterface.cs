@@ -141,6 +141,10 @@ namespace KeizerForClubs
                 }
                 catch (Exception) { }
 
+            sqlCommand.CommandText =
+                @" CREATE UNIQUE INDEX IF NOT EXISTS [id-name-rating-state-etcpp] ON Player (id, name, 
+                    rating, state, rank, Keizer_SumPts, Keizer_StartPts, RatingWDelta, Keizer_PrevPts);";
+            sqlCommand.ExecuteNonQuery();
 
             sqlCommand.CommandText =
                     " CREATE TABLE IF NOT EXISTS Pairing ( " +
@@ -151,7 +155,12 @@ namespace KeizerForClubs
                     " Result INTEGER(2), " +
                     " Pts_W FLOAT, " +
                     " Pts_B FLOAT " +
-                    ");";
+                    ");" +
+                    @" CREATE UNIQUE INDEX IF NOT EXISTS [rnd-board-pid_w-pid_b-etcpp] ON Pairing (Rnd, board, 
+                                    PID_W, PID_B, Result, Pts_W, Pts_B); 
+                       CREATE INDEX IF NOT EXISTS [result-pid_w-rnd-board] ON Pairing (Result, PID_W, Rnd, board); 
+                       CREATE INDEX IF NOT EXISTS [pid_w] ON Pairing (PID_W); 
+                    ";
             sqlCommand.ExecuteNonQuery();
 
 
@@ -390,6 +399,23 @@ namespace KeizerForClubs
             return sqlCommand.ExecuteScalar()?.ToString() ?? null;
         }
 
+
+        public PlayerState GetPlayerState(int id)
+        {
+            if (id < 0)
+                return PlayerState.ErrUndefined;
+            sqlCommand.CommandText = " Select state from player  where ID=:pID ";
+            sqlCommand.Parameters.AddWithValue("pID", (object)id);
+            var res = sqlCommand.ExecuteScalar();
+            var ires = res == null ? (long)(-1) : (long)res;
+            return (PlayerState)ires;
+        }
+
+        ///// <summary> Way faster than without cache. </summary>
+        //public PlayerState GetPlayerStateCached(int id)
+        //{
+        //}
+
         /// <summary> Gibt die PlayerId des Spielers mit dem Namen zurück oder -1, falls keiner gefunden. </summary>
         public int GetPlayerID(string sName)
         {
@@ -404,7 +430,9 @@ namespace KeizerForClubs
         public stPlayer GetPlayer(string sWhere, string sSortorder, int runde)
         {
             var arr = new stPlayer[1];
+            Stopwatches.Start("GetPlayer-1");
             int n = GetPlayerList(ref arr, sWhere, sSortorder, runde);
+            Stopwatches.Stop("GetPlayer-1");
             return n == 0 ? new stPlayer { Id = -1 } : arr[0];
         }
 

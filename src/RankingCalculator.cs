@@ -15,6 +15,7 @@ namespace KeizerForClubs
         /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>
         internal void AllPlayersAllRoundsCalculateTa()
         {
+            Stopwatches.Start("AllPlayersAllRoundsCalculateTa-All");
             cReportingUnit?.DeleteDump();
             int maxRound = db.GetMaxRound();
 
@@ -29,15 +30,21 @@ namespace KeizerForClubs
             for (int runde1 = 1; runde1 <= maxRound; ++runde1)
             {
                 Debug.WriteLine($"=========  ER={runde1} ===========");
+                Stopwatches.Start("AllPlayersAllRoundsCalculateTa-1");
                 db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
+                Stopwatches.Next("AllPlayersAllRoundsCalculateTa-2");
                 for (int runde2 = 1; runde2 <= runde1; ++runde2)
                     this.OneRoundAllPairingsSetKeizerPtsTa(runde2, runde1);
+                Stopwatches.Next("AllPlayersAllRoundsCalculateTa-3");
                 this.AllPlayersSetKeizerSumPtsTa();
+                Stopwatches.Next("AllPlayersAllRoundsCalculateTa-4");
                 this.AllPlayersSetRankAndStartPtsTa();
+                Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-4");
                 cReportingUnit?.DebugPairingsAndStandings(runde1);
                 if (runde1 == maxRound && nExtraRecursions-- > 0)
                     --runde1;
             }
+            Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-All");
         }
 
         /// <summary> Gibt die Keizer-Start-Pts für den 1. Spieler zurück. </summary>
@@ -114,15 +121,19 @@ namespace KeizerForClubs
         private bool OneRoundAllPairingsSetKeizerPtsTa(int runde, int endRundeWhichIsCalculated)
         {
             db.BeginTransaction();
+            Stopwatches.Start("OneRoundAllPairingsSetKeizerPtsTa-1");
             var pairings = db.GetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+            Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-1");
             if (pairings.Count == 0)
                 return false;
             for (int index = 0; index < pairings.Count; ++index)
             {
                 var pair = pairings[index];
                 float erg_w = 0.0f, erg_s = 0.0f;
+                Stopwatches.Start("OneRoundAllPairingsSetKeizerPtsTa-2");
                 var pWhite = db.GetPlayerById(pair.IdW, runde);
                 var pBlack = db.GetPlayerById(pair.IdB, runde);
+                Stopwatches.Next("OneRoundAllPairingsSetKeizerPtsTa-3");
 
                 if (pair.Result == SqliteInterface.Results.WinWhite)
                     erg_w = pBlack.KeizerStartPts;
@@ -161,10 +172,15 @@ namespace KeizerForClubs
                         erg_w = 0;
                     erg_s = 0;
                 }
+                Stopwatches.Next("OneRoundAllPairingsSetKeizerPtsTa-4");
                 db.UpdPairingValues(runde, pair.Board, erg_w, erg_s);
+                Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-4");
             }
+            Stopwatches.Start("OneRoundAllPairingsSetKeizerPtsTa-5");
             db.EndTransaction();
+            Stopwatches.Next("OneRoundAllPairingsSetKeizerPtsTa-6");
             CheckPairingsValuesTa(runde, endRundeWhichIsCalculated);
+            Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-6");
             return true;
         }
 
@@ -181,7 +197,9 @@ namespace KeizerForClubs
             // genausoviel wert sein, wie ein Sieg über X in Runde 5. Entsprechend ein Remis halb so viel. 
             for (int runde = 1; runde <= maxRunde; ++runde)
             {
+                Stopwatches.Start("CheckPairingsValuesTa-1");
                 var pairings = db.GetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
+                Stopwatches.Stop("CheckPairingsValuesTa-1");
                 if (pairings.Count == 0)
                     throw new Exception("pairings.Count == 0");
                 foreach (var p in pairings)
@@ -206,11 +224,13 @@ namespace KeizerForClubs
         void CheckValueOfWinAgainst(SqliteInterface.stPairing p, int runde, int playerId, double valueOfWin,
                 Dictionary<int, double> valueOfWinAgainstPlayerDict, int endRundeWhichIsCalculated)
         {
-
             if (Math.Abs(valueOfWin) < 0.01)
                 return;  // this is the case for retired players and not a real problem.
-            var pl = db.GetPlayerById(playerId, runde);
-            if (pl.State == SqliteInterface.PlayerState.Retired)
+
+            Stopwatches.Start("CheckValueOfWinAgainst-1");
+            var plst = db.GetPlayerState(playerId);
+            Stopwatches.Stop("CheckValueOfWinAgainst-1");
+            if (plst == SqliteInterface.PlayerState.Retired)
                 return;
             int er = endRundeWhichIsCalculated;
             // Debug.WriteLine($"ER={er} Runde={runde} {p.IdW}-{p.IdB} = {Ext.ToDebug(p.PtsW)}:{Ext.ToDebug(p.PtsB)}");
