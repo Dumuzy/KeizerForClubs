@@ -20,7 +20,7 @@ namespace KeizerForClubs
             int maxRound = db.GetMaxRound();
 
             //Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0.
-            db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa(); 
+            db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
             this.AllPlayersSetInitialStartPtsTa(maxRound + 1); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPtsTa();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
@@ -191,6 +191,7 @@ namespace KeizerForClubs
             var er = endRundeWhichIsCalculated;
             // player -> valueOfWinAgainst
             var valueOfWinAgainstPlayerDict = new Dictionary<int, double>();
+            var playerStateDict = new Dictionary<int, SqliteInterface.PlayerState>();
             // Ein Sieg gg Player X muß immer gleich viel wert sein, nach dem eine Runde durchgerechnet
             // wurde. Nach der nächsten Runde kann und wird der Sieg anders bewertet. 
             // Aber, wenn ich zB den Stand nach Runde 5 berechne, muß ein Sieg über X in Runde 1
@@ -206,29 +207,34 @@ namespace KeizerForClubs
                 {
                     if (p.Result == SqliteInterface.Results.WinWhite)
                     {
-                        CheckValueOfWinAgainst(p, runde, p.IdB, p.PtsW, valueOfWinAgainstPlayerDict, er);
+                        CheckValueOfWinAgainst(p, runde, p.IdB, p.PtsW, valueOfWinAgainstPlayerDict, er, playerStateDict);
                     }
                     else if (p.Result == SqliteInterface.Results.WinBlack)
                     {
-                        CheckValueOfWinAgainst(p, runde, p.IdW, p.PtsB, valueOfWinAgainstPlayerDict, er);
+                        CheckValueOfWinAgainst(p, runde, p.IdW, p.PtsB, valueOfWinAgainstPlayerDict, er, playerStateDict);
                     }
                     else if (p.Result == SqliteInterface.Results.Draw)
                     {
-                        CheckValueOfWinAgainst(p, runde, p.IdW, 2 * p.PtsB, valueOfWinAgainstPlayerDict, er);
-                        CheckValueOfWinAgainst(p, runde, p.IdB, 2 * p.PtsW, valueOfWinAgainstPlayerDict, er);
+                        CheckValueOfWinAgainst(p, runde, p.IdW, 2 * p.PtsB, valueOfWinAgainstPlayerDict, er, playerStateDict);
+                        CheckValueOfWinAgainst(p, runde, p.IdB, 2 * p.PtsW, valueOfWinAgainstPlayerDict, er, playerStateDict);
                     }
                 }
             }
         }
 
         void CheckValueOfWinAgainst(SqliteInterface.stPairing p, int runde, int playerId, double valueOfWin,
-                Dictionary<int, double> valueOfWinAgainstPlayerDict, int endRundeWhichIsCalculated)
+                Dictionary<int, double> valueOfWinAgainstPlayerDict, int endRundeWhichIsCalculated,
+                Dictionary<int, SqliteInterface.PlayerState> playerStateDict)
         {
             if (Math.Abs(valueOfWin) < 0.01)
                 return;  // this is the case for retired players and not a real problem.
 
             Stopwatches.Start("CheckValueOfWinAgainst-1");
-            var plst = db.GetPlayerState(playerId);
+            if (!playerStateDict.TryGetValue(playerId, out SqliteInterface.PlayerState plst))
+            {
+                plst = db.GetPlayerState(playerId);
+                playerStateDict[playerId] = plst;
+            }
             Stopwatches.Stop("CheckValueOfWinAgainst-1");
             if (plst == SqliteInterface.PlayerState.Retired)
                 return;
@@ -238,7 +244,7 @@ namespace KeizerForClubs
                 valueOfWinAgainstPlayerDict[playerId] = valueOfWin;
             else
             {
-                if (Math.Abs(prevValue-valueOfWin) > 0.01)
+                if (Math.Abs(prevValue - valueOfWin) > 0.01)
                 {
                     var name = db.GetPlayerName(playerId);
                     var s = $"Win against Id={playerId} Name={name} differs from before in round {runde}. Previous={prevValue} Now={valueOfWin}";
