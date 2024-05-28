@@ -35,7 +35,7 @@ namespace KeizerForClubs
         private Label lblRoundsGameRepeat, lblOutputTo, lblRatioFirst2Last, lblFirstRoundRandom;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
-        private CheckBox chkFreilosVerteilen;
+        private CheckBox chkFreilosVerteilen, chkNovusRandomBoard;
         private CheckBox chkHtml, chkXml, chkTxt, chkCsv;
         private ToolStripMenuItem mnuStartLanguage;
         private ToolStripMenuItem mnuPlayers, mnuPlayersImport, mnuPlayersDeleteAll, mnuPlayersRebaseIds;
@@ -133,6 +133,7 @@ namespace KeizerForClubs
             tbBonusFreilos.Value = db.GetConfigInt("BONUS.Freilos", 50);
 
             chkFreilosVerteilen.Checked = db.GetConfigBool("OPTION.DistBye");
+            chkNovusRandomBoard.Checked = db.GetConfigBool("OPTION.NovusRandom", false);
             chkPairingOnlyPlayed.Checked = db.GetConfigBool("OPTION.ShowOnlyPlayed");
             numRoundsGameRepeat.Value = (Decimal)db.GetConfigInt("OPTION.GameRepeat");
 
@@ -442,6 +443,7 @@ for determining the first round pairings.";
                 db.SetConfigInt("BONUS.Freilos", this.tbBonusFreilos.Value);
 
                 db.SetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
+                db.SetConfigBool("OPTION.NovusRandom", this.chkNovusRandomBoard.Checked);
                 db.SetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
                 db.SetConfigFloat("OPTION.RatioFirst2Last", Helper.ToSingle(ddlRatioFirst2Last.SelectedValue));
                 db.SetConfigInt("OPTION.FirstRoundRandom", Helper.ToInt(ddlFirstRoundRandom.SelectedValue));
@@ -738,6 +740,7 @@ for determining the first round pairings.";
 
             chkPairingOnlyPlayed.Text = db.Locl_GetText("GUI_LABEL", "Nur gespielte");
             chkFreilosVerteilen.Text = db.Locl_GetText("GUI_LABEL", "FreilosVerteilen");
+            chkNovusRandomBoard.Text = db.Locl_GetText("GUI_LABEL", "NovusRandom");
             lblRunde.Text = db.Locl_GetText("GUI_LABEL", "Runde");
             numRoundSelect.Text = db.Locl_GetText("GUI_LABEL", "Runde");
             lblRoundsGameRepeat.Text = db.Locl_GetText("GUI_LABEL", "NumRundeWdh");
@@ -831,6 +834,8 @@ for determining the first round pairings.";
                     db.InsPairingNew(currRunde, index + 1, this.pPairingList[index].IdW, this.pPairingList[index].IdB);
                 this.PairingInsertNoPlaying();
                 db.EndTransaction();
+                if (ShallUseNovusRandomBoard)
+                    ShuffleBoardsOfPairings(currRunde);
                 this.LoadPairingList();
                 Stopwatches.Debug("");
                 return true;
@@ -838,6 +843,24 @@ for determining the first round pairings.";
             db.EndTransaction();
             int num = (int)MessageBox.Show("No success; adjust options or try manually", "Error");
             return false;
+        }
+
+        private bool ShallUseNovusRandomBoard => chkNovusRandomBoard.Checked;
+
+        /// <summary> This is needed for the Latvian Novus game. Details see Issue #66 in GitHub. </summary>
+        private void ShuffleBoardsOfPairings(int currRunde)
+        {
+            var pairs = db.GetClPairingLi($" WHERE Rnd={currRunde} AND board < {stPairing.FirstNonPlayingBoard} ", "");
+            Li<int> boards = pairs.Select(p => p.P.Board).ToLi();
+            foreach (var p in pairs)
+            {
+                var idx = random.Next(boards.Count);
+                p.P.Board = boards[idx];
+                boards.RemoveAt(idx);
+            }
+            db.BeginTransaction();
+            db.ChangeBoards(currRunde, pairs);
+            db.EndTransaction();
         }
 
         private void DealFreilos()
@@ -1151,6 +1174,7 @@ for determining the first round pairings.";
             this.ddlFirstRoundRandom = new ComboBox();
             this.tooltip = new ToolTip();
             this.chkFreilosVerteilen = new CheckBox();
+            this.chkNovusRandomBoard = new CheckBox();
             this.chkHtml = new CheckBox();
             this.chkXml = new CheckBox();
             this.chkTxt = new CheckBox();
@@ -1340,6 +1364,7 @@ for determining the first round pairings.";
             this.tabSettings.Controls.Add((Control)this.ddlRatioFirst2Last);
             this.tabSettings.Controls.Add((Control)this.ddlFirstRoundRandom);
             this.tabSettings.Controls.Add((Control)this.chkFreilosVerteilen);
+            this.tabSettings.Controls.Add((Control)this.chkNovusRandomBoard);
             this.tabSettings.Controls.Add((Control)this.btDonate1);
             this.tabSettings.Controls.Add(this.chkHtml);
             this.tabSettings.Controls.Add(this.chkXml);
@@ -1363,31 +1388,6 @@ for determining the first round pairings.";
             List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f });
             this.ddlRatioFirst2Last.DataSource = list;
 
-            this.lblFirstRoundRandom.Location = new Point(370, 236);
-            this.lblFirstRoundRandom.Size = new Size(200, 23);
-            this.lblFirstRoundRandom.Text = "# First round random";
-            this.ddlFirstRoundRandom.Location = new Point(570, 236);
-            this.ddlFirstRoundRandom.Size = new Size(40, 21);
-            var li = new List<int>(new int[] { 0, 10, 50, 100, 150, 200, 300, 400, 500 });
-            this.ddlFirstRoundRandom.DataSource = li;
-
-            this.lblRoundsGameRepeat.Location = new Point(44, 264);
-            this.lblRoundsGameRepeat.Name = "lblRoundsGameRepeat";
-            this.lblRoundsGameRepeat.Size = new Size(200, 23);
-            this.lblRoundsGameRepeat.TabIndex = 10;
-            this.lblRoundsGameRepeat.Text = "# Rounds before paired again";
-            this.numRoundsGameRepeat.Location = new Point(246, 262);
-            this.numRoundsGameRepeat.Maximum = new Decimal(new int[4]
-            {
-        50,
-        0,
-        0,
-        0
-            });
-            this.numRoundsGameRepeat.Name = "numRoundsGameRepeat";
-            this.numRoundsGameRepeat.Size = new Size(40, 21);
-            this.numRoundsGameRepeat.TabIndex = 9;
-
             this.chkFreilosVerteilen.CheckAlign = ContentAlignment.MiddleRight;
             this.chkFreilosVerteilen.Checked = true;
             this.chkFreilosVerteilen.CheckState = CheckState.Checked;
@@ -1397,6 +1397,36 @@ for determining the first round pairings.";
             this.chkFreilosVerteilen.TabIndex = 8;
             this.chkFreilosVerteilen.Text = "Assign bye's even";
             this.chkFreilosVerteilen.UseVisualStyleBackColor = true;
+
+            this.lblFirstRoundRandom.Location = new Point(300, 236);
+            this.lblFirstRoundRandom.Size = new Size(140, 23);
+            this.lblFirstRoundRandom.Text = "# First round random";
+            this.ddlFirstRoundRandom.Location = new Point(440, 236);
+            this.ddlFirstRoundRandom.Size = new Size(40, 21);
+            var li = new List<int>(new int[] { 0, 10, 50, 100, 150, 200, 300, 400, 500 });
+            this.ddlFirstRoundRandom.DataSource = li;
+
+            this.chkNovusRandomBoard.CheckAlign = ContentAlignment.MiddleRight;
+            this.chkNovusRandomBoard.Checked = true;
+            this.chkNovusRandomBoard.CheckState = CheckState.Checked;
+            this.chkNovusRandomBoard.Location = new Point(505, 232);
+            this.chkNovusRandomBoard.Name = "chkNovusRandomBoard";
+            this.chkNovusRandomBoard.Size = new Size(105, 24);
+            this.chkNovusRandomBoard.TabIndex = 9;
+            this.chkNovusRandomBoard.Text = "Assign bye's even";
+            this.chkNovusRandomBoard.UseVisualStyleBackColor = true;
+
+            this.lblRoundsGameRepeat.Location = new Point(44, 264);
+            this.lblRoundsGameRepeat.Name = "lblRoundsGameRepeat";
+            this.lblRoundsGameRepeat.Size = new Size(200, 23);
+            this.lblRoundsGameRepeat.TabIndex = 10;
+            this.lblRoundsGameRepeat.Text = "# Rounds before paired again";
+            this.numRoundsGameRepeat.Location = new Point(246, 262);
+            this.numRoundsGameRepeat.Maximum = new Decimal(new int[4] { 50, 0, 0, 0 });
+            this.numRoundsGameRepeat.Name = "numRoundsGameRepeat";
+            this.numRoundsGameRepeat.Size = new Size(40, 21);
+            this.numRoundsGameRepeat.TabIndex = 9;
+
 
             var yOutput = 287;
 

@@ -85,6 +85,13 @@ namespace KeizerForClubs
             public bool IsNonPlayingBoard => Board >= FirstNonPlayingBoard;
         };
 
+        public class clPairing
+        {
+            public clPairing(stPairing pair) { this.P = pair; }
+            public stPairing P;
+            public override string ToString() => P.ToString();
+        }
+
         public SqliteInterface()
         {
             SQLiteMyDB = new SQLiteConnection("");
@@ -238,7 +245,8 @@ namespace KeizerForClubs
             return val;
         }
 
-        public bool GetConfigBool(string key) => GetConfigInt(key) != 0;
+        public bool GetConfigBool(string key, bool? defaultVal = null) => 
+            GetConfigInt(key, defaultVal.HasValue && defaultVal.Value ? 1 : 0 ) != 0;
 
         public float GetConfigFloat(string key, float defaultVal)
         {
@@ -568,6 +576,14 @@ namespace KeizerForClubs
         #endregion Player
 
         #region Pairing
+
+        public void ChangeBoards(int runde, Li<SqliteInterface.clPairing> pairs)
+        {
+            DelPairings(runde);
+            foreach (var p in pairs)
+                InsPairingNew(runde, p.P.Board, p.P.IdW, p.P.IdB);
+        }
+
         // Alle Paarungen einer Runde löschen 
         public bool DelPairings(int runde)
         {
@@ -784,6 +800,15 @@ namespace KeizerForClubs
             var li = new Li<SqliteInterface.stPairing>(pList1.Take(n));
             return li;
         }
+
+        public Li<SqliteInterface.clPairing> GetClPairingLi(string sWhere, string sSortorder)
+        {
+            SqliteInterface.stPairing[] pList1 = new SqliteInterface.stPairing[100];
+            var n = GetPairingList(ref pList1, sWhere, sSortorder);
+            var li = new Li<SqliteInterface.clPairing>(pList1.Take(n).Select(sp => new clPairing(sp)));
+            return li;
+        }
+
         #endregion Pairing
 
         #region Playerlist
