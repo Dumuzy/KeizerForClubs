@@ -68,6 +68,17 @@ namespace KeizerForClubs
             }
         };
 
+        /// <summary> Player class without the DB expensive stuff. Mainly FreeCnt is very expensive. </summary>
+        /// <remarks> And this here is a class, stPlayer still is a struct. </remarks>
+        public class clPlayerBase
+        {
+            public int Id;
+            public string Name;
+            public PlayerState State;
+            public float KeizerStartPts;
+            public override string ToString() => $"{Id} {Name} state:{State} kStart {KeizerStartPts} ";
+        }
+
         public struct stPairing
         {
             public int Round;
@@ -245,8 +256,8 @@ namespace KeizerForClubs
             return val;
         }
 
-        public bool GetConfigBool(string key, bool? defaultVal = null) => 
-            GetConfigInt(key, defaultVal.HasValue && defaultVal.Value ? 1 : 0 ) != 0;
+        public bool GetConfigBool(string key, bool? defaultVal = null) =>
+            GetConfigInt(key, defaultVal.HasValue && defaultVal.Value ? 1 : 0) != 0;
 
         public float GetConfigFloat(string key, float defaultVal)
         {
@@ -444,9 +455,68 @@ namespace KeizerForClubs
             return n == 0 ? new stPlayer { Id = -1 } : arr[0];
         }
 
-        /// <summary> Returns the player with the given Id.  New empty player with state 
-        /// unknown and id -1, if none found.</summary>
-        public stPlayer GetPlayerById(int id, int runde) => GetPlayer($" WHERE id = {id} ", "", runde);
+        /// <summary> Returns the players with the given Ids in the order of the ids. 
+        /// New empty player with state unknown and id -1, if one is not found.</summary>
+        public Tuple<clPlayerBase, clPlayerBase> GetPlayerBaseById(int id, int id2)
+        {
+            Stopwatches.Start("GetPlayerBaseById");
+            sqlCommand.CommandText = " SELECT id, name, state, Keizer_StartPts FROM Player p WHERE " +
+                (id2 == -1 ? $"id = {id}" : $"id in ({id}, {id2})");
+            Li<clPlayerBase> lip = new();
+            clPlayerBase p = null;
+            using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
+                if (sqLiteDataReader.HasRows)
+                {
+                    while (sqLiteDataReader.Read())
+                    {
+                        p = new clPlayerBase();
+                        p.Id = sqLiteDataReader.IsDBNull(0) ? 0 : (int)sqLiteDataReader.GetInt16(0);
+                        p.Name = sqLiteDataReader.IsDBNull(1) ? "" : sqLiteDataReader.GetString(1);
+                        int num = sqLiteDataReader.IsDBNull(2) ? 0 : sqLiteDataReader.GetInt32(2);
+                        p.State = (PlayerState)num;
+                        p.KeizerStartPts = sqLiteDataReader.IsDBNull(3) ? 0.0f : sqLiteDataReader.GetFloat(3);
+                        lip.Add(p);
+                    }
+                }
+
+            while (lip.Count < 2)
+                lip.Add(new clPlayerBase { Id = -1, State = PlayerState.Unknown });
+            clPlayerBase p1, p2;
+            if (lip[0].Id == id)
+            {
+                p1 = lip[0];
+                p2 = lip[1];
+            }
+            else if (lip[1].Id == id)
+            {
+                p1 = lip[1];
+                p2 = lip[0];
+            }
+            else if (lip[0].Id == id2)
+            {
+                p1 = lip[1];
+                p2 = lip[0];
+            }
+            else if (lip[1].Id == id2)
+            {
+                p1 = lip[0];
+                p2 = lip[1];
+            }
+            else
+            {
+                p1 = lip[0];
+                p2 = lip[1];
+            }
+
+            if (p1.Id != id && p1.Id != -1)
+                throw new InvalidOperationException($"p1.Id ({p1.Id}) != id ({id}) && p1.Id != -1");
+            else if (p2.Id != id2 && p2.Id != -1)
+                throw new InvalidOperationException($"p2.Id ({p2.Id}) != id2 ({id2}) && p2.Id != -1");
+
+            Stopwatches.Stop("GetPlayerBaseById");
+            var res = new Tuple<clPlayerBase, clPlayerBase>(p1, p2);
+            return res;
+        }
 
         public int CntPlayerNames(string sName)
         {
@@ -579,15 +649,17 @@ namespace KeizerForClubs
 
         public void ChangeBoards(int runde, Li<SqliteInterface.clPairing> pairs)
         {
-            DelPairings(runde);
+            var bb = string.Join(',', pairs.Select(p => p.P.Board.ToString()).ToArray());
+            var andCondition = $" AND board in ({bb}) ";
+            DelPairings(runde, andCondition);
             foreach (var p in pairs)
                 InsPairingNew(runde, p.P.Board, p.P.IdW, p.P.IdB);
         }
 
         // Alle Paarungen einer Runde löschen 
-        public bool DelPairings(int runde)
+        public bool DelPairings(int runde, string andCondition = "")
         {
-            sqlCommand.CommandText = " DELETE FROM Pairing  WHERE Rnd=@pRunde ";
+            sqlCommand.CommandText = $" DELETE FROM Pairing  WHERE Rnd=@pRunde {andCondition}";
             sqlCommand.Parameters.AddWithValue("pRunde", runde);
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
@@ -609,7 +681,7 @@ namespace KeizerForClubs
         // Gibt das nächste freie Brett der Runde zurück. 
         public int GetNextFreeBrettOfRound(int runde, bool isNonPlayingBoard)
         {
-            var extra = isNonPlayingBoard ? $" AND board >= {stPairing.FirstNonPlayingBoard}" 
+            var extra = isNonPlayingBoard ? $" AND board >= {stPairing.FirstNonPlayingBoard}"
                 : $" AND board < {stPairing.FirstNonPlayingBoard}";
             sqlCommand.CommandText = @" SELECT board FROM Pairing WHERE Rnd=@pRunde" + extra;
             sqlCommand.Parameters.AddWithValue("pRunde", runde);
@@ -708,10 +780,8 @@ namespace KeizerForClubs
         public void UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa()
         {
             BeginTransaction();
-            sqlCommand.CommandText = " UPDATE Pairing  SET PTS_W=0, PTS_B=0 ";
-            sqlCommand.Prepare();
-            sqlCommand.ExecuteNonQuery();
-            sqlCommand.CommandText = " UPDATE Player  SET Keizer_SumPts=0 ";
+            sqlCommand.CommandText = @" UPDATE Pairing  SET PTS_W=0, PTS_B=0;
+                                        UPDATE Player  SET Keizer_SumPts=0 ";
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
             EndTransaction();

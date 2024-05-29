@@ -131,8 +131,7 @@ namespace KeizerForClubs
                 var pair = pairings[index];
                 float erg_w = 0.0f, erg_s = 0.0f;
                 Stopwatches.Start("OneRoundAllPairingsSetKeizerPtsTa-2");
-                var pWhite = db.GetPlayerById(pair.IdW, runde);
-                var pBlack = db.GetPlayerById(pair.IdB, runde);
+                (var pWhite, var pBlack) = db.GetPlayerBaseById(pair.IdW, pair.IdB);
                 Stopwatches.Next("OneRoundAllPairingsSetKeizerPtsTa-3");
 
                 if (pair.Result == SqliteInterface.Results.WinWhite)

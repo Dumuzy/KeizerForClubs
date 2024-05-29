@@ -201,8 +201,7 @@ namespace KeizerForClubs
                     if (db.GetPairingList(ref pList4, sWhere, "  ") > 0)
                     {
                         var pair = pList4[0];
-                        var pWhite = db.GetPlayerById(pair.IdW, t.Runde);
-                        var pBlack = db.GetPlayerById(pair.IdB, t.Runde);
+                        (var pWhite, var pBlack) = db.GetPlayerBaseById(pair.IdW, pair.IdB);
                         string str4 = db.Locl_GetGameResultShort(pair.Result) + " ";
                         if (pair.Result > SqliteInterface.Results.WinBlack)
                         {
