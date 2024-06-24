@@ -1409,12 +1409,13 @@ for determining the first round pairings.";
             this.chkNovusRandomBoard.CheckAlign = ContentAlignment.MiddleRight;
             this.chkNovusRandomBoard.Checked = true;
             this.chkNovusRandomBoard.CheckState = CheckState.Checked;
-            this.chkNovusRandomBoard.Location = new Point(505, 232);
+            this.chkNovusRandomBoard.Location = new Point(485, 232);
             this.chkNovusRandomBoard.Name = "chkNovusRandomBoard";
-            this.chkNovusRandomBoard.Size = new Size(105, 24);
+            this.chkNovusRandomBoard.Size = new Size(125, 24);
             this.chkNovusRandomBoard.TabIndex = 9;
-            this.chkNovusRandomBoard.Text = "Assign bye's even";
+            this.chkNovusRandomBoard.Text = "Novuss";
             this.chkNovusRandomBoard.UseVisualStyleBackColor = true;
+            this.chkNovusRandomBoard.TextAlign = ContentAlignment.MiddleRight;
 
             this.lblRoundsGameRepeat.Location = new Point(44, 264);
             this.lblRoundsGameRepeat.Name = "lblRoundsGameRepeat";
