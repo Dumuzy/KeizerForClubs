@@ -13,16 +13,19 @@ namespace KeizerForClubs
 {
     public class ReportingUnit : ReportingBase
     {
-        string sTurnier = "";
+        string sTurnier = "", sDatei = "";
         SqliteInterface db;
 
-        public ReportingUnit(string sTurniername, SqliteInterface db)
+        public ReportingUnit(string sTurniername, string sDatei, SqliteInterface db)
         {
             this.sTurnier = sTurniername;
+            this.sDatei = sDatei;
             this.db = db;
         }
+
+        private string Basename => "export\\" + this.sDatei;
         #region Paarungen 
-        private string GetPaarungenBasename(int runde) => "export\\" + this.sTurnier + "_" +
+        private string GetPaarungenBasename(int runde) => Basename + "_" +
             db.Locl_GetText("GUI_LABEL", "Runde") + "-" + runde;
 
         public bool fReport_Paarungen(int runde)
@@ -75,7 +78,7 @@ namespace KeizerForClubs
 
         #region Tabellenstand
         private string GetFileTabellenstandBasename(int runde) =>
-            "export\\" + this.sTurnier + "_" + db.Locl_GetText("GUI_MENU", "Listen.Calc") + "-" + runde;
+            Basename + "_" + db.Locl_GetText("GUI_MENU", "Listen.Calc") + "-" + runde;
 
         public bool fReport_Tabellenstand(int runde)
         {
@@ -162,7 +165,7 @@ namespace KeizerForClubs
         }
 
         private string GetFileTabellenstandExBasename(int runde) =>
-            "export\\" + this.sTurnier + "_" + db.Locl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + runde;
+             Basename + "_" + db.Locl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + runde;
 
         TableW2Headers fReportTabellenstandVollTable()
         {
@@ -309,7 +312,7 @@ namespace KeizerForClubs
             return t;
         }
 
-        private string GetTeilnehmerBasename(SqliteInterface sqlintf, int runde) => "export\\" + this.sTurnier + "_" +
+        private string GetTeilnehmerBasename(SqliteInterface sqlintf, int runde) => Basename + "_" +
                 sqlintf.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + "-" + runde;
         #endregion Teilnehmer
 

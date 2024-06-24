@@ -15,7 +15,7 @@ namespace KeizerForClubs
     {
         private readonly SqliteInterface db = new SqliteInterface();
         private readonly RankingCalculator ranking;
-        private string sTurniername = "";
+        private string sTurniername = "", sFilename = "unknown";
         private int iPairingRekursionCnt;
         private int iPairingPlayerCntAll;
         private int iPairingPlayerCntAvailable;
@@ -32,7 +32,8 @@ namespace KeizerForClubs
         private NumericUpDown numRoundsGameRepeat;
         private ComboBox ddlRatioFirst2Last, ddlFirstRoundRandom;
         private ToolTip tooltip;
-        private Label lblRoundsGameRepeat, lblOutputTo, lblRatioFirst2Last, lblFirstRoundRandom;
+        private Label lblRoundsGameRepeat, lblOutputTo, lblNiceName, lblRatioFirst2Last, lblFirstRoundRandom;
+        private TextBox tbNiceName;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
         private CheckBox chkFreilosVerteilen, chkNovusRandomBoard;
@@ -112,11 +113,9 @@ namespace KeizerForClubs
                 db.OpenTournament(fileName);
             else
                 db.OpenTournament(fileName);
-            sTurniername = Path.GetFileName(fileName);
-            dlgOpenTournament.FileName = sTurniername;
+            dlgOpenTournament.FileName = Path.GetFileName(fileName);
             dlgOpenTournament.InitialDirectory = Path.GetDirectoryName(fileName);
-            sTurniername = sTurniername.Replace(".s3db", "");
-            Text = "KeizerForClubs " + sTurniername;
+            SetTurnierAndFilename(db.GetConfigText("OPTION.NiceName"));
             if (db.LangCode == "")
                 fSelectLanguage();
             ApplyLanguageText();
@@ -171,6 +170,7 @@ for determining the first round pairings.";
             chkCsv.Checked = db.GetConfigBool("OPTION.Csv");
             numClicks = db.GetConfigInt("INTERNAL.NumClicks");
             numRoundSelect.Value = (Decimal)db.GetMaxRound();
+            tbNiceName.Text = db.GetConfigText("OPTION.NiceName");
             // Der Name des db-Files ist einem ini-File gemerkt, alle anderen Settings in 
             // der Config-Datenbank. Weil die Config-Db nur schwer geöffnet werden kann ohne die 
             // Haupt-Db. Weil die Config-Db eine an die Haupt-Db attached DB ist. 
@@ -261,7 +261,7 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             DelDeletedPlayers();
-            new ReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
+            new ReportingUnit(sTurniername, sFilename, db).WriteCurrentTablesToDb();
             if (db.GetPairings_NoResult() == 0)
                 ExecutePairing();
             else
@@ -274,7 +274,7 @@ for determining the first round pairings.";
             IncNumClicks();
             DelDeletedPlayers();
             int maxRound = db.GetMaxRound();
-            new ReportingUnit(sTurniername, db).WriteCurrentTablesToDb();
+            new ReportingUnit(sTurniername, sFilename, db).WriteCurrentTablesToDb();
             if (sender == mnuPaarungManuell)
             {
                 if (db.GetPairings_NoResult() == 0)
@@ -451,8 +451,21 @@ for determining the first round pairings.";
                 db.SetConfigBool("OPTION.Xml", this.chkXml.Checked);
                 db.SetConfigBool("OPTION.Txt", this.chkTxt.Checked);
                 db.SetConfigBool("OPTION.Csv", this.chkCsv.Checked);
+                var oldNiNa = db.GetConfigText("OPTION.NiceName");
+                if (oldNiNa != this.tbNiceName.Text)
+                {
+                    db.SetConfigText("OPTION.NiceName", this.tbNiceName.Text);
+                    SetTurnierAndFilename(this.tbNiceName.Text);
+                }
             }
             SaveWindowSettings();
+        }
+
+        private void SetTurnierAndFilename(string niceName)
+        {
+            sFilename = (dlgOpenTournament?.FileName?.Replace(".s3db", "") ?? "unknown");
+            sTurniername = string.IsNullOrWhiteSpace(niceName) ? sFilename : niceName;
+            this.Text = "KeizerForClubs  -  " + sTurniername;
         }
 
         private void SaveWindowSettings()
@@ -519,7 +532,7 @@ for determining the first round pairings.";
         {
             RecalcIfNeeded();
             IncNumClicks(db.GetPlayerCount());
-            var ru = new ReportingUnit(sTurniername, db);
+            var ru = new ReportingUnit(sTurniername, sFilename, db);
             ru.fReport_Paarungen(SelectedRound);
             ru.fReport_Tabellenstand(SelectedRound);
             ru.fReport_TabellenstandVoll(SelectedRound);
@@ -534,7 +547,7 @@ for determining the first round pairings.";
         private void MnuListenPairingClick(object sender, EventArgs e)
         {
             IncNumClicks(db.GetPlayerCount() / 2);
-            new ReportingUnit(sTurniername, db).fReport_Paarungen(SelectedRound);
+            new ReportingUnit(sTurniername, sFilename, db).fReport_Paarungen(SelectedRound);
         }
 
         private void MnuListenStandingClick(object sender, EventArgs e)
@@ -542,13 +555,13 @@ for determining the first round pairings.";
             RecalcIfNeeded();
             IncNumClicks(db.GetPlayerCount());
             if (sender == mnuListenStanding)
-                new ReportingUnit(sTurniername, db).fReport_Tabellenstand(SelectedRound);
+                new ReportingUnit(sTurniername, sFilename, db).fReport_Tabellenstand(SelectedRound);
             else if (sender == mnuListenStandingFull)
-                new ReportingUnit(sTurniername, db).fReport_TabellenstandVoll(SelectedRound);
+                new ReportingUnit(sTurniername, sFilename, db).fReport_TabellenstandVoll(SelectedRound);
         }
 
         private void MnuListenParticipantsClick(object sender, EventArgs e) =>
-            new ReportingUnit(sTurniername, db).fReport_Teilnehmer(SelectedRound);
+            new ReportingUnit(sTurniername, sFilename, db).fReport_Teilnehmer(SelectedRound);
 
         private void TbBonusValueChanged(object sender, EventArgs e)
         {
@@ -747,6 +760,7 @@ for determining the first round pairings.";
             lblRatioFirst2Last.Text = db.Locl_GetText("GUI_LABEL", "First2Last");
             lblFirstRoundRandom.Text = db.Locl_GetText("GUI_LABEL", "FirstRoundRandom");
             lblOutputTo.Text = db.Locl_GetText("GUI_LABEL", "OutputTo");
+            lblNiceName.Text = db.Locl_GetText("GUI_LABEL", "NiceName");
             btDonate1.Text = btDonate2.Text = db.Locl_GetText("GUI_TEXT", "Donate");
         }
 
@@ -1169,6 +1183,8 @@ for determining the first round pairings.";
             this.lblRatioFirst2Last = new Label();
             this.lblFirstRoundRandom = new Label();
             this.lblOutputTo = new Label();
+            this.lblNiceName = new Label();
+            this.tbNiceName = new TextBox();
             this.numRoundsGameRepeat = new NumericUpDown();
             this.ddlRatioFirst2Last = new ComboBox();
             this.ddlFirstRoundRandom = new ComboBox();
@@ -1371,6 +1387,9 @@ for determining the first round pairings.";
             this.tabSettings.Controls.Add(this.chkTxt);
             this.tabSettings.Controls.Add(this.chkCsv);
             this.tabSettings.Controls.Add(this.lblOutputTo);
+            this.tabSettings.Controls.Add(this.lblNiceName);
+            this.tabSettings.Controls.Add(this.tbNiceName);
+
             this.tabSettings.Location = new Point(4, 4);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.Padding = new Padding(3);
@@ -1380,28 +1399,24 @@ for determining the first round pairings.";
             this.tabSettings.UseVisualStyleBackColor = true;
             this.tabSettings.Leave += TabSettingsLeave;
 
-            this.lblRatioFirst2Last.Location = new Point(370, 264);
-            this.lblRatioFirst2Last.Size = new Size(200, 23);
-            this.lblRatioFirst2Last.Text = "# Rounds before paired again";
-            this.ddlRatioFirst2Last.Location = new Point(570, 262);
-            this.ddlRatioFirst2Last.Size = new Size(40, 21);
-            List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f });
-            this.ddlRatioFirst2Last.DataSource = list;
+            var yOutput = 230;
 
             this.chkFreilosVerteilen.CheckAlign = ContentAlignment.MiddleRight;
+            this.chkFreilosVerteilen.TextAlign = ContentAlignment.MiddleRight;
             this.chkFreilosVerteilen.Checked = true;
             this.chkFreilosVerteilen.CheckState = CheckState.Checked;
-            this.chkFreilosVerteilen.Location = new Point(44, 232);
+            this.chkFreilosVerteilen.Location = new Point(44, yOutput);
             this.chkFreilosVerteilen.Name = "chkFreilosVerteilen";
             this.chkFreilosVerteilen.Size = new Size(215, 24);
             this.chkFreilosVerteilen.TabIndex = 8;
             this.chkFreilosVerteilen.Text = "Assign bye's even";
             this.chkFreilosVerteilen.UseVisualStyleBackColor = true;
 
-            this.lblFirstRoundRandom.Location = new Point(300, 236);
+            this.lblFirstRoundRandom.Location = new Point(300, yOutput);
             this.lblFirstRoundRandom.Size = new Size(140, 23);
             this.lblFirstRoundRandom.Text = "# First round random";
-            this.ddlFirstRoundRandom.Location = new Point(440, 236);
+            this.lblFirstRoundRandom.TextAlign = ContentAlignment.MiddleRight;
+            this.ddlFirstRoundRandom.Location = new Point(440, yOutput);
             this.ddlFirstRoundRandom.Size = new Size(40, 21);
             var li = new List<int>(new int[] { 0, 10, 50, 100, 150, 200, 300, 400, 500 });
             this.ddlFirstRoundRandom.DataSource = li;
@@ -1409,7 +1424,7 @@ for determining the first round pairings.";
             this.chkNovusRandomBoard.CheckAlign = ContentAlignment.MiddleRight;
             this.chkNovusRandomBoard.Checked = true;
             this.chkNovusRandomBoard.CheckState = CheckState.Checked;
-            this.chkNovusRandomBoard.Location = new Point(485, 232);
+            this.chkNovusRandomBoard.Location = new Point(485, yOutput);
             this.chkNovusRandomBoard.Name = "chkNovusRandomBoard";
             this.chkNovusRandomBoard.Size = new Size(125, 24);
             this.chkNovusRandomBoard.TabIndex = 9;
@@ -1417,20 +1432,30 @@ for determining the first round pairings.";
             this.chkNovusRandomBoard.UseVisualStyleBackColor = true;
             this.chkNovusRandomBoard.TextAlign = ContentAlignment.MiddleRight;
 
-            this.lblRoundsGameRepeat.Location = new Point(44, 264);
-            this.lblRoundsGameRepeat.Name = "lblRoundsGameRepeat";
+
+            yOutput += 23;
+            this.lblRoundsGameRepeat.Location = new Point(44, yOutput);
             this.lblRoundsGameRepeat.Size = new Size(200, 23);
             this.lblRoundsGameRepeat.TabIndex = 10;
             this.lblRoundsGameRepeat.Text = "# Rounds before paired again";
-            this.numRoundsGameRepeat.Location = new Point(246, 262);
+            this.lblRoundsGameRepeat.TextAlign = ContentAlignment.MiddleRight;
+            this.numRoundsGameRepeat.Location = new Point(246, yOutput);
             this.numRoundsGameRepeat.Maximum = new Decimal(new int[4] { 50, 0, 0, 0 });
             this.numRoundsGameRepeat.Name = "numRoundsGameRepeat";
             this.numRoundsGameRepeat.Size = new Size(40, 21);
             this.numRoundsGameRepeat.TabIndex = 9;
 
+            this.lblRatioFirst2Last.Location = new Point(370, yOutput);
+            this.lblRatioFirst2Last.Size = new Size(200, 23);
+            this.lblRatioFirst2Last.Text = "# Rounds before paired again";
+            this.lblRatioFirst2Last.TextAlign = ContentAlignment.MiddleRight;
+            this.ddlRatioFirst2Last.Location = new Point(570, yOutput);
+            this.ddlRatioFirst2Last.Size = new Size(40, 21);
+            List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f });
+            this.ddlRatioFirst2Last.DataSource = list;
 
-            var yOutput = 287;
 
+            yOutput += 23;
             this.chkHtml.CheckAlign = ContentAlignment.MiddleLeft;
             this.chkHtml.Location = new Point(246, yOutput);
             this.chkHtml.Name = "chkHtml";
@@ -1464,10 +1489,22 @@ for determining the first round pairings.";
             this.chkCsv.UseVisualStyleBackColor = true;
 
             this.lblOutputTo.Location = new Point(44, yOutput);
-            this.lblOutputTo.Name = "lblOutputTo";
             this.lblOutputTo.Size = new Size(200, 23);
             this.lblOutputTo.Text = "# Rounds before paired again";
-            this.lblOutputTo.TextAlign = ContentAlignment.MiddleLeft;
+            this.lblOutputTo.TextAlign = ContentAlignment.MiddleRight;
+
+
+            yOutput += 23;
+            this.lblNiceName.Location = new Point(44, yOutput);
+            this.lblNiceName.Size = new Size(200, 23);
+            this.lblNiceName.Text = "Tournament name";
+            this.lblNiceName.TextAlign = ContentAlignment.MiddleRight;
+            this.tbNiceName.Location = new Point(246, yOutput + 2);
+            this.tbNiceName.Size = new Size(400, 23);
+            this.tbNiceName.Text = "Tournament name";
+
+
+
 
             this.btDonate1.Location = new Point(43, 330);
             this.btDonate1.Name = "lblDonate";

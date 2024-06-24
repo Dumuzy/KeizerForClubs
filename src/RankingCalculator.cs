@@ -9,7 +9,7 @@ namespace KeizerForClubs
         {
             this.db = db;
             this.form = mainform;
-            cReportingUnit = shallUseReporting ? new ReportingUnit("qwert", db) : null;
+            cReportingUnit = shallUseReporting ? new ReportingUnit("qwert", "qwert", db) : null;
         }
 
         /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>

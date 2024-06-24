@@ -193,7 +193,8 @@ namespace KeizerForClubs
         #region Config
         public int SetConfigText(string key, string text)
         {
-            sqlCommand.CommandText = $" UPDATE {getTable(key)} SET CfgText= @pCfgTxt  WHERE CfgKey= @pKey ";
+            sqlCommand.CommandText = @$"INSERT or REPLACE INTO {getTable(key)} (CfgKey, CfgText) 
+                    VALUES(@pKey, @pCfgTxt)";
             sqlCommand.Parameters.AddWithValue("pKey", key);
             sqlCommand.Parameters.AddWithValue("pCfgTxt", text);
             sqlCommand.Prepare();
