@@ -140,7 +140,7 @@ class='my-wrapper kfc-wrapper kfc-wrapper-{number of columns}'
 class='my-exwrapper kfc-exwrapper kfc-exwrapper-{number of columns}'
 ```
 
-#### Détails du grille américaine 
+#### Détails de la grille américaine 
 
 ##### Rank-Pb
 
