@@ -976,11 +976,32 @@ namespace KeizerForClubs
                     // irgendwann zurückgetreten. Ich zähle den als zurückgetreten. Es ist nicht 100% korrekt, 
                     // weil es auch sein könnte, daß es ein zurückgetretener Spätstarter ist und der in der aktuell
                     // gefragten Runde noch gar nicht da war. 
-                    if (playerCurrState != PlayerState.Retired)
-                        players[i].State = PlayerState.NotYetStarted;
+                    // Das stimmt aber nicht vor Runde 1. Wenn das hier Runde 0 ist, könnte der Spieler hier auch 
+                    // entschuldigt oder so sein.  
+                    if (runde == 0)
+                    {
+                        if (playerCurrState.IsContainedIn(new PlayerState[]{
+                                PlayerState.Retired, PlayerState.Excused, PlayerState.Unexcused, PlayerState.Hindered }))
+                            players[i].State = playerCurrState;
+                        else
+                            players[i].State = PlayerState.NotYetStarted;
+                    }
+                    else
+                        if (playerCurrState != PlayerState.Retired)
+                            players[i].State = PlayerState.NotYetStarted;
                 }
             }
-            return new Li<stPlayer>(players.Take(count).Where(p => p.State != PlayerState.NotYetStarted));
+            // Es scheint sinnlos, daß Spieler, die nie gespielt haben und zurückgetreten sind, überhaupt
+            // angezeigt werden in der Spielerliste. Die werden drum hier rausgenommen. 
+            var idsNeverPlayedAndRetired = new Li<stPlayer>(players.Take(count).
+                    Where(p => p.State == PlayerState.Retired && CntPlayersPlayedGames(p.Id) <= 0)).
+                    Select(p => p.Id).ToLi();
+
+            var pls = runde == 0 ? new Li<stPlayer>(players.Take(count)) :
+                new Li<stPlayer>(players.Take(count).Where(p => p.State != PlayerState.NotYetStarted));
+            if(!idsNeverPlayedAndRetired.IsEmpty)
+                pls = pls.Where(p => !p.Id.IsContainedIn(idsNeverPlayedAndRetired)).ToLi(); 
+            return pls;
         }
 
         public Li<stPlayer> GetPlayerLi_Available(string sSortorder, int runde)
