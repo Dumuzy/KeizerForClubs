@@ -640,10 +640,31 @@ namespace KeizerForClubs
                     sqlCommand.CommandText = $"UPDATE PLAYER set id={i + 1} WHERE id={li[i].Id}";
                     sqlCommand.ExecuteNonQuery();
                 }
-                EndTransaction();
 
+                RefreshRatingWDelta();
+
+                EndTransaction();
             }
         }
+
+        // This function should probably called everytime when round 1 is deleted. 
+        public void RefreshRatingWDelta()
+        {
+            if (GetMaxRound() == 0)
+            {
+                var li = GetPlayerLi("", "", 0);
+                var firstRoundRandom = GetConfigInt("OPTION.FirstRoundRandom", 0);
+                for (int rwd, i = 0; i < li.Count; ++i)
+                {
+                    if (firstRoundRandom == 0)
+                        rwd = 0;
+                    else
+                        rwd = random.Next(-firstRoundRandom, firstRoundRandom) + li[i].Rating;
+                    UpdPlayerRatingWDelta(li[i].Id, rwd);
+                }
+            }
+        }
+        static readonly Random random = new();
         #endregion Player
 
         #region Pairing
@@ -989,7 +1010,7 @@ namespace KeizerForClubs
                     }
                     else
                         if (playerCurrState != PlayerState.Retired)
-                            players[i].State = PlayerState.NotYetStarted;
+                        players[i].State = PlayerState.NotYetStarted;
                 }
             }
             // Es scheint sinnlos, daß Spieler, die nie gespielt haben und zurückgetreten sind, überhaupt
@@ -1000,8 +1021,8 @@ namespace KeizerForClubs
 
             var pls = runde == 0 ? new Li<stPlayer>(players.Take(count)) :
                 new Li<stPlayer>(players.Take(count).Where(p => p.State != PlayerState.NotYetStarted));
-            if(!idsNeverPlayedAndRetired.IsEmpty)
-                pls = pls.Where(p => !p.Id.IsContainedIn(idsNeverPlayedAndRetired)).ToLi(); 
+            if (!idsNeverPlayedAndRetired.IsEmpty)
+                pls = pls.Where(p => !p.Id.IsContainedIn(idsNeverPlayedAndRetired)).ToLi();
             return pls;
         }
 
