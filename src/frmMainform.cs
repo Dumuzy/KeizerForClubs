@@ -11,7 +11,7 @@ using TrackBar = System.Windows.Forms.TrackBar;
 
 namespace KeizerForClubs
 {
-    public class frmMainform : Form
+    public partial class frmMainform : Form
     {
         private readonly SqliteInterface db = new SqliteInterface();
         private readonly RankingCalculator ranking;
@@ -334,8 +334,15 @@ for determining the first round pairings.";
                 return;
             string fileName = ofd.FileName;
             var lines = File.ReadAllLines(fileName).ToLi();
+            ImportPlayers(lines);
+        }
+
+        void ImportPlayers(Li<string> lines)
+        {
             var first = lines.FirstOrDefault();
-            if (first != null)
+            if (first != null && first.ToLowerInvariant() == "testscript")
+                ExecTestScript(lines);
+            else if (first != null)
             {
                 var idxSplitter = first.IndexOfAny(";:,".ToCharArray());
                 var splitter = idxSplitter != -1 ? first[idxSplitter] : '+';
@@ -1317,7 +1324,7 @@ for determining the first round pairings.";
             this.chkPairingOnlyPlayed.CheckedChanged += new EventHandler(this.ChkPairingOnlyPlayedCheckedChanged);
             this.numRoundSelect.Font = new Font("Microsoft Sans Serif", 12f, FontStyle.Bold, GraphicsUnit.Point, (byte)0);
             this.numRoundSelect.Location = new Point(237, 16);
-            this.numRoundSelect.Maximum = new Decimal(new int[4] { 99, 0, 0, 0 });
+            this.numRoundSelect.Maximum = new Decimal(new int[4] { 298, 0, 0, 0 });
             this.numRoundSelect.Name = "numRoundSelect";
             this.numRoundSelect.Size = new Size(59, 26);
             this.numRoundSelect.TabIndex = 1;

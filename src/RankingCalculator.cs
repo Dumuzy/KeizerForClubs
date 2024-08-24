@@ -45,6 +45,7 @@ namespace KeizerForClubs
                     --runde1;
             }
             Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-All");
+            Stopwatches.Debug("");
         }
 
         /// <summary> Gibt die Keizer-Start-Pts für den 1. Spieler zurück. </summary>
@@ -190,7 +191,9 @@ namespace KeizerForClubs
             var er = endRundeWhichIsCalculated;
             // player -> valueOfWinAgainst
             var valueOfWinAgainstPlayerDict = new Dictionary<int, double>();
-            var playerStateDict = new Dictionary<int, SqliteInterface.PlayerState>();
+            Stopwatches.Start("CheckPairingsValuesTa-0");
+            var playerStateDict = db.GetPlayerStateDict();
+            Stopwatches.Stop("CheckPairingsValuesTa-0");
             // Ein Sieg gg Player X muß immer gleich viel wert sein, nach dem eine Runde durchgerechnet
             // wurde. Nach der nächsten Runde kann und wird der Sieg anders bewertet. 
             // Aber, wenn ich zB den Stand nach Runde 5 berechne, muß ein Sieg über X in Runde 1

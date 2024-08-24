@@ -431,6 +431,23 @@ namespace KeizerForClubs
             return (PlayerState)ires;
         }
 
+        public Dictionary<int, SqliteInterface.PlayerState> GetPlayerStateDict()
+        {
+            var d = new Dictionary<int, SqliteInterface.PlayerState>();
+            sqlCommand.CommandText = " Select id, state from player ";
+            using (var r = sqlCommand.ExecuteReader())
+                if (r.HasRows)
+                {
+                    while (r.Read())
+                    {
+                        var id = r.IsDBNull(0) ? 0 : (int)r.GetInt16(0);
+                        var state = (PlayerState)(r.IsDBNull(1) ? (long)(-1) : (long)r.GetInt16(1));
+                        d[id] = state;
+                    }
+                }
+            return d;
+        }
+
         ///// <summary> Way faster than without cache. </summary>
         //public PlayerState GetPlayerStateCached(int id)
         //{
