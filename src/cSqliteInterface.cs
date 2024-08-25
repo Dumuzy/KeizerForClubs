@@ -801,11 +801,11 @@ namespace KeizerForClubs
         {
             // Ergebnis gültig? 
             // "Normal" oder "Spezialergebnis" je nach richtiger oder Pseudo-Paarung
+            // TODO T51 Allow other values. 
             if (ids > 0)
             {
-                if (erg != SqliteInterface.Results.WinWhite &&
-                    erg != SqliteInterface.Results.WinBlack &&
-                    erg != SqliteInterface.Results.Draw)
+                if (erg != Results.WinWhite && erg != Results.WinBlack &&
+                    erg != Results.Draw && erg != Results.ErrUndefined)
                     return false;
             }
             else
@@ -1148,11 +1148,24 @@ namespace KeizerForClubs
 
         public SqliteInterface.Results Locl_GetGameResult(string result)
         {
-            string key = Locl_FindKey("GAMERESULT", result);
-            return !(key == "") ? (SqliteInterface.Results)Convert.ToInt32(key) : SqliteInterface.Results.ErrUndefined;
+            SqliteInterface.Results res;
+            if (result == ColPairingUndefinedText)
+                res = Results.ErrUndefined;
+            else
+            {
+                string key = Locl_FindKey("GAMERESULT", result);
+                res = key != "" ? (Results)Convert.ToInt32(key) : Results.ErrUndefined;
+            }
+            return res;
         }
 
-        public string Locl_GetGameResultText(SqliteInterface.Results result) => Locl_GetText("GAMERESULT", ((int)result).ToString());
+        public string Locl_GetGameResultText(SqliteInterface.Results result)
+        {
+            var t = result == Results.ErrUndefined ? ColPairingUndefinedText 
+                : Locl_GetText("GAMERESULT", ((int)result).ToString());
+            return t;
+        }
+        public const string ColPairingUndefinedText = "-";
 
         public string Locl_GetGameResultShort(SqliteInterface.Results result)
         {

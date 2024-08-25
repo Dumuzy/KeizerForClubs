@@ -692,10 +692,11 @@ for determining the first round pairings.";
 
         private void GrdPairingsCellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            SqliteInterface.Results gameResult = db.Locl_GetGameResult(this.grdPairings.Rows[e.RowIndex].Cells[7].Value.ToString());
-            int int16_1 = (int)Convert.ToInt16(this.grdPairings.Rows[e.RowIndex].Cells[1].Value);
-            int int16_2 = (int)Convert.ToInt16(this.grdPairings.Rows[e.RowIndex].Cells[4].Value);
-            db.UpdPairingResult((int)Convert.ToInt16(this.numRoundSelect.Value), int16_1, int16_2, gameResult);
+            var value = grdPairings.Rows[e.RowIndex].Cells[7].Value.ToString();
+            SqliteInterface.Results gameResult = db.Locl_GetGameResult(value);
+            int pid1 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[1].Value);
+            int pid2 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[4].Value);
+            db.UpdPairingResult(Convert.ToInt16(numRoundSelect.Value), pid1, pid2, gameResult);
         }
 
         private void ApplyPlayerStateTexte()
@@ -710,16 +711,24 @@ for determining the first round pairings.";
                 colPlayerState.Items.Add((object)texte[index]);
         }
 
-        private void ApplyLanguageText()
+        private void ApplyPairingResultTexte()
         {
-            ApplyPlayerStateTexte();
             string[] texte = new string[20];
             colPairingResult.Items.Clear();
             int topicTexte2 = db.Locl_GetTopicTexte("GAMERESULT", " AND key < '8' ", ref texte);
             // TODO T51                                       Remove ^^^^^^^^^for T51.
 
-            for (int index = 0; index < topicTexte2; ++index)
-                colPairingResult.Items.Add((object)texte[index]);
+            var tt = texte.Take(topicTexte2).ToLi();
+            tt.Insert(0, SqliteInterface.ColPairingUndefinedText);
+
+            foreach(var text in tt) 
+                colPairingResult.Items.Add(text);
+        }
+
+        private void ApplyLanguageText()
+        {
+            ApplyPlayerStateTexte(); 
+            ApplyPairingResultTexte();
             colPlayerState.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Status");
             colRating.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Rating");
             colPlayerName.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Name");
@@ -803,12 +812,12 @@ for determining the first round pairings.";
                 if (!this.chkPairingOnlyPlayed.Checked || pList[index].Board < stPairing.FirstNonPlayingBoard)
                 {
                     this.grdPairings.Rows.Add();
-                    this.grdPairings.Rows[index].Cells[0].Value = (object)pList[index].Board.ToString();
-                    this.grdPairings.Rows[index].Cells[1].Value = (object)pList[index].IdW.ToString();
-                    this.grdPairings.Rows[index].Cells[2].Value = (object)db.GetPlayerName(pList[index].IdW);
-                    this.grdPairings.Rows[index].Cells[4].Value = (object)pList[index].IdB.ToString();
-                    this.grdPairings.Rows[index].Cells[5].Value = (object)db.GetPlayerName(pList[index].IdB);
-                    this.grdPairings.Rows[index].Cells[7].Value = (object)db.Locl_GetGameResultText(pList[index].Result);
+                    this.grdPairings.Rows[index].Cells[0].Value = pList[index].Board.ToString();
+                    this.grdPairings.Rows[index].Cells[1].Value = pList[index].IdW.ToString();
+                    this.grdPairings.Rows[index].Cells[2].Value = db.GetPlayerName(pList[index].IdW);
+                    this.grdPairings.Rows[index].Cells[4].Value = pList[index].IdB.ToString();
+                    this.grdPairings.Rows[index].Cells[5].Value = db.GetPlayerName(pList[index].IdB);
+                    this.grdPairings.Rows[index].Cells[7].Value = db.Locl_GetGameResultText(pList[index].Result);
                 }
             }
         }
