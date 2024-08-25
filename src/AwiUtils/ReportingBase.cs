@@ -187,6 +187,12 @@ namespace AwiUtils
         public readonly int Runde;
         public Li<string> Footer;
         public void AddRow(Li<string> row) => rows.Add(row);
+        public void RemoveColAt(int idx)
+        {
+            if (idx < ColsCount && idx >= 0)
+                foreach (var li in rows)
+                    li.RemoveAt(idx);
+        }
         public int Count => rows.Count;
         public Li<string> this[int i] { get { return rows[i]; } }
         public int ColsCount => rows.FirstOrDefault()?.Count ?? 0;

@@ -35,13 +35,19 @@ namespace KeizerForClubs
                 db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
                 // db.UpdPairing_AllKeizerSumsResetValuesTa(); // TEST TODO
                 Stopwatches.Next("AllPlayersAllRoundsCalculateTa-2");
-                for (int runde2 = 1; runde2 <= runde1; ++runde2)
-                    this.OneRoundAllPairingsSetKeizerPtsTa(runde2, runde1);
-                Stopwatches.Next("AllPlayersAllRoundsCalculateTa-3");
-                this.AllPlayersSetKeizerSumPtsTa();
-                Stopwatches.Next("AllPlayersAllRoundsCalculateTa-4");
-                this.AllPlayersSetRankAndStartPtsTa();
-                Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-4");
+                bool ok = AllPlayersSetRankAndStartPtsFromDbCacheTa(runde1);
+                Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-2");
+                if (!ok)
+                {
+                    Stopwatches.Next("AllPlayersAllRoundsCalculateTa-3");
+                    for (int runde2 = 1; runde2 <= runde1; ++runde2)
+                        this.OneRoundAllPairingsSetKeizerPtsTa(runde2, runde1);
+                    Stopwatches.Next("AllPlayersAllRoundsCalculateTa-4");
+                    this.AllPlayersSetKeizerSumPtsTa();
+                    Stopwatches.Next("AllPlayersAllRoundsCalculateTa-5");
+                    this.AllPlayersSetRankAndStartPtsTa();
+                    Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-5");
+                }
                 cReportingUnit?.DebugPairingsAndStandings(runde1);
                 if (runde1 == maxRound && nExtraRecursions-- > 0)
                     --runde1;
@@ -60,6 +66,36 @@ namespace KeizerForClubs
             var ratioFirst2Last = db.GetConfigFloat("OPTION.RatioFirst2Last", 3);
             double firstStartPtsFaktor = ratioFirst2Last / (ratioFirst2Last - 1);
             return Convert.ToInt32((playerCount - 1) * firstStartPtsFaktor);
+        }
+
+        /// <summary> Gibt T zurück, falls das ging, F andernfalls. Setzt Rank, KeizerStartPts und KeizerSumPts
+        /// in die Player-Liste der DB, falls aus DB-Cache ermittelbar. </summary>
+        /// <param name="runde">Stand nach dieser Runde gewünscht, 1-basiert. </param>
+        bool AllPlayersSetRankAndStartPtsFromDbCacheTa(int runde)
+        {
+            TableW2Headers table = runde != db.GetMaxRound() ?
+                db.ReadTableWHeadersFromDb(TableType.Stand, runde) : null;
+            bool ok = table != null;
+            if (ok)
+            {
+                // If the header line contains "Id", the table contains the playerId.
+                int playerIdIdx = table[0].IndexOf("Id");
+                // The table contains one header line. 
+                int firstStartPts = FirstStartPts(table.Count - 1);
+
+                db.BeginTransaction();
+                for (int i = 1; i < table.Count; ++i)
+                {
+                    var row = table[i];
+                    var rank = Helper.ToInt(row[0]);
+                    var keizerSum = Helper.ToSingle(row[2]);
+                    var playerId = playerIdIdx != -1 ? Helper.ToInt(row[playerIdIdx]) : db.GetPlayerID(row[1]);
+                    (var pl, var dummy) = db.GetPlayerBaseById(playerId, 0);
+                    db.UpdPlayer_SetRankAndStartPtsAndKeizerSumPts(playerId, rank, firstStartPts--, keizerSum);
+                }
+                db.EndTransaction();
+            }
+            return ok;
         }
 
         /// <summary> Das ist die Funktion, die die anfänglichen Keizer-Punkte verteilt. </summary>

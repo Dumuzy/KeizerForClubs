@@ -55,7 +55,7 @@ namespace KeizerForClubs
         TableW2Headers fReportPaarungenTable(int runde)
         {
             var t = new TableW2Headers(sTurnier, TableType.Paarungen, runde);
-            t.Header2 = db.Locl_GetText("GUI_MENU", "Paarungen") + " " + 
+            t.Header2 = db.Locl_GetText("GUI_MENU", "Paarungen") + " " +
                 db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
             t.AddRow("Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis".Split().
                     Select(s => db.Locl_GetText("GUI_COLS", s)).ToLi());
@@ -84,8 +84,18 @@ namespace KeizerForClubs
         {
             try
             {
-                TableW2Headers table = runde != db.GetMaxRound() ? 
-                    db.ReadTableWHeadersFromDb(TableType.Stand, runde) : fReportTabellenstandTable();
+                TableW2Headers table = runde != db.GetMaxRound() ?
+                    db.ReadTableWHeadersFromDb(TableType.Stand, runde) : fReportTabellenstandTable(false);
+                if (runde != db.GetMaxRound())
+                {
+                    // The playerIdIdx is only in the table to be used for fast calculation. Therefore, 
+                    // this column is killed if the table is used for showing.  
+                    // That is not the cleanest thing to do it like this, but it was easily done and
+                    // I don't need any extra tables with this solution. 
+                    int playerIdIdx = table[0].IndexOf("Id");
+                    if (playerIdIdx != -1)
+                        table.RemoveColAt(playerIdIdx);
+                }
                 var fileBase = GetFileTabellenstandBasename(runde);
 
                 if (db.GetConfigBool("OPTION.Xml"))
@@ -108,7 +118,7 @@ namespace KeizerForClubs
             return true;
         }
 
-        TableW2Headers fReportTabellenstandTable()
+        TableW2Headers fReportTabellenstandTable(bool isWithPlayerId)
         {
             var t = new TableW2Headers(sTurnier, TableType.Stand, db.GetMaxRound());
             string str2 = db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde;
@@ -117,6 +127,8 @@ namespace KeizerForClubs
             var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc ", t.Runde);
             var lih = new Li<string>(new string[] { "", db.Locl_GetText("GUI_TEXT", "Name"),
                 db.Locl_GetText("GUI_TEXT", "Keizer-Punkte"), db.Locl_GetText("GUI_TEXT", "Spiel-Punkte") });
+            if (isWithPlayerId)
+                lih.Add("Id");
             t.AddRow(lih);
             for (int index = 0, num1 = 1; index < players.Count; ++index)
             {
@@ -128,6 +140,8 @@ namespace KeizerForClubs
                     li.Add(player.Name);
                     li.Add(player.KeizerSumPts.ToString("0.00"));
                     li.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
+                    if (isWithPlayerId)
+                        li.Add(player.Id.ToString());
                     t.AddRow(li);
                 }
             }
@@ -295,7 +309,7 @@ namespace KeizerForClubs
         {
             var t = new TableW2Headers(sTurnier, TableType.Spieler, db.GetMaxRound());
             t.Header2 = sqlintf.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
-                db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde; 
+                db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde;
 
             var players = sqlintf.GetPlayerLi("", " ORDER BY ID ", t.Runde);
             for (int index = 0; index < players.Count; ++index)
@@ -322,7 +336,7 @@ namespace KeizerForClubs
             int maxRound = db.GetMaxRound();
             if (maxRound > 0)
             {
-                db.WriteTableWHeaders2Db(TableType.Stand, maxRound, fReportTabellenstandTable());
+                db.WriteTableWHeaders2Db(TableType.Stand, maxRound, fReportTabellenstandTable(true));
                 db.WriteTableWHeaders2Db(TableType.Kreuz, maxRound, fReportTabellenstandVollTable());
             }
         }

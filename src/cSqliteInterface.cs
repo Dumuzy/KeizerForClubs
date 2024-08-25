@@ -355,6 +355,19 @@ namespace KeizerForClubs
             return true;
         }
 
+        public bool UpdPlayer_SetRankAndStartPtsAndKeizerSumPts(int id, int rang, float keizerStart, float keizerSum)
+        {
+            sqlCommand.CommandText = @" UPDATE Player  SET Rank=@pRang, Keizer_PrevPts=Keizer_StartPts, 
+                        Keizer_StartPts=@pPts, Keizer_SumPts=@pSum WHERE ID=@pID ";
+            sqlCommand.Parameters.AddWithValue("pRang", rang);
+            sqlCommand.Parameters.AddWithValue("pPts", keizerStart);
+            sqlCommand.Parameters.AddWithValue("pSum", keizerSum);
+            sqlCommand.Parameters.AddWithValue("pID", id);
+            sqlCommand.Prepare();
+            sqlCommand.ExecuteNonQuery();
+            return true;
+        }
+
         // Partien eines Spieler abfragen(für Kreuztabelle)
         public bool GetPlayerGames(int ID, ref string[] sResults)
         {
