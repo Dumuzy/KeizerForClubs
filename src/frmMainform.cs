@@ -294,20 +294,23 @@ for determining the first round pairings.";
 
         void MnuPairingDropLastClick(object sender, EventArgs e)
         {
-            IncNumClicks();
-            int maxRound = db.GetMaxRound();
-            if (SelectedRound != maxRound)
+            if (SelectedRound != 0)
             {
-                int num = (int)MessageBox.Show(db.Locl_GetText("GUI_TEXT", "Hinweis.DelLetzteRd"), "No....", MessageBoxButtons.OK);
+                IncNumClicks();
+                int maxRound = db.GetMaxRound();
+                if (SelectedRound != maxRound)
+                {
+                    int num = (int)MessageBox.Show(db.Locl_GetText("GUI_TEXT", "Hinweis.DelLetzteRd"), "No....", MessageBoxButtons.OK);
+                }
+                else
+                {
+                    db.DelPairings(maxRound);
+                    db.DelCurrentStoredTablesWHeader(maxRound);
+                    this.numRoundSelect.Value = (Decimal)(maxRound - 1);
+                    this.LoadPairingList();
+                }
+                ApplyPlayerStateTexte();
             }
-            else
-            {
-                db.DelPairings(maxRound);
-                db.DelCurrentStoredTablesWHeader(maxRound);
-                this.numRoundSelect.Value = (Decimal)(maxRound - 1);
-                this.LoadPairingList();
-            }
-            ApplyPlayerStateTexte();
         }
 
         void MnuAboutBoxClick(object sender, EventArgs e) => fShowAboutBox();

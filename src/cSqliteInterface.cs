@@ -677,7 +677,7 @@ namespace KeizerForClubs
             }
         }
 
-        // This function should probably called everytime when round 1 is deleted. 
+        // This function is called everytime when round 1 is deleted. 
         public void RefreshRatingWDelta()
         {
             if (GetMaxRound() == 0)
@@ -715,6 +715,9 @@ namespace KeizerForClubs
             sqlCommand.Parameters.AddWithValue("pRunde", runde);
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
+            if (runde == 1 && string.IsNullOrWhiteSpace(andCondition))
+                RefreshRatingWDelta();
+            
             return true;
         }
 
