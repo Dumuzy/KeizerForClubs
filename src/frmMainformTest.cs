@@ -59,8 +59,6 @@ namespace KeizerForClubs
         {
             for (int j = 0; j < grdPairings.RowCount; ++j)
             {
-                // db.Locl_GetGameResult(this.grdPairings.Rows[e.RowIndex].Cells[7].Value.ToString());
-
                 int pid1 = Convert.ToInt16(this.grdPairings.Rows[j].Cells[1].Value);
                 int pid2 = Convert.ToInt16(this.grdPairings.Rows[j].Cells[4].Value);
                 int rat1 = GetPlayerRating(pid1);

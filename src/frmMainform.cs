@@ -674,29 +674,56 @@ for determining the first round pairings.";
             {
                 if (row.Cells[2].Value == null)
                     row.Cells[2].Value = 0;
-                if (row.Cells[3].Value == null)
-                    row.Cells[3].Value = db.Locl_GetPlayerStateText(SqliteInterface.PlayerState.Available);
+                if (row.Cells[grdPlayersStateCol].Value == null)
+                    row.Cells[grdPlayersStateCol].Value = db.Locl_GetPlayerStateText(SqliteInterface.PlayerState.Available);
 
                 db.InsPlayerNew(newPlayerName, Convert.ToInt16(row.Cells[2].Value));
                 row.Cells[0].Value = db.GetPlayerID(newPlayerName);
                 db.UpdPlayer(Helper.ToInt(row.Cells[0].Value), newPlayerName,
                             Helper.ToInt(row.Cells[2].Value),
-                            db.Locl_GetPlayerState(row.Cells[3].Value.ToString()));
+                            db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()));
             }
             else
                 db.UpdPlayer(gridPlayerId, newPlayerName,
                     Helper.ToInt((row.Cells[2].Value?.ToString() ?? "").Trim()),
-                    db.Locl_GetPlayerState(row.Cells[3].Value.ToString()));
+                    db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()));
             row.Cells[1].Value = newPlayerName;
         }
 
+        private void GrdPlayersDirty(object sender, EventArgs e)
+        {
+            if (grdPlayers.IsCurrentCellDirty)
+                if (grdPlayers.CurrentCellAddress.X == grdPlayersStateCol)
+                {
+                    grdPlayers.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                    grdPlayers.EndEdit();
+                }
+        }
+        const int grdPlayersStateCol = 3, grdPairingsResultCol = 7;
+
         private void GrdPairingsCellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            var value = grdPairings.Rows[e.RowIndex].Cells[7].Value.ToString();
-            SqliteInterface.Results gameResult = db.Locl_GetGameResult(value);
-            int pid1 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[1].Value);
-            int pid2 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[4].Value);
-            db.UpdPairingResult(Convert.ToInt16(numRoundSelect.Value), pid1, pid2, gameResult);
+            if (e.RowIndex >= 0)
+            {
+                var rawval = grdPairings.Rows[e.RowIndex].Cells[grdPairingsResultCol].Value;
+                if (rawval != null)
+                {
+                    var value = rawval?.ToString() ?? "";
+                    SqliteInterface.Results gameResult = db.Locl_GetGameResult(value);
+                    int pid1 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[1].Value);
+                    int pid2 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[4].Value);
+                    db.UpdPairingResult(Convert.ToInt16(numRoundSelect.Value), pid1, pid2, gameResult);
+                }
+            }
+        }
+
+        private void GrdPairingsDirty(object sender, EventArgs e)
+        {
+            if (grdPairings.IsCurrentCellDirty)
+            {
+                grdPairings.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                grdPairings.EndEdit();
+            }
         }
 
         private void ApplyPlayerStateTexte()
@@ -721,13 +748,13 @@ for determining the first round pairings.";
             var tt = texte.Take(topicTexte2).ToLi();
             tt.Insert(0, SqliteInterface.ColPairingUndefinedText);
 
-            foreach(var text in tt) 
+            foreach (var text in tt)
                 colPairingResult.Items.Add(text);
         }
 
         private void ApplyLanguageText()
         {
-            ApplyPlayerStateTexte(); 
+            ApplyPlayerStateTexte();
             ApplyPairingResultTexte();
             colPlayerState.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Status");
             colRating.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Rating");
@@ -798,7 +825,8 @@ for determining the first round pairings.";
                 grdPlayers.Rows[i].Cells[0].Value = players[i].Id;
                 grdPlayers.Rows[i].Cells[1].Value = players[i].Name;
                 grdPlayers.Rows[i].Cells[2].Value = players[i].Rating.ToString();
-                grdPlayers.Rows[i].Cells[3].Value = db.Locl_GetPlayerStateText(players[i].State);
+                grdPlayers.Rows[i].Cells[grdPlayersStateCol].Value =
+                        db.Locl_GetPlayerStateText(players[i].State);
             }
         }
 
@@ -817,7 +845,7 @@ for determining the first round pairings.";
                     this.grdPairings.Rows[index].Cells[2].Value = db.GetPlayerName(pList[index].IdW);
                     this.grdPairings.Rows[index].Cells[4].Value = pList[index].IdB.ToString();
                     this.grdPairings.Rows[index].Cells[5].Value = db.GetPlayerName(pList[index].IdB);
-                    this.grdPairings.Rows[index].Cells[7].Value = db.Locl_GetGameResultText(pList[index].Result);
+                    this.grdPairings.Rows[index].Cells[grdPairingsResultCol].Value = db.Locl_GetGameResultText(pList[index].Result);
                 }
             }
         }
@@ -1285,6 +1313,7 @@ for determining the first round pairings.";
             this.grdPlayers.Size = new Size(690, 367);
             this.grdPlayers.TabIndex = 0;
             this.grdPlayers.CellEndEdit += new DataGridViewCellEventHandler(this.GrdPlayersCellEndEdit);
+            this.grdPlayers.CurrentCellDirtyStateChanged += new EventHandler(this.GrdPlayersDirty);
             this.grdPlayers.DataError += new DataGridViewDataErrorEventHandler(this.GrdPlayersDataError);
             this.grdPlayers.CellValidating += new DataGridViewCellValidatingEventHandler(this.GrdPlayersCellValidating);
             this.colPlayerID.HeaderText = "ID";
@@ -1352,7 +1381,8 @@ for determining the first round pairings.";
             this.grdPairings.Name = "grdPairings";
             this.grdPairings.Size = new Size(690, 314);
             this.grdPairings.TabIndex = 0;
-            this.grdPairings.CellEndEdit += new DataGridViewCellEventHandler(this.GrdPairingsCellEndEdit);
+            this.grdPairings.CellEndEdit += new DataGridViewCellEventHandler(GrdPairingsCellEndEdit);
+            this.grdPairings.CurrentCellDirtyStateChanged += new EventHandler(GrdPairingsDirty);
             this.colPairgBoard.HeaderText = "Bd.";
             this.colPairgBoard.Name = "colPairgBoard";
             this.colPairgBoard.ReadOnly = true;
