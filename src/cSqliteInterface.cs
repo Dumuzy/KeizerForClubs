@@ -826,6 +826,15 @@ namespace KeizerForClubs
             EndTransaction();
         }
 
+        /// <summary> Setzt alle Keizer_SumPts auf 0. </summary>
+        public void UpdPairing_AllKeizerSumsResetValuesTa()
+        {
+            BeginTransaction();
+            sqlCommand.CommandText = @"  UPDATE Player  SET Keizer_SumPts=0 ";
+            sqlCommand.Prepare();
+            sqlCommand.ExecuteNonQuery();
+            EndTransaction();
+        }
         /// <summary> Setzt die KeizerPts für eine Runde für ein Brett in die DB. </summary>
         /// <param name="erg_w"> KeizerPts für W. </param>
         /// <param name="erg_s"> KeizerPts für S. </param>

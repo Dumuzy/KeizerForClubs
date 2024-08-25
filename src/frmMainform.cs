@@ -901,7 +901,7 @@ for determining the first round pairings.";
 
         private bool RunPairingRecursion(int brett, int currRunde)
         {
-            Debug.WriteLine($"fPairingRekursion brett:{brett}");
+            // Debug.WriteLine($"fPairingRekursion brett:{brett}");
             if (brett == 0)
                 DealFreilos();
             int minrunde = currRunde - Convert.ToInt16(this.numRoundsGameRepeat.Value);
@@ -961,7 +961,7 @@ for determining the first round pairings.";
                                 }
                             }
                             Stopwatches.Stop("RunPairingRecursion-1");
-                            Debug.WriteLine($"fPairingRekursion brett:{brett} paired:{player1.Name} vs {player2.Name}");
+                            // Debug.WriteLine($"fPairingRekursion brett:{brett} paired:{player1.Name} vs {player2.Name}");
                             if (this.RunPairingRecursion(brett + 1, currRunde))
                                 return true;
                             player2.State = SqliteInterface.PlayerState.Available;

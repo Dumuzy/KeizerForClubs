@@ -15,12 +15,13 @@ namespace KeizerForClubs
         /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>
         internal void AllPlayersAllRoundsCalculateTa()
         {
-            Stopwatches.Start("AllPlayersAllRoundsCalculateTa-All");
-            cReportingUnit?.DeleteDump();
             int maxRound = db.GetMaxRound();
+            Stopwatches.Start($"AllPlayersAllRoundsCalculateTa-All MaxRound={maxRound}");
+            cReportingUnit?.DeleteDump();
 
             //Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0.
             db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
+            // db.UpdPairing_AllKeizerSumsResetValuesTa(); // TEST TODO
             this.AllPlayersSetInitialStartPtsTa(maxRound + 1); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPtsTa();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
@@ -32,6 +33,7 @@ namespace KeizerForClubs
                 Debug.WriteLine($"=========  ER={runde1} ===========");
                 Stopwatches.Start("AllPlayersAllRoundsCalculateTa-1");
                 db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
+                // db.UpdPairing_AllKeizerSumsResetValuesTa(); // TEST TODO
                 Stopwatches.Next("AllPlayersAllRoundsCalculateTa-2");
                 for (int runde2 = 1; runde2 <= runde1; ++runde2)
                     this.OneRoundAllPairingsSetKeizerPtsTa(runde2, runde1);
@@ -44,7 +46,7 @@ namespace KeizerForClubs
                 if (runde1 == maxRound && nExtraRecursions-- > 0)
                     --runde1;
             }
-            Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-All");
+            Stopwatches.Stop($"AllPlayersAllRoundsCalculateTa-All MaxRound={maxRound}");
             Stopwatches.Debug("");
         }
 
@@ -71,7 +73,7 @@ namespace KeizerForClubs
             var playerCountNotDropped = db.GetPlayerCount_NotDropped(currRunde);
             int firstStartPts = FirstStartPts(playerCountNotDropped);
             int playerCount = db.GetPlayerList(ref pList, " ", $" ORDER BY {order} desc ", currRunde);
-            Debug.WriteLine($"FirstStartPts = {firstStartPts}");
+            Debug.WriteLine($"FirstStartPts = {firstStartPts} currRunde={currRunde}");
             for (int index = 0; index < playerCount; ++index)
             {
                 if (pList[index].State != SqliteInterface.PlayerState.Retired)
@@ -121,10 +123,11 @@ namespace KeizerForClubs
         /// <remarks> Die Punkte sind bei Sieg gleich der momentanen Keizer_StartPts der Gegner. </remarks>
         private bool OneRoundAllPairingsSetKeizerPtsTa(int runde, int endRundeWhichIsCalculated)
         {
+            // Debug.WriteLine($"OneRoundAllPairingsSetKeizerPtsTa Runde={runde} EndRunde={endRundeWhichIsCalculated}");
             db.BeginTransaction();
-            Stopwatches.Start("OneRoundAllPairingsSetKeizerPtsTa-1");
+            Stopwatches.Start($"OneRoundAllPairingsSetKeizerPtsTa-1");
             var pairings = db.GetPairingLi(" WHERE rnd=" + runde.ToString(), " ORDER BY board ");
-            Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-1");
+            Stopwatches.Stop($"OneRoundAllPairingsSetKeizerPtsTa-1");
             if (pairings.Count == 0)
                 return false;
             for (int index = 0; index < pairings.Count; ++index)
@@ -172,9 +175,13 @@ namespace KeizerForClubs
                         erg_w = 0;
                     erg_s = 0;
                 }
-                Stopwatches.Next("OneRoundAllPairingsSetKeizerPtsTa-4");
-                db.UpdPairingValues(runde, pair.Board, erg_w, erg_s);
-                Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-4");
+                Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-3");
+                if (pair.PtsW != erg_w || pair.PtsB != erg_s)
+                {
+                    Stopwatches.Start("OneRoundAllPairingsSetKeizerPtsTa-4");
+                    db.UpdPairingValues(runde, pair.Board, erg_w, erg_s);
+                    Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-4");
+                }
             }
             Stopwatches.Start("OneRoundAllPairingsSetKeizerPtsTa-5");
             db.EndTransaction();
