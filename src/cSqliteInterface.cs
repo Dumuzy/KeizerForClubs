@@ -52,6 +52,16 @@ namespace KeizerForClubs
             //Adjourned = 11,
         };
 
+        /// <summary> T falls es sich um ein Resultat ohne Brett handelt, also sowas wie Freilos, Entschuldigt, ... </summary>
+        public static bool IsNonBoardResult(Results result) => NonBoardResults.Contains(result);
+        public static readonly Results[] NonBoardResults = new Results[] { Results.FreeWin, Results.Hindered, Results.Excused, Results.Unexcused };
+
+        //  TODO for T51: Forfeit stuff.
+        /// <summary> T falls es sich um ein Resultat mit Brett handelt, also sowas wie Weißsieg, ForfeitForfeit, Adjourned. </summary>
+        public static bool IsBoardResult(Results result) => BoardResults.Contains(result);
+        public static readonly Results[] BoardResults = new Results[] { Results.ErrUndefined, Results.WinWhite, Results.Draw, Results.WinBlack};
+
+
         public struct stPlayer
         {
             public int Id;

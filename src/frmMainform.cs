@@ -835,20 +835,26 @@ for determining the first round pairings.";
 
         private void LoadPairingList()
         {
-            SqliteInterface.stPairing[] pList = new SqliteInterface.stPairing[50];
-            int pairingList = db.GetPairingList(ref pList, " WHERE rnd=" + this.numRoundSelect.Value.ToString(), " ORDER BY board ");
+            var pairingList = db.GetPairingLi(" WHERE rnd=" + this.numRoundSelect.Value.ToString(), " ORDER BY board ");
             this.grdPairings.Rows.Clear();
-            for (int index = 0; index < pairingList; ++index)
+            for (int idx = 0; idx < pairingList.Count; ++idx)
             {
-                if (!this.chkPairingOnlyPlayed.Checked || pList[index].Board < stPairing.FirstNonPlayingBoard)
+                var pair = pairingList[idx];
+                if (!this.chkPairingOnlyPlayed.Checked || pair.Board < stPairing.FirstNonPlayingBoard)
                 {
                     this.grdPairings.Rows.Add();
-                    this.grdPairings.Rows[index].Cells[0].Value = pList[index].Board.ToString();
-                    this.grdPairings.Rows[index].Cells[1].Value = pList[index].IdW.ToString();
-                    this.grdPairings.Rows[index].Cells[2].Value = db.GetPlayerName(pList[index].IdW);
-                    this.grdPairings.Rows[index].Cells[4].Value = pList[index].IdB.ToString();
-                    this.grdPairings.Rows[index].Cells[5].Value = db.GetPlayerName(pList[index].IdB);
-                    this.grdPairings.Rows[index].Cells[grdPairingsResultCol].Value = db.Locl_GetGameResultText(pList[index].Result);
+                    this.grdPairings.Rows[idx].Cells[0].Value = pair.Board.ToString();
+                    this.grdPairings.Rows[idx].Cells[1].Value = pair.IdW.ToString();
+                    this.grdPairings.Rows[idx].Cells[2].Value = db.GetPlayerName(pair.IdW);
+                    this.grdPairings.Rows[idx].Cells[4].Value = pair.IdB.ToString();
+                    this.grdPairings.Rows[idx].Cells[5].Value = db.GetPlayerName(pair.IdB);
+                    var cbcell = (DataGridViewComboBoxCell)grdPairings.Rows[idx].Cells[grdPairingsResultCol];
+                    cbcell.Value = db.Locl_GetGameResultText(pair.Result);
+                    if (SqliteInterface.IsBoardResult(pair.Result))
+                        foreach (var res in SqliteInterface.NonBoardResults)
+                            cbcell.Items.Remove(db.Locl_GetGameResultText(res));
+                    else if (SqliteInterface.IsNonBoardResult(pair.Result))
+                        cbcell.ReadOnly = true;
                 }
             }
         }
