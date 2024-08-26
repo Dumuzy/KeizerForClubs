@@ -717,7 +717,7 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
             if (runde == 1 && string.IsNullOrWhiteSpace(andCondition))
                 RefreshRatingWDelta();
-            
+
             return true;
         }
 
@@ -1164,7 +1164,7 @@ namespace KeizerForClubs
 
         public string Locl_GetGameResultText(SqliteInterface.Results result)
         {
-            var t = result == Results.ErrUndefined ? ColPairingUndefinedText 
+            var t = result == Results.ErrUndefined ? ColPairingUndefinedText
                 : Locl_GetText("GAMERESULT", ((int)result).ToString());
             return t;
         }
@@ -1236,25 +1236,32 @@ namespace KeizerForClubs
         {
             var tn = TabWHName(tt, runde);
             var table = new TableW2Headers("", tt, runde);
-            sqlCommand.CommandText = $"SELECT line FROM {tn} ORDER BY id;";
-            using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
-                if (sqLiteDataReader.HasRows)
+            if (runde > 0)
+            {
+                sqlCommand.CommandText = $"SELECT line FROM {tn} ORDER BY id;";
+                try
                 {
-                    int i = 0;
-                    while (sqLiteDataReader.Read())
-                    {
-                        var text = sqLiteDataReader.IsDBNull(0) ? "" : sqLiteDataReader.GetString(0);
-                        if (i == 0)
-                            table.Header1 = text;
-                        else if (i == 1)
-                            table.Header2 = text;
-                        else if (i == 2)
-                            table.Footer = text.Split(tableSplitter).ToLi();
-                        else
-                            table.AddRow(text.Split(tableSplitter).ToLi());
-                        ++i;
-                    }
+                    using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
+                        if (sqLiteDataReader.HasRows)
+                        {
+                            int i = 0;
+                            while (sqLiteDataReader.Read())
+                            {
+                                var text = sqLiteDataReader.IsDBNull(0) ? "" : sqLiteDataReader.GetString(0);
+                                if (i == 0)
+                                    table.Header1 = text;
+                                else if (i == 1)
+                                    table.Header2 = text;
+                                else if (i == 2)
+                                    table.Footer = text.Split(tableSplitter).ToLi();
+                                else
+                                    table.AddRow(text.Split(tableSplitter).ToLi());
+                                ++i;
+                            }
+                        }
                 }
+                catch (Exception) { }
+            }
             return table;
         }
 

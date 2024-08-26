@@ -21,21 +21,27 @@ namespace KeizerForClubs
 
             //Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0.
             db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
-            // db.UpdPairing_AllKeizerSumsResetValuesTa(); // TEST TODO
             this.AllPlayersSetInitialStartPtsTa(maxRound + 1); // Keizer_StartPts in die DB setzen.
             this.AllPlayersSetKeizerSumPtsTa();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
             // If nExtraRecursions is > 0, at the end of the calculation, that many
             // extra rounds of calculation are appended. Only for testing stuff, currently. 
             int nExtraRecursions = 0;
-            for (int runde1 = 1; runde1 <= maxRound; ++runde1)
+            int runde1Start = 1;
+
+            var table = GetTableDbCacheForRound(maxRound - 1);
+            if (table != null && table.Count > 0)
+                runde1Start = maxRound - 1;
+
+
+            for (int runde1 = runde1Start; runde1 <= maxRound; ++runde1)
             {
-                Debug.WriteLine($"=========  ER={runde1} ===========");
+                // Debug.WriteLine($"=========  ER={runde1} ===========");
                 Stopwatches.Start("AllPlayersAllRoundsCalculateTa-1");
                 db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
-                // db.UpdPairing_AllKeizerSumsResetValuesTa(); // TEST TODO
                 Stopwatches.Next("AllPlayersAllRoundsCalculateTa-2");
-                bool ok = AllPlayersSetRankAndStartPtsFromDbCacheTa(runde1);
+                bool ok = AllPlayersSetRankAndStartPtsFromDbCacheTa(runde1, table);
+                table = null;
                 Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-2");
                 if (!ok)
                 {
@@ -68,14 +74,21 @@ namespace KeizerForClubs
             return Convert.ToInt32((playerCount - 1) * firstStartPtsFaktor);
         }
 
-        /// <summary> Gibt T zurück, falls das ging, F andernfalls. Setzt Rank, KeizerStartPts und KeizerSumPts
-        /// in die Player-Liste der DB, falls aus DB-Cache ermittelbar. </summary>
-        /// <param name="runde">Stand nach dieser Runde gewünscht, 1-basiert. </param>
-        bool AllPlayersSetRankAndStartPtsFromDbCacheTa(int runde)
+        TableW2Headers GetTableDbCacheForRound(int runde)
         {
             TableW2Headers table = runde != db.GetMaxRound() ?
                 db.ReadTableWHeadersFromDb(TableType.Stand, runde) : null;
-            bool ok = table != null;
+            return table;
+        }
+
+        /// <summary> Gibt T zurück, falls das ging, F andernfalls. Setzt Rank, KeizerStartPts und KeizerSumPts
+        /// in die Player-Liste der DB, falls aus DB-Cache ermittelbar. </summary>
+        /// <param name="runde">Stand nach dieser Runde gewünscht, 1-basiert. </param>
+        bool AllPlayersSetRankAndStartPtsFromDbCacheTa(int runde, TableW2Headers table)
+        {
+            if(table == null || table.Count == 0)
+                table = GetTableDbCacheForRound(runde);
+            bool ok = table != null && table.Count != 0;
             if (ok)
             {
                 // If the header line contains "Id", the table contains the playerId.
@@ -232,6 +245,11 @@ namespace KeizerForClubs
         void CheckPairingsValuesTa(int maxRunde, int endRundeWhichIsCalculated)
         {
             var er = endRundeWhichIsCalculated;
+            // Diese Funktion braucht einen Haufen Zeit - was speziell bei sehr hohen Rundenzahlen nervt. 
+            // Darum führ ich die Funktion dann nicht immer durch. 
+            if (endRundeWhichIsCalculated > 15 && (maxRunde % 11 !=0 && maxRunde != 1 && maxRunde != er))
+                return;
+
             // player -> valueOfWinAgainst
             var valueOfWinAgainstPlayerDict = new Dictionary<int, double>();
             Stopwatches.Start("CheckPairingsValuesTa-0");
