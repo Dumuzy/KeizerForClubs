@@ -63,15 +63,65 @@ namespace KeizerForClubs
         }
 
         /// <summary> Gibt die Keizer-Start-Pts für den 1. Spieler zurück. </summary>
-        int FirstStartPts(int playerCount)
+        int FirstStartPtsInner(int playerCount, float ratioFirst2Last)
         {
             // ratioFirst2Last: Ein Sieg gegen den 1. in der Tabelle zählt ratioFirst2Last mal soviel wie gegen den letzten. 
             // ratioFirst2Last = 3 ist das was üblicherweise beim Keizersystem empfohlen wird. 
             // Kleinere Zahlen scheinen mir angemessener.
-            // Verwendet in fRanking_Init und fRankingCalcRanks.
-            var ratioFirst2Last = db.GetConfigFloat("OPTION.RatioFirst2Last", 3);
+            // Verwendet nur noch in KeizerPointsList.
             double firstStartPtsFaktor = ratioFirst2Last / (ratioFirst2Last - 1);
             return Convert.ToInt32((playerCount - 1) * firstStartPtsFaktor);
+        }
+
+        /// <summary> I call the Normalization of Keizer points "WickerNormalization". </summary>
+        internal enum WickerNormalization { None = 0, OneForVictoryAgainstLast = 1 };
+
+        /// <summary> Returns list of KeizerPoints you'd get for a victory against player with certain rank. </summary>
+        Li<float> KeizerPointsList(int playerCount)
+        {
+            Stopwatches.Start("KeizerPointsList");
+            var kpn = (WickerNormalization)db.GetConfigInt("OPTION.WickerNormalization", 0);
+            var ratioFirst2Last = db.GetConfigFloat("OPTION.RatioFirst2Last", 3);
+
+            var kpl = new Li<float>();
+            if (kpn == WickerNormalization.None)
+            {
+                var first = FirstStartPtsInner(playerCount, ratioFirst2Last);
+                var last = first - playerCount + 1;
+                for (int i = 0; i < playerCount; ++i)
+                    if (kpn == WickerNormalization.None)
+                        kpl.Add(first--);
+            }
+            else
+            {
+                // If unnormalized, the ratios between first and last are usually not exact.
+                // If normalized, we can use exact ratios. 
+                float delta = 0;
+                if (kpn == WickerNormalization.OneForVictoryAgainstLast)
+                    delta = (ratioFirst2Last - 1) / (playerCount - 1);
+
+                for (int i = 0; i < playerCount; ++i)
+                    kpl.Add(ratioFirst2Last - i * delta);
+
+                var roundTo = GetNachkommaStellenForWickerNormalization(kpl[0], kpl[1]);
+                if (kpn != WickerNormalization.None)
+                {
+                    for (int i = 0; i < playerCount; ++i)
+                        kpl[i] = (float)Math.Round(kpl[i], roundTo);
+                }
+            }
+            Stopwatches.Stop("KeizerPointsList");
+            return kpl;
+        }
+
+        public static int GetNachkommaStellenForWickerNormalization(float kp0, float kp1)
+        {
+            int nkStellen = -1;
+            var dkpl0 = kp0 - kp1;
+            for (int i = 0; i < 10  && nkStellen == -1; ++i)
+                if (dkpl0 > Math.Pow(10, -i))
+                    nkStellen = i;
+            return nkStellen;
         }
 
         TableW2Headers GetTableDbCacheForRound(int runde)
@@ -86,7 +136,7 @@ namespace KeizerForClubs
         /// <param name="runde">Stand nach dieser Runde gewünscht, 1-basiert. </param>
         bool AllPlayersSetRankAndStartPtsFromDbCacheTa(int runde, TableW2Headers table)
         {
-            if(table == null || table.Count == 0)
+            if (table == null || table.Count == 0)
                 table = GetTableDbCacheForRound(runde);
             bool ok = table != null && table.Count != 0;
             if (ok)
@@ -94,7 +144,7 @@ namespace KeizerForClubs
                 // If the header line contains "Id", the table contains the playerId.
                 int playerIdIdx = table[0].IndexOf("Id");
                 // The table contains one header line. 
-                int firstStartPts = FirstStartPts(table.Count - 1);
+                var kpli = KeizerPointsList(table.Count - 1);
 
                 db.BeginTransaction();
                 for (int i = 1; i < table.Count; ++i)
@@ -103,8 +153,7 @@ namespace KeizerForClubs
                     var rank = Helper.ToInt(row[0]);
                     var keizerSum = Helper.ToSingle(row[2]);
                     var playerId = playerIdIdx != -1 ? Helper.ToInt(row[playerIdIdx]) : db.GetPlayerID(row[1]);
-                    (var pl, var dummy) = db.GetPlayerBaseById(playerId, 0);
-                    db.UpdPlayer_SetRankAndStartPtsAndKeizerSumPts(playerId, rank, firstStartPts--, keizerSum);
+                    db.UpdPlayer_SetRankAndStartPtsAndKeizerSumPts(playerId, rank, kpli[i - 1], keizerSum);
                 }
                 db.EndTransaction();
             }
@@ -120,16 +169,13 @@ namespace KeizerForClubs
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
             var order = firstRoundRandom == 0 ? "rating" : "RatingWDelta";
             var playerCountNotDropped = db.GetPlayerCount_NotDropped(currRunde);
-            int firstStartPts = FirstStartPts(playerCountNotDropped);
+            var kpli = KeizerPointsList(playerCountNotDropped);
             int playerCount = db.GetPlayerList(ref pList, " ", $" ORDER BY {order} desc ", currRunde);
-            Debug.WriteLine($"FirstStartPts = {firstStartPts} currRunde={currRunde}");
-            for (int index = 0; index < playerCount; ++index)
+            Debug.WriteLine($"FirstStartPts = {kpli[0]} currRunde={currRunde}");
+            for (int index = 0, iNotDropped = 0; index < playerCount; ++index)
             {
                 if (pList[index].State != SqliteInterface.PlayerState.Retired)
-                {
-                    db.UpdPlayer_SetRankAndStartPts(pList[index].Id, index + 1, firstStartPts);
-                    --firstStartPts;
-                }
+                    db.UpdPlayer_SetRankAndStartPts(pList[index].Id, index + 1, kpli[iNotDropped++]);
                 else
                     db.UpdPlayer_SetRankAndStartPts(pList[index].Id, index + 1, 0);
             }
@@ -156,13 +202,12 @@ namespace KeizerForClubs
         {
             db.BeginTransaction();
             var players = db.GetPlayerLi(" Where state != 9 ", " ORDER BY Keizer_SumPts desc, rating desc ", db.GetMaxRound());
-            int firstStartPts = FirstStartPts(players.Count);
+            var kpli = KeizerPointsList(players.Count);
             for (int i = 0; i < players.Count; ++i)
             {
                 if (players[i].State == SqliteInterface.PlayerState.Retired)
                     continue;
-                db.UpdPlayer_SetRankAndStartPts(players[i].Id, i + 1, firstStartPts);
-                --firstStartPts;
+                db.UpdPlayer_SetRankAndStartPts(players[i].Id, i + 1, kpli[i]);
             }
             db.EndTransaction();
         }
@@ -247,7 +292,7 @@ namespace KeizerForClubs
             var er = endRundeWhichIsCalculated;
             // Diese Funktion braucht einen Haufen Zeit - was speziell bei sehr hohen Rundenzahlen nervt. 
             // Darum führ ich die Funktion dann nicht immer durch. 
-            if (endRundeWhichIsCalculated > 15 && (maxRunde % 11 !=0 && maxRunde != 1 && maxRunde != er))
+            if (endRundeWhichIsCalculated > 15 && (maxRunde % 11 != 0 && maxRunde != 1 && maxRunde != er))
                 return;
 
             // player -> valueOfWinAgainst

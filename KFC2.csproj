@@ -7,7 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x86</PlatformTarget>
-    <VersionPrefix>1.1.7.9</VersionPrefix>
+    <VersionPrefix>1.1.8.0</VersionPrefix>
     <Version>$(VersionPrefix)</Version>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>sgKey.snk</AssemblyOriginatorKeyFile>

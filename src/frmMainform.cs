@@ -37,7 +37,7 @@ namespace KeizerForClubs
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
         private CheckBox chkFreilosVerteilen, chkNovusRandomBoard;
-        private CheckBox chkHtml, chkXml, chkTxt, chkCsv;
+        private CheckBox chkHtml, chkXml, chkTxt, chkCsv, chkWickerNormalization;
         private ToolStripMenuItem mnuStartLanguage;
         private ToolStripMenuItem mnuPlayers, mnuPlayersImport, mnuPlayersDeleteAll, mnuPlayersRebaseIds;
         private CheckBox chkPairingOnlyPlayed;
@@ -168,6 +168,7 @@ for determining the first round pairings.";
             chkXml.Checked = db.GetConfigBool("OPTION.Xml");
             chkTxt.Checked = db.GetConfigBool("OPTION.Txt");
             chkCsv.Checked = db.GetConfigBool("OPTION.Csv");
+            chkWickerNormalization.Checked = db.GetConfigBool("OPTION.WickerNormalization");
             numClicks = db.GetConfigInt("INTERNAL.NumClicks");
             numRoundSelect.Value = (Decimal)db.GetMaxRound();
             tbNiceName.Text = db.GetConfigText("OPTION.NiceName");
@@ -461,6 +462,7 @@ for determining the first round pairings.";
                 db.SetConfigBool("OPTION.Xml", this.chkXml.Checked);
                 db.SetConfigBool("OPTION.Txt", this.chkTxt.Checked);
                 db.SetConfigBool("OPTION.Csv", this.chkCsv.Checked);
+                db.SetConfigBool("OPTION.WickerNormalization", this.chkWickerNormalization.Checked);
                 var oldNiNa = db.GetConfigText("OPTION.NiceName");
                 if (oldNiNa != this.tbNiceName.Text)
                 {
@@ -807,6 +809,7 @@ for determining the first round pairings.";
             lblFirstRoundRandom.Text = db.Locl_GetText("GUI_LABEL", "FirstRoundRandom");
             lblOutputTo.Text = db.Locl_GetText("GUI_LABEL", "OutputTo");
             lblNiceName.Text = db.Locl_GetText("GUI_LABEL", "NiceName");
+            chkWickerNormalization.Text = db.Locl_GetText("GUI_LABEL", "WickerNorm");
             btDonate1.Text = btDonate2.Text = db.Locl_GetText("GUI_TEXT", "Donate");
         }
 
@@ -1248,6 +1251,7 @@ for determining the first round pairings.";
             this.chkXml = new CheckBox();
             this.chkTxt = new CheckBox();
             this.chkCsv = new CheckBox();
+            this.chkWickerNormalization = new CheckBox();
 
             this.btDonate1 = new Button();
             this.btDonate2 = new Button();
@@ -1441,6 +1445,7 @@ for determining the first round pairings.";
             this.tabSettings.Controls.Add(this.chkXml);
             this.tabSettings.Controls.Add(this.chkTxt);
             this.tabSettings.Controls.Add(this.chkCsv);
+            this.tabSettings.Controls.Add(this.chkWickerNormalization);
             this.tabSettings.Controls.Add(this.lblOutputTo);
             this.tabSettings.Controls.Add(this.lblNiceName);
             this.tabSettings.Controls.Add(this.tbNiceName);
@@ -1506,42 +1511,49 @@ for determining the first round pairings.";
             this.lblRatioFirst2Last.TextAlign = ContentAlignment.MiddleRight;
             this.ddlRatioFirst2Last.Location = new Point(570, yOutput);
             this.ddlRatioFirst2Last.Size = new Size(40, 21);
-            List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f });
+            List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f, 1.1f, 1.01f });
             this.ddlRatioFirst2Last.DataSource = list;
 
 
             yOutput += 23;
-            this.chkHtml.CheckAlign = ContentAlignment.MiddleLeft;
-            this.chkHtml.Location = new Point(246, yOutput);
+            int dxOutput = 50, dx0 = 246;
+            this.chkHtml.CheckAlign = chkHtml.TextAlign = ContentAlignment.MiddleRight;
+            this.chkHtml.Location = new Point(dx0, yOutput);
             this.chkHtml.Name = "chkHtml";
             this.chkHtml.Size = new Size(45, 24);
             this.chkHtml.TabIndex = 10;
             this.chkHtml.Text = "Html";
             this.chkHtml.UseVisualStyleBackColor = true;
 
-            this.chkXml.CheckAlign = ContentAlignment.MiddleLeft;
-            this.chkXml.Location = new Point(315, yOutput);
+            this.chkXml.CheckAlign = chkXml.TextAlign = ContentAlignment.MiddleRight;
+            this.chkXml.Location = new Point(dx0 + dxOutput, yOutput);
             this.chkXml.Name = "chkXml";
             this.chkXml.Size = new Size(44, 24);
             this.chkXml.TabIndex = 11;
             this.chkXml.Text = "Xml";
             this.chkXml.UseVisualStyleBackColor = true;
 
-            this.chkTxt.CheckAlign = ContentAlignment.MiddleLeft;
-            this.chkTxt.Location = new Point(384, yOutput);
+            this.chkTxt.CheckAlign = chkTxt.TextAlign = ContentAlignment.MiddleRight;
+            this.chkTxt.Location = new Point(dx0 + 2 * dxOutput, yOutput);
             this.chkTxt.Name = "chkTxt";
             this.chkTxt.Size = new Size(44, 24);
             this.chkTxt.TabIndex = 12;
             this.chkTxt.Text = "Txt";
             this.chkTxt.UseVisualStyleBackColor = true;
 
-            this.chkCsv.CheckAlign = ContentAlignment.MiddleLeft;
-            this.chkCsv.Location = new Point(453, yOutput);
+            this.chkCsv.CheckAlign = chkCsv.TextAlign = ContentAlignment.MiddleRight;
+            this.chkCsv.Location = new Point(dx0 + 3 * dxOutput, yOutput);
             this.chkCsv.Name = "chkCsv";
             this.chkCsv.Size = new Size(44, 24);
             this.chkCsv.TabIndex = 13;
             this.chkCsv.Text = "Csv";
             this.chkCsv.UseVisualStyleBackColor = true;
+
+            this.chkWickerNormalization.CheckAlign = chkWickerNormalization.TextAlign = ContentAlignment.MiddleRight;
+            this.chkWickerNormalization.Size = new Size(150, 24);
+            this.chkWickerNormalization.Location = new Point(610 - chkWickerNormalization.Size.Width, yOutput);
+            this.chkWickerNormalization.TabIndex = 14;
+            this.chkWickerNormalization.UseVisualStyleBackColor = true;
 
             this.lblOutputTo.Location = new Point(44, yOutput);
             this.lblOutputTo.Size = new Size(200, 23);

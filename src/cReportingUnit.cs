@@ -194,6 +194,20 @@ namespace KeizerForClubs
             for (int i = 0; i < t.Runde; ++i)
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
+
+            var kppFormat = "";
+            if ((RankingCalculator.WickerNormalization)db.GetConfigInt("OPTION.WickerNormalization", 1) !=
+                RankingCalculator.WickerNormalization.None)
+            {
+                var kpps = players.Select(p => p.KeizerPrevPts).ToLi();
+                var biggest = kpps.Max();
+                kpps.Remove(biggest);
+                var next = kpps.Max();
+
+                var kppNks = RankingCalculator.GetNachkommaStellenForWickerNormalization(biggest, next);
+                kppFormat = "0." + new string('0', kppNks);
+            }
+
             for (int index1 = 0, numPlayer = 1; index1 < players.Count; ++index1)
             {
                 var player = players[index1];
@@ -207,7 +221,7 @@ namespace KeizerForClubs
                     line.Add("(ret)");
                 line.Add(player.Name);
                 // str1.Add(player.rating.ToString());
-                line.Add(player.KeizerPrevPts.ToString());
+                line.Add(player.KeizerPrevPts.ToString(kppFormat));
                 line.Add(player.KeizerSumPts.ToString("0.00"));
                 line.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
 
@@ -222,7 +236,7 @@ namespace KeizerForClubs
                         string str4 = db.Locl_GetGameResultShort(pair.Result) + " ";
                         if (pair.Result > SqliteInterface.Results.WinBlack)
                         {
-                            str3 = str4 + " - - p=" + pair.PtsW.ToString();
+                            str3 = str4 + " - - p=" + pair.PtsW.ToString(kppFormat);
                         }
                         else
                         {
@@ -232,7 +246,7 @@ namespace KeizerForClubs
                                 str3 = (pBlack.State != SqliteInterface.PlayerState.Retired ?
                                     str5 + " " + pBlack.Name + " " :
                                     str5 + " " + pBlack.Name + " (r) ") +
-                                    "p=" + pair.PtsW.ToString() + " ";
+                                    "p=" + pair.PtsW.ToString(kppFormat) + " ";
                             }
                             else
                             {
@@ -240,7 +254,7 @@ namespace KeizerForClubs
                                 str3 = (pWhite.State != SqliteInterface.PlayerState.Retired ?
                                     str6 + " " + pWhite.Name + " " :
                                     str6 + " " + pWhite.Name + " (r) ") +
-                                    "p=" + pair.PtsB.ToString() + " ";
+                                    "p=" + pair.PtsB.ToString(kppFormat) + " ";
                             }
                         }
                     }
