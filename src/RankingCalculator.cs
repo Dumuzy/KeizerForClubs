@@ -233,14 +233,20 @@ namespace KeizerForClubs
                 Stopwatches.Next("OneRoundAllPairingsSetKeizerPtsTa-3");
 
                 if (pair.Result == SqliteInterface.Results.WinWhite)
+                {
                     erg_w = pBlack.KeizerStartPts;
+                    erg_s = pWhite.KeizerStartPts * form.tbBonusVerlust.Value / 100.0f;
+                }
                 else if (pair.Result == SqliteInterface.Results.Draw)
                 {
                     erg_w = pBlack.KeizerStartPts / 2f;
                     erg_s = pWhite.KeizerStartPts / 2f;
                 }
                 else if (pair.Result == SqliteInterface.Results.WinBlack)
+                {
                     erg_s = pWhite.KeizerStartPts;
+                    erg_w = pBlack.KeizerStartPts * form.tbBonusVerlust.Value / 100.0f;
+                }
                 else if (pair.Result == SqliteInterface.Results.Excused)
                     erg_w = pWhite.KeizerStartPts * form.tbBonusExcused.Value / 100.0f;
                 else if (pair.Result == SqliteInterface.Results.Unexcused)

@@ -56,9 +56,10 @@ namespace KeizerForClubs
         private OpenFileDialog dlgOpenTournament;
         private DataGridViewComboBoxColumn colPairingResult;
         private DataGridViewComboBoxColumn colPlayerState;
-        private Label lblBonusClubValue, lblBonusExcusedValue, lblBonusUnexcusedValue, lblBonusRetiredValue, lblBonusFreilosValue;
-        internal TrackBar tbBonusClub, tbBonusExcused, tbBonusUnexcused, tbBonusRetired, tbBonusFreilos;
-        private Label lblBonusClub, lblBonusExcused, lblBonusUnexcused, lblBonusRetired, lblBonusFreilos;
+        private Label lblBonusClubValue, lblBonusExcusedValue, lblBonusUnexcusedValue, lblBonusRetiredValue, 
+            lblBonusFreilosValue, lblBonusVerlustValue;
+        internal TrackBar tbBonusClub, tbBonusExcused, tbBonusUnexcused, tbBonusRetired, tbBonusFreilos, tbBonusVerlust;
+        private Label lblBonusClub, lblBonusExcused, lblBonusUnexcused, lblBonusRetired, lblBonusFreilos, lblBonusVerlust;
         private TabPage tabSettings;
         private DataGridViewTextBoxColumn colPairingAddInfoB;
         private DataGridViewTextBoxColumn colPairingNameBlack;
@@ -130,6 +131,7 @@ namespace KeizerForClubs
             tbBonusUnexcused.Value = db.GetConfigInt("BONUS.Unexcused");
             tbBonusRetired.Value = db.GetConfigInt("BONUS.Retired");
             tbBonusFreilos.Value = db.GetConfigInt("BONUS.Freilos", 50);
+            tbBonusVerlust.Value = db.GetConfigInt("BONUS.Verlust", 0);
 
             chkFreilosVerteilen.Checked = db.GetConfigBool("OPTION.DistBye");
             chkNovusRandomBoard.Checked = db.GetConfigBool("OPTION.NovusRandom", false);
@@ -452,6 +454,7 @@ for determining the first round pairings.";
                 db.SetConfigInt("BONUS.Unexcused", this.tbBonusUnexcused.Value);
                 db.SetConfigInt("BONUS.Retired", this.tbBonusRetired.Value);
                 db.SetConfigInt("BONUS.Freilos", this.tbBonusFreilos.Value);
+                db.SetConfigInt("BONUS.Verlust", this.tbBonusVerlust.Value);
 
                 db.SetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
                 db.SetConfigBool("OPTION.NovusRandom", this.chkNovusRandomBoard.Checked);
@@ -582,6 +585,7 @@ for determining the first round pairings.";
             this.lblBonusUnexcusedValue.Text = this.tbBonusUnexcused.Value.ToString();
             this.lblBonusRetiredValue.Text = this.tbBonusRetired.Value.ToString();
             this.lblBonusFreilosValue.Text = this.tbBonusFreilos.Value.ToString();
+            this.lblBonusVerlustValue.Text = this.tbBonusVerlust.Value.ToString();
         }
 
         private void BtDonateClick(object sender, EventArgs e) => new frmAboutBox(true).ShowDialog();
@@ -798,6 +802,7 @@ for determining the first round pairings.";
             lblBonusClub.Text = db.Locl_GetText("GUI_LABEL", "Bonus verhindert");
             lblBonusRetired.Text = db.Locl_GetText("GUI_LABEL", "Bonus Rueckzug");
             lblBonusFreilos.Text = db.Locl_GetText("GUI_LABEL", "Bonus Freilos");
+            lblBonusVerlust.Text = db.Locl_GetText("GUI_LABEL", "Bonus Verlust");
 
             chkPairingOnlyPlayed.Text = db.Locl_GetText("GUI_LABEL", "Nur gespielte");
             chkFreilosVerteilen.Text = db.Locl_GetText("GUI_LABEL", "FreilosVerteilen");
@@ -1234,6 +1239,7 @@ for determining the first round pairings.";
             InitializeBonus(3, "Unexcused", ref lblBonusUnexcused, ref tbBonusUnexcused, ref lblBonusUnexcusedValue);
             InitializeBonus(4, "Retired", ref lblBonusRetired, ref tbBonusRetired, ref lblBonusRetiredValue);
             InitializeBonus(5, "Freilos", ref lblBonusFreilos, ref tbBonusFreilos, ref lblBonusFreilosValue);
+            InitializeBonus(6, "Verlust", ref lblBonusVerlust, ref tbBonusVerlust, ref lblBonusVerlustValue);
 
             this.lblRoundsGameRepeat = new Label();
             this.lblRatioFirst2Last = new Label();
@@ -1739,7 +1745,7 @@ Keizer points much more graspable.
 
         private void InitializeBonus(int num, string name, ref Label lblText, ref TrackBar tb, ref Label lblValue)
         {
-            var yloc = 15 + (num - 1) * 40;
+            var yloc = 15 + (num - 1) * 25;
             InitializeBonusText(num, yloc, name, ref lblText);
             InitializeBonusValue(num, yloc, name, ref lblValue);
             InitializeBonusTrackbar(num, yloc, name, ref tb);
@@ -1754,7 +1760,8 @@ Keizer points much more graspable.
             tb.Location = new Point(245, yloc);
             tb.Maximum = 100;
             tb.Name = $"tbBonus" + name;
-            tb.Size = new Size(208, 40);  // Seems this cannot be smaller than 40 in y-direction. 
+            tb.AutoSize = false;
+            tb.Size = new Size(200, 20);
             tb.SmallChange = 5;
             tb.TabIndex = num;
             tb.TickFrequency = 5;
@@ -1766,11 +1773,12 @@ Keizer points much more graspable.
         {
             lblText = new Label();
             this.tabSettings.Controls.Add(lblText);
-            lblText.Location = new Point(43, yloc);
+            lblText.Location = new Point(90, yloc);
             lblText.Name = "lblBonus" + name;
-            lblText.Size = new Size(149, 23);
+            lblText.Size = new Size(150, 23);
             lblText.TabIndex = 10 + num;
             lblText.Text = "...";
+            lblText.TextAlign = ContentAlignment.MiddleRight;
         }
 
         private void InitializeBonusValue(int num, int yloc, string name, ref Label lblValue)
@@ -1778,11 +1786,12 @@ Keizer points much more graspable.
             lblValue = new Label();
             this.tabSettings.Controls.Add(lblValue);
 
-            lblValue.Location = new Point(485, yloc);
+            lblValue.Location = new Point(450, yloc);
             lblValue.Name = $"lblBonus{name}Value";
             lblValue.Size = new Size(100, 23);
             lblValue.TabIndex = 10 + num;
             lblValue.Text = "...";
+            lblValue.TextAlign = ContentAlignment.MiddleLeft;
         }
 
     }

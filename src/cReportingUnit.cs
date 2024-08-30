@@ -195,7 +195,7 @@ namespace KeizerForClubs
                 thead.Add("R " + (i + 1));
             t.AddRow(thead);
 
-            var kppFormat = "";
+            string kppFormat = "", kppFormat2 = "";
             if ((RankingCalculator.WickerNormalization)db.GetConfigInt("OPTION.WickerNormalization", 1) !=
                 RankingCalculator.WickerNormalization.None)
             {
@@ -206,6 +206,9 @@ namespace KeizerForClubs
 
                 var kppNks = RankingCalculator.GetNachkommaStellenForWickerNormalization(biggest, next);
                 kppFormat = "0." + new string('0', kppNks);
+
+                var bonusVerlust = db.GetConfigInt("BONUS.Verlust", 0);
+                kppFormat2 = (bonusVerlust != 0 && bonusVerlust < 50) ? kppFormat + "0" : kppFormat;
             }
 
             for (int index1 = 0, numPlayer = 1; index1 < players.Count; ++index1)
@@ -246,7 +249,7 @@ namespace KeizerForClubs
                                 str3 = (pBlack.State != SqliteInterface.PlayerState.Retired ?
                                     str5 + " " + pBlack.Name + " " :
                                     str5 + " " + pBlack.Name + " (r) ") +
-                                    "p=" + pair.PtsW.ToString(kppFormat) + " ";
+                                    "p=" + pair.PtsW.ToString(kppFormat2) + " ";
                             }
                             else
                             {
@@ -254,7 +257,7 @@ namespace KeizerForClubs
                                 str3 = (pWhite.State != SqliteInterface.PlayerState.Retired ?
                                     str6 + " " + pWhite.Name + " " :
                                     str6 + " " + pWhite.Name + " (r) ") +
-                                    "p=" + pair.PtsB.ToString(kppFormat) + " ";
+                                    "p=" + pair.PtsB.ToString(kppFormat2) + " ";
                             }
                         }
                     }
