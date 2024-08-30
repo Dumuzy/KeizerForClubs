@@ -188,7 +188,7 @@ namespace KeizerForClubs
             var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", t.Runde);
 
             string strr = db.Locl_GetText("GUI_LABEL", "Runde") + " " + db.GetMaxRound();
-            t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + strr;
+            t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.CalcFull") + " " + strr;
             // var thead = new Li<string>("Platz Name Rating Rank-P Keizer-Sum GamePts".Split());
             var thead = new Li<string>(db.Locl_GetText("GUI_LABEL", "Kreuztab.Header").Split());
             for (int i = 0; i < t.Runde; ++i)
