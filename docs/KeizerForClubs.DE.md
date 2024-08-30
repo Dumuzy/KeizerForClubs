@@ -173,6 +173,23 @@ Dieser Wert ist gleich dem Verhältnis der Punkte, die Sie für einen Sieg gegen d
 Je niedriger dieser Wert ist, desto näher sind sich das Keizer-System und das Schweizer System. Drei ist der Standardwert. Je höher die Zahl ist, desto mehr bleiben die besseren Spieler unter sich. Ich empfehle niedrigere Werte für Turniere mit
 weniger als 20 Spielern. 
 
+#### Sieg-Normalisierung
+
+Wenn dieses Kästchen angekreuzt ist, werden alle 
+Keizer-Punkte so normalisiert, dass ein Sieg gegen den letzten der Rangliste 1 Keizer-Punkt zählt. 
+
+Das ändert nicht wirklich etwas an der Berechnung der Ranglisten oder an der Paarung. 
+Aber es macht die Keizer-Punkte irgendwie viel greifbarer.
+
+(Im ursprünglichen Keizer-System sind die angegebenen Keizer-Punkte in der Regel große ganze Zahlen.
+Ursprünglich war dies wahrscheinlich der Fall, um die Berechnungen zu vereinfachen. 
+Es ist einfacher, mit ganzen Zahlen zu rechnen, wenn man keinen Computer hat.
+
+Heutzutage werden alle Berechnungen vom Computer durchgeführt, und so können wir viel 
+kleinere, aber gebrochene Zahlen verwenden.)
+
+
+
 <br />
 
 ### Menü Listen

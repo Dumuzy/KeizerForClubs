@@ -122,6 +122,20 @@ Dans le système Keizer, une victoire contre le joueur classé premier du tourno
 
 Cette valeur correspond aux points que vous obtiendriez pour une victoire contre le joueur le mieux classé du tournoi, divisés par les points que vous obtiendriez contre le joueur le moins bien classé du tournoi. Plus ce chiffre est petit, plus le système Keizer et le système suisse sont proches. 3 est la valeur par défaut. Plus le chiffre est élevé, plus les joueurs les mieux classés du tournoi se distinguent des autres. Je recommande des valeurs plus basses pour les tournois de moins de 20 joueurs.
 
+#### Normalisation de la victoire
+
+
+Si cette case est cochée, tous les points Keizer sont normalisés de sorte qu’une victoire contre le 
+dernier du classement compte pour 1 point Keizer. Cela ne change rien au calcul du classement ou 
+de l’appariement, mais cela rend les points Keizer beaucoup plus faciles à comprendre.
+
+(Dans le système Keizer original, les points Keizer attribués sont généralement de grands nombres entiers. 
+Cela a probablement été fait à l’origine dans le but de faciliter les calculs. 
+En effet, il est plus facile de calculer avec des nombres entiers si l’on n’a pas d’ordinateur.
+
+De nos jours cependant, tous les calculs sont effectués par ordinateur et nous pouvons par 
+conséquent utiliser des nombres beaucoup plus petits sous forme fractionnaire.)
+
 
 <br />
 

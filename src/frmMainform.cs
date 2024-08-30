@@ -1554,6 +1554,18 @@ for determining the first round pairings.";
             this.chkWickerNormalization.Location = new Point(610 - chkWickerNormalization.Size.Width, yOutput);
             this.chkWickerNormalization.TabIndex = 14;
             this.chkWickerNormalization.UseVisualStyleBackColor = true;
+            var ttwn = @"If this checkbox is checked, all the Keizer points are normalized so 
+that a win against the last in the rank counts 1 Keizer point. 
+This doesn't really change anything. But it somehow makes the 
+Keizer points much more graspable.
+
+(In the original Keizer system the given Keizer points usually are big whole numbers.
+ Originally, this has probably been the case to make the caclculations easier. 
+ It's easier to calculate with whole numbers if you don't have a computer.
+
+ Nowadays, all the calculation is done by the computer and so we can use much 
+ smaller but broken numbers.)";
+            this.tooltip.SetToolTip(chkWickerNormalization, ttwn);
 
             this.lblOutputTo.Location = new Point(44, yOutput);
             this.lblOutputTo.Size = new Size(200, 23);

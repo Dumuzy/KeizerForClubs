@@ -183,6 +183,22 @@ is the default. The higher the number, the more the better players stay
 separated from the others. I recommend lower values for tournaments with
 less than 20 players. 
 
+#### Normalization of victory
+
+If this checkbox is checked, all the Keizer points 
+are normalized so that a win against the last in the rank counts 1 Keizer point. 
+
+This doesn't really change anything in the calculation of the rankings or the pairing.
+But it somehow makes the Keizer points much more graspable.
+
+(In the original Keizer system the given Keizer points usually are big whole numbers.
+Originally, this has probably been the case to make the caclculations easier. 
+It's easier to calculate with whole numbers if you don't have a computer.
+
+Nowadays, all the calculation is done by the computer and so we can use much 
+smaller but broken numbers.) 
+
+
 <br />
 
 ### Lists menu
