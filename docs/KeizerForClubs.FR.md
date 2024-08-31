@@ -98,6 +98,17 @@ Les valeurs en pourcentage peuvent être choisies dans l'onglet des paramètres.
 -   75% pour les parties contre des joueurs qui se sont retirés.
 -   50% pour un bye.
 
+#### Bonus de difficulté
+
+Dans KeizerForClubs, vous pouvez obtenir une fraction de points pour avoir joué, même si vous perdez. Vous obtenez le bonus de difficulté multiplié par le nombre de Keizer-Rank-Points de votre adversaire si vous perdez une partie. Je recommande des valeurs de 2 à 5 %.  
+
+*Raisonnement*
+
+1. Une défaite toujours égale à 0 semble un peu injuste, parce que si vous perdez contre le vainqueur du tournoi, cela signifie quelque chose de différent que si vous perdez contre le dernier du tournoi. 
+C'est pourquoi, dans le système suisse, il existe ce que l'on appelle en allemand *Buchholz*, en anglais *SOS* ou *sum of opponent scores*, en français *SPA* ou *somme des points des adversaires*. C'est la somme de tous les points de vos adversaires. Vous obtenez plus de *SPA* si vous avez perdu contre le vainqueur que si vous avez perdu contre le dernier. Le bonus de difficulté est l'équivalent pour KeizerForClubs de *Buchholz*, *SOS* ou *SPA*.
+
+2. Avec le système Keizer, les joueurs qui ne jouent pas peuvent obtenir un nombre considérable de points. Cela semble injuste pour ceux qui jouent et perdent, car les perdants obtiennent toujours zéro, alors que les évitants obtiennent toujours des points.
+
 <br />
 
 ### Explication des options

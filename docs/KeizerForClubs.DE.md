@@ -139,6 +139,15 @@ Voreingestellt sind folgende Werte:
 - 75% für Spiele gegen Zurückgetretene.
 - 50% für Freilos
 
+#### Härtebonus
+ 
+ In KeizerForClubs kannst man einen Bruchteil der Punkte für das Antreten bekommen, auch wenn man verliert. Man bekommt den Härtebonus mal die Keizer-Rang-Punkte des Gegners, wenn man ein Spiel verliert. Ich empfehle Werte von 2-5 %.  
+
+*Begründung:*
+
+1. Eine Niederlage, die immer 0 zählt, fühlt sich ein wenig unfair an, denn wenn man gegen den Turniersieger verliert, bedeutet das etwas anderes, als wenn man gegen den Letzten des Turniers verliert. 
+Deshalb gibt es im Schweizer System das, was man auf Deutsch *Buchholz* nennt, auf Englisch *SOS* oder *sum of opponent scores*, auf Französisch *SPA* oder *somme des points des adversaires*. Es ist die Summe aller Punkte der Gegner. Man bekommt mehr *Buchholz*, wenn man gegen den Sieger verloren hat, als wenn man gegen den Letzten verloren hat. Der Härtebonus ist das KeizerForClubs-Äquivalent zu *Buchholz*, *SOS* oder *SPA*.
+
 <br />
 
 ### Erklärung der Optionen

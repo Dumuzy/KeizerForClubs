@@ -145,6 +145,19 @@ the following values are set:
 -   75% for games against withdrawn players.
 -   50% for bye
 
+
+#### Toughness Bonus 
+
+In KeizerForClubs, you can get some fraction of points for playing, even if you lose. You get the toughness bonus times the Keizer-Rank-Points of your opponent for losing a game. I recommend values at 2-5 %.  
+
+*Reasoning:*
+
+1. A defeat being always 0 feels a bit unfair, because if you loose against the tournament winner, that means something different than if you lose against the last of the tournament. 
+Therefore in swiss system you have what in german is called *Buchholz*, in english it is called *SOS* or *sum of opponent scores*, in french *SPA* or *somme des points des adversaires*. It is the sum of all the points of your opponents. You get more *SOS* if you've lost against the winner than if you've lost against the last. The toughness bonus is the KeizerForClubs equivalent to  *Buchholz*, *SOS* or *SPA*.
+
+2. With the Keizer system, players who don't play may get considerable amount of points. It feels unfair against those who play and lose, that the losers all the time get zero but the avoiders still get points.
+
+
 <br />
 
 ### Explanation of options
