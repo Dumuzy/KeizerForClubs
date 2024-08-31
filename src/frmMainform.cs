@@ -751,8 +751,7 @@ for determining the first round pairings.";
         {
             string[] texte = new string[20];
             colPairingResult.Items.Clear();
-            int topicTexte2 = db.Locl_GetTopicTexte("GAMERESULT", " AND key < '8' ", ref texte);
-            // TODO T51                                       Remove ^^^^^^^^^for T51.
+            int topicTexte2 = db.Locl_GetTopicTexte("GAMERESULT", "", ref texte);
 
             var tt = texte.Take(topicTexte2).ToLi();
             tt.Insert(0, SqliteInterface.ColPairingUndefinedText);

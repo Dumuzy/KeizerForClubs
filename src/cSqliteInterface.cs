@@ -45,21 +45,27 @@ namespace KeizerForClubs
             Excused = 6,
             Unexcused = 7,
 
-            //  TODO for T51.
-            //WinWhiteForfeit = 8, 
-            //WinBlackForfeit = 9, 
-            //ForfeitForfeit = 10, 
-            //Adjourned = 11,
+            WinWhiteForfeit = 8, 
+            WinBlackForfeit = 9, 
+            ForfeitForfeit = 10, 
+            Adjourned = 11,
         };
 
-        /// <summary> T falls es sich um ein Resultat ohne Brett handelt, also sowas wie Freilos, Entschuldigt, ... </summary>
+        /// <summary> T falls es sich um ein Resultat ohne Brett bzw einem Spieler handelt, also sowas 
+        /// wie Freilos, Entschuldigt, ... </summary>
         public static bool IsNonBoardResult(Results result) => NonBoardResults.Contains(result);
-        public static readonly Results[] NonBoardResults = new Results[] { Results.FreeWin, Results.Hindered, Results.Excused, Results.Unexcused };
+        public static readonly Results[] NonBoardResults = new Results[] { Results.FreeWin, Results.Hindered, 
+            Results.Excused, Results.Unexcused };
 
-        //  TODO for T51: Forfeit stuff.
-        /// <summary> T falls es sich um ein Resultat mit Brett handelt, also sowas wie Weißsieg, ForfeitForfeit, Adjourned. </summary>
+        /// <summary> T falls es sich um ein Resultat mit Brett bzw 2 Spielern handelt, also 
+        /// sowas wie Weißsieg, ForfeitForfeit, Adjourned. </summary>
         public static bool IsBoardResult(Results result) => BoardResults.Contains(result);
-        public static readonly Results[] BoardResults = new Results[] { Results.ErrUndefined, Results.WinWhite, Results.Draw, Results.WinBlack};
+        public static readonly Results[] BoardResults = new Results[] { Results.ErrUndefined, Results.WinWhite, Results.Draw, 
+            Results.WinBlack, Results.WinWhiteForfeit, Results.WinBlackForfeit, Results.ForfeitForfeit, Results.Adjourned };
+
+        public static bool IsWhiteWin(Results r) => r == Results.WinWhite || r == Results.WinWhiteForfeit;
+        public static bool IsBlackWin(Results r) => r == Results.WinBlack || r == Results.WinBlackForfeit;
+        public static bool IsDrawish(Results r) => r == Results.Draw || r == Results.Adjourned;
 
 
         public struct stPlayer
@@ -810,22 +816,18 @@ namespace KeizerForClubs
         }
 
         // Ergebnis einer Paarung eintragen
-        public bool UpdPairingResult(int runde, int idw, int ids, SqliteInterface.Results erg)
+        public bool UpdPairingResult(int runde, int idWhite, int idBlack, SqliteInterface.Results erg)
         {
             // Ergebnis gültig? 
             // "Normal" oder "Spezialergebnis" je nach richtiger oder Pseudo-Paarung
-            // TODO T51 Allow other values. 
-            if (ids > 0)
+            if (idBlack > 0)
             {
-                if (erg != Results.WinWhite && erg != Results.WinBlack &&
-                    erg != Results.Draw && erg != Results.ErrUndefined)
+                if (!IsBoardResult(erg))
                     return false;
             }
             else
             {   // Pseudo-Paarung (Freilos, entschuldigt abwesend etc)
-                if (erg == Results.WinWhite ||
-                    erg == Results.WinBlack ||
-                    erg == Results.Draw)
+                if (!IsNonBoardResult(erg))
                     return false;
             }
 
@@ -834,8 +836,8 @@ namespace KeizerForClubs
                                             " AND PID_W=@pID_W  AND PID_B=@pID_B ";
             sqlCommand.Parameters.AddWithValue("pResult", (int)erg);
             sqlCommand.Parameters.AddWithValue("pRunde", runde);
-            sqlCommand.Parameters.AddWithValue("pID_W", idw);
-            sqlCommand.Parameters.AddWithValue("pID_B", ids);
+            sqlCommand.Parameters.AddWithValue("pID_W", idWhite);
+            sqlCommand.Parameters.AddWithValue("pID_B", idBlack);
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
             return true;
@@ -1026,8 +1028,7 @@ namespace KeizerForClubs
                     {
                         // Those pairings which have not yet been played have Result == ErrUndefined. 
                         // In the player list they must show up as available. 
-                        if (pa.Result.IsContainedIn(new Results[]{ Results.WinWhite, Results.Draw,
-                                        Results.WinBlack, Results.FreeWin, Results.ErrUndefined }.ToLi()))
+                        if (IsBoardResult(pa.Result) || pa.Result == Results.FreeWin)
                         {
                             players[i].State = PlayerState.Available;
                             break;
@@ -1167,7 +1168,7 @@ namespace KeizerForClubs
             else
             {
                 string key = Locl_FindKey("GAMERESULT", result);
-                res = key != "" ? (Results)Convert.ToInt32(key) : Results.ErrUndefined;
+                res = key != "" ? (Results)Convert.ToInt32(key, 16) : Results.ErrUndefined;
             }
             return res;
         }
@@ -1175,7 +1176,7 @@ namespace KeizerForClubs
         public string Locl_GetGameResultText(SqliteInterface.Results result)
         {
             var t = result == Results.ErrUndefined ? ColPairingUndefinedText
-                : Locl_GetText("GAMERESULT", ((int)result).ToString());
+                : Locl_GetText("GAMERESULT", ((int)result).ToString("X"));
             return t;
         }
         public const string ColPairingUndefinedText = "-";
@@ -1202,7 +1203,7 @@ namespace KeizerForClubs
         {
             int topicTexte = 0;
             sqlCommand.CommandText = @" SELECT text FROM config_db.LangText  WHERE code= @pCode  
-                        AND topic=@pTopic " + sWhereAdd + " ORDER BY (0 + key)";
+                        AND topic=@pTopic " + sWhereAdd + " ORDER BY key";
             sqlCommand.Parameters.AddWithValue("pCode", (object)LangCode);
             sqlCommand.Parameters.AddWithValue("pTopic", (object)topic);
             sqlCommand.Prepare();

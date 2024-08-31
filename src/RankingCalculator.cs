@@ -232,20 +232,22 @@ namespace KeizerForClubs
                 (var pWhite, var pBlack) = db.GetPlayerBaseById(pair.IdW, pair.IdB);
                 Stopwatches.Next("OneRoundAllPairingsSetKeizerPtsTa-3");
 
-                if (pair.Result == SqliteInterface.Results.WinWhite)
+                if (SqliteInterface.IsWhiteWin(pair.Result))
                 {
                     erg_w = pBlack.KeizerStartPts;
-                    erg_s = pWhite.KeizerStartPts * form.tbBonusVerlust.Value / 100.0f;
+                    if(pair.Result != SqliteInterface.Results.WinWhiteForfeit)
+                        erg_s = pWhite.KeizerStartPts * form.tbBonusVerlust.Value / 100.0f;
                 }
-                else if (pair.Result == SqliteInterface.Results.Draw)
+                else if (SqliteInterface.IsDrawish(pair.Result))
                 {
                     erg_w = pBlack.KeizerStartPts / 2f;
                     erg_s = pWhite.KeizerStartPts / 2f;
                 }
-                else if (pair.Result == SqliteInterface.Results.WinBlack)
+                else if (SqliteInterface.IsBlackWin(pair.Result))
                 {
                     erg_s = pWhite.KeizerStartPts;
-                    erg_w = pBlack.KeizerStartPts * form.tbBonusVerlust.Value / 100.0f;
+                    if (pair.Result != SqliteInterface.Results.WinBlackForfeit)
+                        erg_w = pBlack.KeizerStartPts * form.tbBonusVerlust.Value / 100.0f;
                 }
                 else if (pair.Result == SqliteInterface.Results.Excused)
                     erg_w = pWhite.KeizerStartPts * form.tbBonusExcused.Value / 100.0f;
@@ -257,9 +259,9 @@ namespace KeizerForClubs
                     erg_w = pWhite.KeizerStartPts * form.tbBonusFreilos.Value / 100.0f;
                 if (pWhite.State == SqliteInterface.PlayerState.Retired)
                 {
-                    if (pair.Result == SqliteInterface.Results.WinBlack)
+                    if (SqliteInterface.IsBlackWin(pair.Result))
                         erg_s = pBlack.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
-                    else if (pair.Result == SqliteInterface.Results.Draw)
+                    else if (SqliteInterface.IsDrawish(pair.Result))
                         erg_s = 0.5f * pBlack.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
                     else
                         erg_s = 0;
@@ -267,9 +269,9 @@ namespace KeizerForClubs
                 }
                 if (pBlack.State == SqliteInterface.PlayerState.Retired)
                 {
-                    if (pair.Result == SqliteInterface.Results.WinWhite)
+                    if (SqliteInterface.IsWhiteWin(pair.Result))
                         erg_w = pWhite.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
-                    else if (pair.Result == SqliteInterface.Results.Draw)
+                    else if (SqliteInterface.IsDrawish(pair.Result))
                         erg_w = 0.5f * pWhite.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
                     else
                         erg_w = 0;
