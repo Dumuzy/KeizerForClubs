@@ -837,6 +837,11 @@ for determining the first round pairings.";
                 grdPlayers.Rows[i].Cells[2].Value = players[i].Rating.ToString();
                 grdPlayers.Rows[i].Cells[grdPlayersStateCol].Value =
                         db.Locl_GetPlayerStateText(players[i].State);
+                if (db.CntPlayersBoardGames(players[i].Id) == 0)
+                {
+                    var cbcell = (DataGridViewComboBoxCell)grdPlayers.Rows[i].Cells[grdPlayersStateCol];
+                    cbcell.Items.Add(db.Locl_GetPlayerStateText(SqliteInterface.PlayerState.Deleted));
+                }
             }
         }
 
@@ -847,21 +852,26 @@ for determining the first round pairings.";
             for (int idx = 0; idx < pairingList.Count; ++idx)
             {
                 var pair = pairingList[idx];
-                if (!this.chkPairingOnlyPlayed.Checked || pair.Board < stPairing.FirstNonPlayingBoard)
+                string nameWhite = db.GetPlayerName(pair.IdW); // Can be empty with deleted players. 
+                string nameBlack = db.GetPlayerName(pair.IdB);
+                if ((!this.chkPairingOnlyPlayed.Checked || pair.Board < stPairing.FirstNonPlayingBoard) &&
+                    !string.IsNullOrEmpty(nameWhite)) 
                 {
-                    this.grdPairings.Rows.Add();
-                    this.grdPairings.Rows[idx].Cells[0].Value = pair.Board.ToString();
-                    this.grdPairings.Rows[idx].Cells[1].Value = pair.IdW.ToString();
-                    this.grdPairings.Rows[idx].Cells[2].Value = db.GetPlayerName(pair.IdW);
-                    this.grdPairings.Rows[idx].Cells[4].Value = pair.IdB.ToString();
-                    this.grdPairings.Rows[idx].Cells[5].Value = db.GetPlayerName(pair.IdB);
-                    var cbcell = (DataGridViewComboBoxCell)grdPairings.Rows[idx].Cells[grdPairingsResultCol];
+                    var newidx= grdPairings.Rows.Add();
+                    this.grdPairings.Rows[newidx].Cells[0].Value = pair.Board.ToString();
+                    this.grdPairings.Rows[newidx].Cells[1].Value = pair.IdW.ToString();
+                    this.grdPairings.Rows[newidx].Cells[2].Value = nameWhite;
+                    this.grdPairings.Rows[newidx].Cells[4].Value = pair.IdB.ToString();
+                    this.grdPairings.Rows[newidx].Cells[5].Value = nameBlack;
+                    var cbcell = (DataGridViewComboBoxCell)grdPairings.Rows[newidx].Cells[grdPairingsResultCol];
                     cbcell.Value = db.Locl_GetGameResultText(pair.Result);
                     if (SqliteInterface.IsBoardResult(pair.Result))
                         foreach (var res in SqliteInterface.NonBoardResults)
                             cbcell.Items.Remove(db.Locl_GetGameResultText(res));
-                    else if (SqliteInterface.IsNonBoardResult(pair.Result))
-                        cbcell.ReadOnly = true;
+                    else
+                        foreach (var res in SqliteInterface.BoardResults)
+                            if(res != SqliteInterface.Results.ErrUndefined)
+                                cbcell.Items.Remove(db.Locl_GetGameResultText(res));
                 }
             }
         }

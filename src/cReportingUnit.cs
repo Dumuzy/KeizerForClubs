@@ -211,7 +211,7 @@ namespace KeizerForClubs
             {
                 var player = players[index1];
 
-                if (player.State == SqliteInterface.PlayerState.Retired && db.CntPlayersPlayedGames(player.Id) == 0)
+                if (player.State == SqliteInterface.PlayerState.Retired && db.CntPlayersBoardGames(player.Id) == 0)
                     continue;
                 var line = new Li<string>();
                 if (player.State != SqliteInterface.PlayerState.Retired)

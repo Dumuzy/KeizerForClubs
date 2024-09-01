@@ -45,9 +45,9 @@ namespace KeizerForClubs
             Excused = 6,
             Unexcused = 7,
 
-            WinWhiteForfeit = 8, 
-            WinBlackForfeit = 9, 
-            ForfeitForfeit = 10, 
+            WinWhiteForfeit = 8,
+            WinBlackForfeit = 9,
+            ForfeitForfeit = 10,
             Adjourned = 11,
         };
 
@@ -413,11 +413,11 @@ namespace KeizerForClubs
             return true;
         }
 
-        /// <summary> Gibt die Anzahl der gespielten Spiele (mit Ergebnis gewonnen, verloren oder remis)
-        /// des Spielers mit der id zurück. </summary>
-        public int CntPlayersPlayedGames(int id)
+        /// <summary> Gibt die Anzahl der gepaarten Spiele des Spielers mit der id zurück. Also solchen, 
+        /// wo im Prinzip 2 Leute am Spiel beteiligt waren. </summary>
+        public int CntPlayersBoardGames(int id)
         {
-            var sWhere = $" where ((PID_W={id} or PID_B={id}) AND Result in (1,2,3)) ";
+            var sWhere = $" where ((PID_W={id} or PID_B={id}) AND Result in {BoardResultsSql}) ";
             var li = GetPairingLi(sWhere, "");
             return li.Count;
         }
@@ -614,6 +614,7 @@ namespace KeizerForClubs
         static readonly string WhiteWinResultsSql = GetResultsInSql(WhiteWinResults);
         static readonly string BlackWinResultsSql = GetResultsInSql(BlackWinResults);
         static readonly string DrawishResultsSql = GetResultsInSql(DrawishResults);
+        static readonly string BoardResultsSql = GetResultsInSql(BoardResults);
 
 
         private bool HasColumn(string tableName, string colName)
@@ -654,15 +655,12 @@ namespace KeizerForClubs
         public int DelDeletedPlayers()
         {
             int nDeleted = 0;
-            if (GetMaxRound() == 0)
+            sqlCommand.CommandText = " SELECT COUNT(1) from player where state = " + (int)PlayerState.Deleted;
+            nDeleted = Helper.ToInt(sqlCommand.ExecuteScalar());
+            if (nDeleted > 0)
             {
-                sqlCommand.CommandText = " SELECT COUNT(1) from player where state = " + (int)PlayerState.Deleted;
-                nDeleted = Helper.ToInt(sqlCommand.ExecuteScalar());
-                if (nDeleted > 0)
-                {
-                    sqlCommand.CommandText = " DELETE from player where state = " + (int)PlayerState.Deleted;
-                    sqlCommand.ExecuteScalar();
-                }
+                sqlCommand.CommandText = " DELETE from player where state = " + (int)PlayerState.Deleted;
+                sqlCommand.ExecuteScalar();
             }
             return nDeleted;
         }
@@ -1080,7 +1078,7 @@ namespace KeizerForClubs
             // Es scheint sinnlos, daß Spieler, die nie gespielt haben und zurückgetreten sind, überhaupt
             // angezeigt werden in der Spielerliste. Die werden drum hier rausgenommen. 
             var idsNeverPlayedAndRetired = new Li<stPlayer>(players.Take(count).
-                    Where(p => p.State == PlayerState.Retired && CntPlayersPlayedGames(p.Id) <= 0)).
+                    Where(p => p.State == PlayerState.Retired && CntPlayersBoardGames(p.Id) <= 0)).
                     Select(p => p.Id).ToLi();
 
             var pls = runde == 0 ? new Li<stPlayer>(players.Take(count)) :
