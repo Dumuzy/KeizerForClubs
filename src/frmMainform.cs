@@ -906,7 +906,7 @@ for determining the first round pairings.";
                 this.numRoundSelect.Value = (Decimal)currRunde;
                 for (int index = 0; index < this.iPairingPlayerCntAvailable / 2; ++index)
                     db.InsPairingNew(currRunde, index + 1, this.pPairingList[index].IdW, this.pPairingList[index].IdB);
-                this.PairingInsertNoPlaying();
+                this.PairingInsertNoPlaying(currRunde);
                 db.EndTransaction();
                 if (ShallUseNovusRandomBoard)
                     ShuffleBoardsOfPairings(currRunde);
@@ -1035,9 +1035,8 @@ for determining the first round pairings.";
             this.pPairingList[brett].IdB = playerBlack.Id;
         }
 
-        private bool PairingInsertNoPlaying()
+        private bool PairingInsertNoPlaying(int currRunde)
         {
-            int maxRound = db.GetMaxRound();
             int num = stPairing.FirstNonPlayingBoard;
             for (int i = 0; i < this.iPairingPlayerCntAll; ++i)
             {
@@ -1045,17 +1044,17 @@ for determining the first round pairings.";
                         SqliteInterface.PlayerState.Hindered, SqliteInterface.PlayerState.Excused,
                         SqliteInterface.PlayerState.Unexcused }))
                 {
-                    db.DelPairings(maxRound, this.pPairingPlayerList[i].Id);
-                    db.InsPairingNew(maxRound, num++, this.pPairingPlayerList[i].Id, -1);
+                    db.DelPairings(currRunde, this.pPairingPlayerList[i].Id);
+                    db.InsPairingNew(currRunde, num++, this.pPairingPlayerList[i].Id, -1);
 
                     if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Freilos)
-                        db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.FreeWin);
+                        db.UpdPairingResult(currRunde, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.FreeWin);
                     else if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Hindered)
-                        db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Hindered);
+                        db.UpdPairingResult(currRunde, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Hindered);
                     else if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Excused)
-                        db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Excused);
+                        db.UpdPairingResult(currRunde, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Excused);
                     else if (this.pPairingPlayerList[i].State == SqliteInterface.PlayerState.Unexcused)
-                        db.UpdPairingResult(maxRound, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Unexcused);
+                        db.UpdPairingResult(currRunde, this.pPairingPlayerList[i].Id, -1, SqliteInterface.Results.Unexcused);
                 }
             }
             return true;
@@ -1143,7 +1142,7 @@ for determining the first round pairings.";
                         this.pPairingPlayerList[idx].State = SqliteInterface.PlayerState.Freilos;
                 }
 
-                this.PairingInsertNoPlaying();
+                this.PairingInsertNoPlaying(currRunde);
             }
             this.LoadPairingList();
             return true;
