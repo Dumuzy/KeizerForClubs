@@ -121,6 +121,8 @@ namespace KeizerForClubs
             for (int i = 0; i < 10  && nkStellen == -1; ++i)
                 if (dkpl0 > Math.Pow(10, -i))
                     nkStellen = i;
+            if (nkStellen == -1)
+                nkStellen = 1;  //Shouldn't happen, but it has happened. 
             return nkStellen;
         }
 
