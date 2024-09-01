@@ -471,6 +471,34 @@ namespace AwiUtils
             return result;
         }
 
+        /// <summary> Gibt das größte und 2.größte ELement einer Liste zurück. </summary>
+        public static Tuple<float, float> GetMaxAnd2nd(IList<float> aa)
+        {
+            float largest, second;
+            if (aa[0] < aa[1])
+            {
+                largest = aa[1];
+                second = aa[0];
+            }
+            else
+            {
+                largest = aa[0];
+                second = aa[1];
+            }
+
+            for (int i = 2; i < aa.Count; ++i)
+            {
+                if (aa[i] > largest)
+                {
+                    second = largest;
+                    largest = aa[i];
+                }
+                else if (aa[i] > second)
+                    second = aa[i];
+            }
+            return new Tuple<float, float>(largest, second); 
+        }
+
         /// <summary> Gibt true zurück, wenn die beiden Listen gleich lang sind und den gleichen Inhalt haben. </summary>
         public static bool AreStringListsEqual(IList<string> first, IList<string> second)
         {
@@ -1066,6 +1094,6 @@ namespace AwiUtils
         }
 
         static Random random = new Random();
-            
+
     }
 }

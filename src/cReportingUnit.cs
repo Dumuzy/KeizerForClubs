@@ -199,11 +199,7 @@ namespace KeizerForClubs
             if ((RankingCalculator.WickerNormalization)db.GetConfigInt("OPTION.WickerNormalization", 1) !=
                 RankingCalculator.WickerNormalization.None)
             {
-                var kpps = players.Select(p => p.KeizerPrevPts).ToLi();
-                var biggest = kpps.Max();
-                kpps.Remove(biggest);
-                var next = kpps.Max();
-
+                (float biggest, float next) = Helper.GetMaxAnd2nd(players.Select(p => p.KeizerPrevPts).ToLi());
                 var kppNks = RankingCalculator.GetNachkommaStellenForWickerNormalization(biggest, next);
                 kppFormat = "0." + new string('0', kppNks);
 

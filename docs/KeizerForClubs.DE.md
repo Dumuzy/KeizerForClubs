@@ -250,6 +250,18 @@ x;x;;xxx;Name;;Rating
 ``` 
 Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der 5. Spalte, die Ratings der Spieler sind in der 7. Spalte. 
 
+##### Test-Skript ausführen
+Das geht auch über *Spieler importieren*. Wenn das ausgewählte csv nur den Text `testscript` in der ersten Zeile hat, wird alles was folgt als Anweisungen für das Test-Skripting interpretiert. Folgende Anweisungen sind möglich:
+
+```
+# Leerzeilen und Zeilen, die mit einem # beginnen, werden ignoriert. 
+nn delete-round  # Ruft nn mal die Funktion *Runde löschen* auf. 
+kk create-player  # Es werden kk Test-Spieler erzeugt. 
+ii create-round create-results # Es wird ii mal eine neue Runde automatisch erzeugt und automatisch Ergebnisse dazu. 
+delete-all-rounds  # Lösche alle Runden.
+delete-all-players # Lösche alle Spieler. 
+create-results-2   # Ergebnisse mit vielen (- +), (+ -), (- -), (vertagt) automatisch erzeugen. 
+```
 
 #### Alle löschen
 Löscht alle Spieler. Dies ist nützlich, wenn Sie ein Turnier B erstellen möchten, das genau die gleichen Einstellungen wie das vorherige Turnier A haben soll. 
@@ -261,7 +273,10 @@ Nach dem Importieren einer Spielerliste, z. B. der Vereinsmitglieder, und dem an
 in KeizerForClubs viele Löcher in der Reihenfolge der Spielernummern haben. Das ist ein bisschen ärgerlich. Zumal man an der höchsten Spieler-ID nicht erkennen kann, wie viele Teilnehmer am Turnier teilnehmen.  
 Sie können _Spieler-IDs neu vergeben_ verwenden, um die Löcher in der Reihenfolge der IDs zu entfernen. Nur möglich am Anfang eines Turniers. 
 
+
 <br />
+
+
 
 
 ### Danksagungen

@@ -31,16 +31,18 @@ namespace KeizerForClubs
             else
             {
                 parts.RemoveAt(0);
-                if (parts[0] == "create-players")
+                if (parts[0] == "create-player")
                     n = 1;
             }
             for (int i = 0; i < n; ++i)
                 for (int j = 0; j < parts.Count; ++j)
                 {
-                    if (parts[j] == "create-players")
+                    if (parts[j] == "create-player")
                         ExecTestCreatePlayers(nPlayers);
                     else if (parts[j] == "create-results")
-                        ExecTestCreateResults();
+                        ExecTestCreateResults(1);
+                    else if (parts[j] == "create-results-2")
+                        ExecTestCreateResults(2);
                     else if (parts[j] == "create-round")
                         MnuPairingNextRoundClick(this, null);
                     else if (parts[j] == "delete-all-players")
@@ -55,7 +57,7 @@ namespace KeizerForClubs
             Debug.WriteLine($"ExTeLi needed sec {sw.ElapsedMilliseconds / 1000} End:{line}");
         }
 
-        void ExecTestCreateResults()
+        void ExecTestCreateResults(int type)
         {
             for (int j = 0; j < grdPairings.RowCount; ++j)
             {
@@ -65,6 +67,16 @@ namespace KeizerForClubs
                 int rat2 = GetPlayerRating(pid2);
                 SqliteInterface.Results gameResult = rat1 > rat2 ? SqliteInterface.Results.WinWhite :
                         rat2 > rat1 + 100 ? SqliteInterface.Results.WinBlack : SqliteInterface.Results.Draw;
+                if (type == 2)
+                {
+                    gameResult = rat1 > rat2 + 150 ? SqliteInterface.Results.WinWhiteForfeit :
+                        rat1 > rat2 + 100 ? SqliteInterface.Results.WinWhite :
+                        rat1 > rat2 ? SqliteInterface.Results.ForfeitForfeit :
+                        rat2 > rat1 + 200 ? SqliteInterface.Results.WinBlackForfeit :
+                        rat2 > rat1 + 150 ? SqliteInterface.Results.WinBlack :
+                        rat2 > rat1 + 50 ? SqliteInterface.Results.Adjourned :
+                            SqliteInterface.Results.Draw;
+                }
                 db.UpdPairingResult((int)Convert.ToInt16(this.numRoundSelect.Value), pid1, pid2, gameResult);
             }
         }

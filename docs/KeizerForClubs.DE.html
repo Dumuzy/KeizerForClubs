@@ -274,6 +274,18 @@ Beispiel: Die erste Zeile der csv-Datei ist</p>
 <pre><code>x;x;;xxx;Name;;Rating</code></pre>
 <p>Dann wird Trennzeichen der Strichpunkt, die Spielernamen sind in der
 5. Spalte, die Ratings der Spieler sind in der 7. Spalte.</p>
+<h5 id="test-skript-ausführen">Test-Skript ausführen</h5>
+<p>Das geht auch über <em>Spieler importieren</em>. Wenn das ausgewählte
+csv nur den Text <code>testscript</code> in der ersten Zeile hat, wird
+alles was folgt als Anweisungen für das Test-Skripting interpretiert.
+Folgende Anweisungen sind möglich:</p>
+<pre><code># Leerzeilen und Zeilen, die mit einem # beginnen, werden ignoriert. 
+nn delete-round  # Ruft nn mal die Funktion *Runde löschen* auf. 
+kk create-player  # Es werden kk Test-Spieler erzeugt. 
+ii create-round create-results # Es wird ii mal eine neue Runde automatisch erzeugt und automatisch Ergebnisse dazu. 
+delete-all-rounds  # Lösche alle Runden.
+delete-all-players # Lösche alle Spieler. 
+create-results-2   # Ergebnisse mit vielen (- +), (+ -), (- -), (vertagt) automatisch erzeugen. </code></pre>
 <h4 id="alle-löschen">Alle löschen</h4>
 <p>Löscht alle Spieler. Dies ist nützlich, wenn Sie ein Turnier B
 erstellen möchten, das genau die gleichen Einstellungen wie das

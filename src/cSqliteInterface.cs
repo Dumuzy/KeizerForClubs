@@ -51,21 +51,23 @@ namespace KeizerForClubs
             Adjourned = 11,
         };
 
+        public static readonly Results[] NonBoardResults = new Results[] { Results.FreeWin, Results.Hindered, Results.Excused, Results.Unexcused };
+        public static readonly Results[] BoardResults = new Results[] { Results.ErrUndefined, Results.WinWhite, Results.Draw,
+            Results.WinBlack, Results.WinWhiteForfeit, Results.WinBlackForfeit, Results.ForfeitForfeit, Results.Adjourned };
+        public static readonly Results[] WhiteWinResults = new Results[] { Results.WinWhite, Results.WinWhiteForfeit };
+        public static readonly Results[] BlackWinResults = new Results[] { Results.WinBlack, Results.WinBlackForfeit };
+        public static readonly Results[] DrawishResults = new Results[] { Results.Draw, Results.Adjourned };
+
         /// <summary> T falls es sich um ein Resultat ohne Brett bzw einem Spieler handelt, also sowas 
         /// wie Freilos, Entschuldigt, ... </summary>
         public static bool IsNonBoardResult(Results result) => NonBoardResults.Contains(result);
-        public static readonly Results[] NonBoardResults = new Results[] { Results.FreeWin, Results.Hindered, 
-            Results.Excused, Results.Unexcused };
 
         /// <summary> T falls es sich um ein Resultat mit Brett bzw 2 Spielern handelt, also 
         /// sowas wie Weißsieg, ForfeitForfeit, Adjourned. </summary>
         public static bool IsBoardResult(Results result) => BoardResults.Contains(result);
-        public static readonly Results[] BoardResults = new Results[] { Results.ErrUndefined, Results.WinWhite, Results.Draw, 
-            Results.WinBlack, Results.WinWhiteForfeit, Results.WinBlackForfeit, Results.ForfeitForfeit, Results.Adjourned };
-
-        public static bool IsWhiteWin(Results r) => r == Results.WinWhite || r == Results.WinWhiteForfeit;
-        public static bool IsBlackWin(Results r) => r == Results.WinBlack || r == Results.WinBlackForfeit;
-        public static bool IsDrawish(Results r) => r == Results.Draw || r == Results.Adjourned;
+        public static bool IsWhiteWin(Results r) => WhiteWinResults.Contains(r);
+        public static bool IsBlackWin(Results r) => BlackWinResults.Contains(r);
+        public static bool IsDrawish(Results r) => DrawishResults.Contains(r);
 
 
         public struct stPlayer
@@ -596,14 +598,23 @@ namespace KeizerForClubs
         // Partiepunkte (Sieg=1, remis=1/2) liefern  
         public float GetPlayer_PartiePunkte(int ID)
         {
-            sqlCommand.CommandText = @" select  (Select Count(*) from Pairing where PID_W= p1.ID and result=1) +
-                (Select Count(*) from Pairing where PID_B= p1.ID and result=3) +
+            sqlCommand.CommandText = $@" select  
+                (Select Count(*) from Pairing where PID_W= p1.ID and result in {WhiteWinResultsSql}) +
+                (Select Count(*) from Pairing where PID_B= p1.ID and result in {BlackWinResultsSql}) +
                 (Select Count(*) from Pairing where (PID_W= p1.ID OR PID_B= p1.ID) 
-                    and result=2)/2.0  from player p1  where ID=:pID ";
+                    and result in {DrawishResultsSql})/2.0  from player p1  where ID=:pID ";
             sqlCommand.Parameters.AddWithValue("pID", (object)ID);
             sqlCommand.Prepare();
             return Convert.ToSingle(sqlCommand.ExecuteScalar());
         }
+
+        static string GetResultsInSql(Results[] rr) =>
+            "(" + string.Join(",", rr.Select(r => ((int)r).ToString())) + ")";
+
+        static readonly string WhiteWinResultsSql = GetResultsInSql(WhiteWinResults);
+        static readonly string BlackWinResultsSql = GetResultsInSql(BlackWinResults);
+        static readonly string DrawishResultsSql = GetResultsInSql(DrawishResults);
+
 
         private bool HasColumn(string tableName, string colName)
         {
