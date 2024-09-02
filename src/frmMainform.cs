@@ -1261,12 +1261,13 @@ for determining the first round pairings.";
             this.colPairingResult = new DataGridViewComboBoxColumn();
             this.tabSettings = new TabPage();
 
-            InitializeBonus(1, "Clubgame", ref lblBonusClub, ref tbBonusClub, ref lblBonusClubValue);
-            InitializeBonus(2, "Excused", ref lblBonusExcused, ref tbBonusExcused, ref lblBonusExcusedValue);
-            InitializeBonus(3, "Unexcused", ref lblBonusUnexcused, ref tbBonusUnexcused, ref lblBonusUnexcusedValue);
-            InitializeBonus(4, "Retired", ref lblBonusRetired, ref tbBonusRetired, ref lblBonusRetiredValue);
-            InitializeBonus(5, "Freilos", ref lblBonusFreilos, ref tbBonusFreilos, ref lblBonusFreilosValue);
-            InitializeBonus(6, "Verlust", ref lblBonusVerlust, ref tbBonusVerlust, ref lblBonusVerlustValue);
+            int xloc = 12;
+            InitializeBonus(1, xloc, "Clubgame", ref lblBonusClub, ref tbBonusClub, ref lblBonusClubValue);
+            InitializeBonus(2, xloc, "Excused", ref lblBonusExcused, ref tbBonusExcused, ref lblBonusExcusedValue);
+            InitializeBonus(3, xloc, "Unexcused", ref lblBonusUnexcused, ref tbBonusUnexcused, ref lblBonusUnexcusedValue);
+            InitializeBonus(4, xloc, "Retired", ref lblBonusRetired, ref tbBonusRetired, ref lblBonusRetiredValue);
+            InitializeBonus(5, xloc, "Freilos", ref lblBonusFreilos, ref tbBonusFreilos, ref lblBonusFreilosValue);
+            InitializeBonus(6, xloc, "Verlust", ref lblBonusVerlust, ref tbBonusVerlust, ref lblBonusVerlustValue);
 
             this.lblRoundsGameRepeat = new Label();
             this.lblRatioFirst2Last = new Label();
@@ -1465,15 +1466,15 @@ for determining the first round pairings.";
             this.colPairingResult.Name = "colPairingResult";
             this.colPairingResult.Width = 140;
 
-            this.tabSettings.Controls.Add((Control)this.lblRoundsGameRepeat);
-            this.tabSettings.Controls.Add((Control)this.lblRatioFirst2Last);
-            this.tabSettings.Controls.Add((Control)this.lblFirstRoundRandom);
-            this.tabSettings.Controls.Add((Control)this.numRoundsGameRepeat);
-            this.tabSettings.Controls.Add((Control)this.ddlRatioFirst2Last);
-            this.tabSettings.Controls.Add((Control)this.ddlFirstRoundRandom);
-            this.tabSettings.Controls.Add((Control)this.chkFreilosVerteilen);
-            this.tabSettings.Controls.Add((Control)this.chkNovusRandomBoard);
-            this.tabSettings.Controls.Add((Control)this.btDonate1);
+            this.tabSettings.Controls.Add(this.lblRoundsGameRepeat);
+            this.tabSettings.Controls.Add(this.lblRatioFirst2Last);
+            this.tabSettings.Controls.Add(this.lblFirstRoundRandom);
+            this.tabSettings.Controls.Add(this.numRoundsGameRepeat);
+            this.tabSettings.Controls.Add(this.ddlRatioFirst2Last);
+            this.tabSettings.Controls.Add(this.ddlFirstRoundRandom);
+            this.tabSettings.Controls.Add(this.chkFreilosVerteilen);
+            this.tabSettings.Controls.Add(this.chkNovusRandomBoard);
+            this.tabSettings.Controls.Add(this.btDonate1);
             this.tabSettings.Controls.Add(this.chkHtml);
             this.tabSettings.Controls.Add(this.chkXml);
             this.tabSettings.Controls.Add(this.chkTxt);
@@ -1492,24 +1493,23 @@ for determining the first round pairings.";
             this.tabSettings.UseVisualStyleBackColor = true;
             this.tabSettings.Leave += TabSettingsLeave;
 
-            var yOutput = 230;
+            var yOutput = 180;
+            xloc -= 4;
 
             this.chkFreilosVerteilen.CheckAlign = ContentAlignment.MiddleRight;
             this.chkFreilosVerteilen.TextAlign = ContentAlignment.MiddleRight;
             this.chkFreilosVerteilen.Checked = true;
             this.chkFreilosVerteilen.CheckState = CheckState.Checked;
-            this.chkFreilosVerteilen.Location = new Point(44, yOutput);
+            this.chkFreilosVerteilen.Location = new Point(xloc, yOutput);
             this.chkFreilosVerteilen.Name = "chkFreilosVerteilen";
-            this.chkFreilosVerteilen.Size = new Size(215, 24);
+            this.chkFreilosVerteilen.Size = new Size(171, 24);
             this.chkFreilosVerteilen.TabIndex = 8;
-            this.chkFreilosVerteilen.Text = "Assign bye's even";
             this.chkFreilosVerteilen.UseVisualStyleBackColor = true;
 
-            this.lblFirstRoundRandom.Location = new Point(270, yOutput);
+            this.lblFirstRoundRandom.Location = new Point(xloc + 180, yOutput);
             this.lblFirstRoundRandom.Size = new Size(170, 23);
-            this.lblFirstRoundRandom.Text = "# First round random";
             this.lblFirstRoundRandom.TextAlign = ContentAlignment.MiddleRight;
-            this.ddlFirstRoundRandom.Location = new Point(440, yOutput);
+            this.ddlFirstRoundRandom.Location = new Point(xloc + 350, yOutput);
             this.ddlFirstRoundRandom.Size = new Size(40, 21);
             var li = new List<int>(new int[] { 0, 10, 50, 100, 150, 200, 300, 400, 500 });
             this.ddlFirstRoundRandom.DataSource = li;
@@ -1517,39 +1517,40 @@ for determining the first round pairings.";
             this.chkNovusRandomBoard.CheckAlign = ContentAlignment.MiddleRight;
             this.chkNovusRandomBoard.Checked = true;
             this.chkNovusRandomBoard.CheckState = CheckState.Checked;
-            this.chkNovusRandomBoard.Location = new Point(485, yOutput);
+            this.chkNovusRandomBoard.Location = new Point(xloc + 395, yOutput);
             this.chkNovusRandomBoard.Name = "chkNovusRandomBoard";
-            this.chkNovusRandomBoard.Size = new Size(125, 24);
+            this.chkNovusRandomBoard.Size = new Size(126, 24);
             this.chkNovusRandomBoard.TabIndex = 9;
-            this.chkNovusRandomBoard.Text = "Novuss";
             this.chkNovusRandomBoard.UseVisualStyleBackColor = true;
             this.chkNovusRandomBoard.TextAlign = ContentAlignment.MiddleRight;
 
 
             yOutput += 23;
-            this.lblRoundsGameRepeat.Location = new Point(44, yOutput);
-            this.lblRoundsGameRepeat.Size = new Size(200, 23);
+            this.lblRoundsGameRepeat.Location = new Point(xloc-5, yOutput);
+            this.lblRoundsGameRepeat.Size = new Size(159, 23);
             this.lblRoundsGameRepeat.TabIndex = 10;
-            this.lblRoundsGameRepeat.Text = "# Rounds before paired again";
             this.lblRoundsGameRepeat.TextAlign = ContentAlignment.MiddleRight;
-            this.numRoundsGameRepeat.Location = new Point(246, yOutput);
+            this.numRoundsGameRepeat.Location = new Point(xloc + 158, yOutput+2);
             this.numRoundsGameRepeat.Maximum = new Decimal(new int[4] { 50, 0, 0, 0 });
             this.numRoundsGameRepeat.Name = "numRoundsGameRepeat";
             this.numRoundsGameRepeat.Size = new Size(40, 21);
             this.numRoundsGameRepeat.TabIndex = 9;
 
-            this.lblRatioFirst2Last.Location = new Point(370, yOutput);
+            this.lblRatioFirst2Last.Location = new Point(xloc + 280, yOutput);
             this.lblRatioFirst2Last.Size = new Size(200, 23);
-            this.lblRatioFirst2Last.Text = "# Rounds before paired again";
             this.lblRatioFirst2Last.TextAlign = ContentAlignment.MiddleRight;
-            this.ddlRatioFirst2Last.Location = new Point(570, yOutput);
+            this.ddlRatioFirst2Last.Location = new Point(xloc + 481, yOutput);
             this.ddlRatioFirst2Last.Size = new Size(40, 21);
             List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f, 1.1f, 1.01f });
             this.ddlRatioFirst2Last.DataSource = list;
 
 
             yOutput += 23;
-            int dxOutput = 50, dx0 = 246;
+            this.lblOutputTo.Location = new Point(xloc, yOutput);
+            this.lblOutputTo.Size = new Size(154, 23);
+            this.lblOutputTo.TextAlign = ContentAlignment.MiddleRight;
+
+            int dxOutput = 50, dx0 = xloc + 166;
             this.chkHtml.CheckAlign = chkHtml.TextAlign = ContentAlignment.MiddleRight;
             this.chkHtml.Location = new Point(dx0, yOutput);
             this.chkHtml.Name = "chkHtml";
@@ -1584,7 +1585,7 @@ for determining the first round pairings.";
 
             this.chkWickerNormalization.CheckAlign = chkWickerNormalization.TextAlign = ContentAlignment.MiddleRight;
             this.chkWickerNormalization.Size = new Size(150, 24);
-            this.chkWickerNormalization.Location = new Point(610 - chkWickerNormalization.Size.Width, yOutput);
+            this.chkWickerNormalization.Location = new Point(xloc + 521 - chkWickerNormalization.Size.Width, yOutput);
             this.chkWickerNormalization.TabIndex = 14;
             this.chkWickerNormalization.UseVisualStyleBackColor = true;
             var ttwn = @"If this checkbox is checked, all the Keizer points are normalized so 
@@ -1600,22 +1601,13 @@ Keizer points much more graspable.
  smaller but broken numbers.)";
             this.tooltip.SetToolTip(chkWickerNormalization, ttwn);
 
-            this.lblOutputTo.Location = new Point(44, yOutput);
-            this.lblOutputTo.Size = new Size(200, 23);
-            this.lblOutputTo.Text = "# Rounds before paired again";
-            this.lblOutputTo.TextAlign = ContentAlignment.MiddleRight;
-
 
             yOutput += 23;
-            this.lblNiceName.Location = new Point(44, yOutput);
-            this.lblNiceName.Size = new Size(200, 23);
-            this.lblNiceName.Text = "Tournament name";
+            this.lblNiceName.Location = new Point(xloc, yOutput);
+            this.lblNiceName.Size = new Size(154, 23);
             this.lblNiceName.TextAlign = ContentAlignment.MiddleRight;
-            this.tbNiceName.Location = new Point(246, yOutput + 2);
-            this.tbNiceName.Size = new Size(400, 23);
-            this.tbNiceName.Text = "Tournament name";
-
-
+            this.tbNiceName.Location = new Point(xloc + 158, yOutput + 2);
+            this.tbNiceName.Size = new Size(362, 23);
 
 
             this.btDonate1.Location = new Point(43, 330);
@@ -1770,21 +1762,21 @@ Keizer points much more graspable.
             }
         }
 
-        private void InitializeBonus(int num, string name, ref Label lblText, ref TrackBar tb, ref Label lblValue)
+        private void InitializeBonus(int num, int xloc, string name, ref Label lblText, ref TrackBar tb, ref Label lblValue)
         {
             var yloc = 15 + (num - 1) * 25;
-            InitializeBonusText(num, yloc, name, ref lblText);
-            InitializeBonusValue(num, yloc, name, ref lblValue);
-            InitializeBonusTrackbar(num, yloc, name, ref tb);
+            InitializeBonusText(num, xloc, yloc, name, ref lblText);
+            InitializeBonusTrackbar(num, xloc + 155, yloc, name, ref tb);
+            InitializeBonusValue(num, xloc + 360, yloc, name, ref lblValue);
         }
 
-        private void InitializeBonusTrackbar(int num, int yloc, string name, ref TrackBar tb)
+        private void InitializeBonusTrackbar(int num, int xloc, int yloc, string name, ref TrackBar tb)
         {
             tb = new TrackBar();
             tb.BeginInit();
             this.tabSettings.Controls.Add(tb);
             tb.LargeChange = 20;
-            tb.Location = new Point(245, yloc);
+            tb.Location = new Point(xloc, yloc);
             tb.Maximum = 100;
             tb.Name = $"tbBonus" + name;
             tb.AutoSize = false;
@@ -1796,28 +1788,26 @@ Keizer points much more graspable.
             tb.EndInit();
         }
 
-        private void InitializeBonusText(int num, int yloc, string name, ref Label lblText)
+        private void InitializeBonusText(int num, int xloc, int yloc, string name, ref Label lblText)
         {
             lblText = new Label();
             this.tabSettings.Controls.Add(lblText);
-            lblText.Location = new Point(90, yloc);
+            lblText.Location = new Point(xloc, yloc);
             lblText.Name = "lblBonus" + name;
             lblText.Size = new Size(150, 23);
             lblText.TabIndex = 10 + num;
-            lblText.Text = "...";
             lblText.TextAlign = ContentAlignment.MiddleRight;
         }
 
-        private void InitializeBonusValue(int num, int yloc, string name, ref Label lblValue)
+        private void InitializeBonusValue(int num, int xloc, int yloc, string name, ref Label lblValue)
         {
             lblValue = new Label();
             this.tabSettings.Controls.Add(lblValue);
 
-            lblValue.Location = new Point(450, yloc);
+            lblValue.Location = new Point(xloc, yloc);
             lblValue.Name = $"lblBonus{name}Value";
             lblValue.Size = new Size(100, 23);
             lblValue.TabIndex = 10 + num;
-            lblValue.Text = "...";
             lblValue.TextAlign = ContentAlignment.MiddleLeft;
         }
 
