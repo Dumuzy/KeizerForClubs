@@ -617,6 +617,7 @@ namespace KeizerForClubs
         static readonly string BlackWinResultsSql = GetResultsInSql(BlackWinResults);
         static readonly string DrawishResultsSql = GetResultsInSql(DrawishResults);
         static readonly string BoardResultsSql = GetResultsInSql(BoardResults);
+        static readonly string NonBoardResultsSql = GetResultsInSql(NonBoardResults);
 
 
         private bool HasColumn(string tableName, string colName)
@@ -977,7 +978,7 @@ namespace KeizerForClubs
         public int GetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder, int runde)
         {
             string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
-                                WHERE result in (4,5,6,7) GROUP BY pid_w) f on f.PID_W = p.id ";
+                                WHERE result in {NonBoardResultsSql} GROUP BY pid_w) f on f.PID_W = p.id ";
             int playerCount = 0;
             sqlCommand.CommandText = @" SELECT p.id, p.name, p.rating, p.state, p.Keizer_StartPts, p.Keizer_SumPts, 
                                 p.Keizer_PrevPts, p.rank, f.frei, p.ratingWDelta FROM Player p 
