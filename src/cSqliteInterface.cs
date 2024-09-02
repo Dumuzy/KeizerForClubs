@@ -49,9 +49,11 @@ namespace KeizerForClubs
             WinBlackForfeit = 9,
             ForfeitForfeit = 10,
             Adjourned = 11,
+
+            LateStart = 12,
         };
 
-        public static readonly Results[] NonBoardResults = new Results[] { Results.FreeWin, Results.Hindered, Results.Excused, Results.Unexcused };
+        public static readonly Results[] NonBoardResults = new Results[] { Results.FreeWin, Results.Hindered, Results.Excused, Results.Unexcused, Results.LateStart };
         public static readonly Results[] BoardResults = new Results[] { Results.ErrUndefined, Results.WinWhite, Results.Draw,
             Results.WinBlack, Results.WinWhiteForfeit, Results.WinBlackForfeit, Results.ForfeitForfeit, Results.Adjourned };
         public static readonly Results[] WhiteWinResults = new Results[] { Results.WinWhite, Results.WinWhiteForfeit };
@@ -1201,8 +1203,8 @@ namespace KeizerForClubs
                     s = s.Truncate(4, null);
                     if (s == "ents" || s == "unen")
                         s = "fehl";
-                    if (s == "Frei")
-                        s = "frei";
+                    if (s == "Frei" || s == "Spät")
+                        s = s.ToLowerInvariant();
                 }
             }
             return s;

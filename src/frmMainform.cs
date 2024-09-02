@@ -56,7 +56,7 @@ namespace KeizerForClubs
         private OpenFileDialog dlgOpenTournament;
         private DataGridViewComboBoxColumn colPairingResult;
         private DataGridViewComboBoxColumn colPlayerState;
-        private Label lblBonusClubValue, lblBonusExcusedValue, lblBonusUnexcusedValue, lblBonusRetiredValue, 
+        private Label lblBonusClubValue, lblBonusExcusedValue, lblBonusUnexcusedValue, lblBonusRetiredValue,
             lblBonusFreilosValue, lblBonusVerlustValue;
         internal TrackBar tbBonusClub, tbBonusExcused, tbBonusUnexcused, tbBonusRetired, tbBonusFreilos, tbBonusVerlust;
         private Label lblBonusClub, lblBonusExcused, lblBonusUnexcused, lblBonusRetired, lblBonusFreilos, lblBonusVerlust;
@@ -123,7 +123,7 @@ namespace KeizerForClubs
             tabMainWindow.Enabled = true;
             mnuListen.Enabled = true;
             mnuHelp.Enabled = mnuStartLanguage.Enabled = true;
-            LoadPlayerlist();
+            LoadPlayerList();
             LoadPairingList();
 
             tbBonusClub.Value = db.GetConfigInt("BONUS.Clubgame");
@@ -322,7 +322,7 @@ for determining the first round pairings.";
         {
             this.fSelectLanguage();
             this.ApplyLanguageText();
-            this.LoadPlayerlist();
+            this.LoadPlayerList();
             this.LoadPairingList();
         }
 
@@ -385,7 +385,7 @@ for determining the first round pairings.";
                             alreadyExistingAndChanged.Add($"{p.Item1} ({rating}) -> {name}");
                         db.InsPlayerNew(name, rating);
                     }
-                    LoadPlayerlist();
+                    LoadPlayerList();
                     if (alreadyExistingAndChanged.Any())
                     {
 
@@ -409,7 +409,7 @@ for determining the first round pairings.";
                 {
                     db.DeleteAllPlayersTa();
                     db.ResetPlayerBaseIdTa();
-                    LoadPlayerlist();
+                    LoadPlayerList();
                 }
             }
             else
@@ -422,7 +422,7 @@ for determining the first round pairings.";
             {
                 db.RebasePlayerIdsTa();
                 db.ResetPlayerBaseIdTa();
-                LoadPlayerlist();
+                LoadPlayerList();
             }
             else
                 MessageBox.Show(db.Locl_GetText("GUI_TEXT", "OnlyBefore1"), Text);
@@ -687,10 +687,12 @@ for determining the first round pairings.";
                     row.Cells[grdPlayersStateCol].Value = db.Locl_GetPlayerStateText(SqliteInterface.PlayerState.Available);
 
                 db.InsPlayerNew(newPlayerName, Convert.ToInt16(row.Cells[2].Value));
-                row.Cells[0].Value = db.GetPlayerID(newPlayerName);
-                db.UpdPlayer(Helper.ToInt(row.Cells[0].Value), newPlayerName,
+                int playerId = db.GetPlayerID(newPlayerName);
+                row.Cells[0].Value = playerId;
+                db.UpdPlayer(playerId, newPlayerName,
                             Helper.ToInt(row.Cells[2].Value),
                             db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()));
+                HandleLateStarter(playerId);
             }
             else
                 db.UpdPlayer(gridPlayerId, newPlayerName,
@@ -698,6 +700,20 @@ for determining the first round pairings.";
                     db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()));
             row.Cells[1].Value = newPlayerName;
         }
+
+        private void HandleLateStarter(int playerId)
+        {
+            int currRunde = db.GetMaxRound();
+            if (currRunde > 0)
+                for (int i = 1; i <= currRunde; ++i)
+                {
+                    // Insert non-playing pairings into pairings table. 
+                    var brett = db.GetNextFreeBrettOfRound(i, true);
+                    db.InsPairingNew(i, brett, playerId, -1);
+                    db.UpdPairingResult(i, playerId, -1, SqliteInterface.Results.LateStart);
+                }
+        }
+
 
         private void GrdPlayersDirty(object sender, EventArgs e)
         {
@@ -821,11 +837,14 @@ for determining the first round pairings.";
         {
             int n = db.DelDeletedPlayers();
             if (n > 0)
-                LoadPlayerlist();
+            {
+                LoadPlayerList();
+                LoadPairingList();
+            }
         }
 
         /// <summary> Erzeugt die Spielerliste auf dem Spieler-Tab.</summary>
-        private void LoadPlayerlist()
+        private void LoadPlayerList()
         {
             var players = db.GetPlayerLi("", " ORDER BY ID ", db.GetMaxRound() + 1);
             this.grdPlayers.Rows.Clear();
@@ -855,9 +874,9 @@ for determining the first round pairings.";
                 string nameWhite = db.GetPlayerName(pair.IdW); // Can be empty with deleted players. 
                 string nameBlack = db.GetPlayerName(pair.IdB);
                 if ((!this.chkPairingOnlyPlayed.Checked || pair.Board < stPairing.FirstNonPlayingBoard) &&
-                    !string.IsNullOrEmpty(nameWhite)) 
+                    !string.IsNullOrEmpty(nameWhite))
                 {
-                    var newidx= grdPairings.Rows.Add();
+                    var newidx = grdPairings.Rows.Add();
                     this.grdPairings.Rows[newidx].Cells[0].Value = pair.Board.ToString();
                     this.grdPairings.Rows[newidx].Cells[1].Value = pair.IdW.ToString();
                     this.grdPairings.Rows[newidx].Cells[2].Value = nameWhite;
@@ -870,7 +889,7 @@ for determining the first round pairings.";
                             cbcell.Items.Remove(db.Locl_GetGameResultText(res));
                     else
                         foreach (var res in SqliteInterface.BoardResults)
-                            if(res != SqliteInterface.Results.ErrUndefined)
+                            if (res != SqliteInterface.Results.ErrUndefined)
                                 cbcell.Items.Remove(db.Locl_GetGameResultText(res));
                 }
             }

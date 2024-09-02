@@ -17,6 +17,9 @@ namespace KeizerForClubs
                                 !li.StartsWith("#")).ToLi();
             foreach (var line in lines)
                 ExecTestLine(line);
+
+            LoadPairingList();
+            LoadPlayerList();
         }
 
         void ExecTestLine(string line)
@@ -87,7 +90,6 @@ namespace KeizerForClubs
             {
                 db.DeleteAllPlayersTa();
                 db.ResetPlayerBaseIdTa();
-                LoadPlayerlist();
                 dictPlayerRating.Clear();
             }
         }
@@ -99,7 +101,6 @@ namespace KeizerForClubs
                 db.DelPairings(maxRound);
                 db.DelCurrentStoredTablesWHeader(maxRound);
                 this.numRoundSelect.Value = (Decimal)(maxRound - 1);
-                this.LoadPairingList();
             }
             ApplyPlayerStateTexte();
         }

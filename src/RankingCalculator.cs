@@ -259,6 +259,8 @@ namespace KeizerForClubs
                     erg_w = pWhite.KeizerStartPts * form.tbBonusClub.Value / 100.0f;
                 else if (pair.Result == SqliteInterface.Results.FreeWin)
                     erg_w = pWhite.KeizerStartPts * form.tbBonusFreilos.Value / 100.0f;
+                else if (pair.Result == SqliteInterface.Results.LateStart)
+                    erg_w = pWhite.KeizerStartPts * form.tbBonusUnexcused.Value / 100.0f;
                 if (pWhite.State == SqliteInterface.PlayerState.Retired)
                 {
                     if (SqliteInterface.IsBlackWin(pair.Result))
