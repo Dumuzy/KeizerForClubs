@@ -209,6 +209,58 @@ dans KeizerForClubs présente de nombreux trous dans l'ordre des numéros de jou
 D'autant plus que l'Id de joueur le plus élevé ne permet pas de savoir combien de participants participent au tournoi.  
 Vous pouvez utiliser _Joueur Ids réattrribué_ pour supprimer les trous dans l'ordre des Id. Possible uniquement au début d'un tournoi. 
 
+<br/> 
+
+### Système Keizer et Système Suisse
+
+#### Comparaison des systèmes d'appariement Keizer et Suisse
+
+<style>
+th, td {
+    padding: 5px;
+}
+tr:hover {background-color: coral;}
+tr:nth-child(odd) {background-color: #f2f2f2;}
+</style>
+
+<table style="max-width: 800px">
+<colgroup>
+<col span="1" style="width: 20%;">
+<col span="1" style="width: 40%;">
+<col span="1" style="width: 40%;">
+</colgroup>
+<tr><th>Propriété</th><th>Keizer</th><th>Suisse</th></tr>
+<tr><th>L'appariement </th><td>se fait généralement peu de temps avant que la manche ne soit jouée.</td><td>peut se faire des jours ou des semaines avant que la manche ne soit jouée.</td></tr>
+<tr><th>Les joueurs forts sont opposés les uns aux autres</th><td>dès le premier tour.</td><td>seulement plus tard.</td></tr>
+<tr><th>Le joueur n'a pas d'adversaire</th><td> Parce que l'appariement est fait peu de temps avant le tour, cela n'arrive pas souvent.</td><td>Peut arriver souvent.</td></tr>
+<tr><th>Points pour la victoire</th><td>Plus de points pour les victoires contre de meilleurs joueurs.</td><td>Un point pour chaque victoire, 
+  plus une évaluation fine comme *somme des points de l'adversaire* ou SPA.</td></tr>
+<tr><th>Points pour la défaite</th><td>Dans le Keizer original, juste zéro. Dans KeizerForClubs, il est possible d'attribuer un bonus de solidité.
+Cela remplace l'évaluation de l'amende SPA en Suisse. </td><td>Zéro, mais compte pour l'évaluation SPA fine.</td></tr>
+<tr><th>Gestion des couleurs </th><td>La couleur ne joue aucun rôle dans l'appariement.  Celui qui avait relativement moins de blanc obtient le blanc. En pratique, la différence avec la gestion suisse des couleurs est marginale.</td><td>Idéalement, chaque tour est différent pour chaque joueur, personne n'obtient jamais trois fois la même couleur à la suite.  Cette règle est appliquée lors de l'appariement. </td></tr>
+<tr><th>Les joueurs manquants</th><td> obtiennent généralement des fractions de points. </td><td> Un ou deux *bye-draws* sont souvent autorisés. </td></tr>
+<tr><th>Jeux contre des joueurs démissionnaires</th><td>Un traitement spécial est utilisé.</td><td>Les résultats peuvent être annulés pour une évaluation fine.</td></tr>
+<tr><th>Le même adversaire au tour suivant</th><td>peut être autorisé.</td><td>n'est jamais autorisé.</td></tr>
+<tr><th></th><td></td><td></td></tr>
+</table>
+
+#### Systèmes hybrides Keizer-Swiss
+
+On peut imaginer de nombreux systèmes hybrides Keizer-Swiss différents. Avec KeizerForClubs, vous pouvez en créer un grand nombre. 
+
+Par exemple :
+
+* Une victoire contre n'importe qui compte pour un point plus une évaluation fine. Similaire à Swiss.
+* Les couleurs sont gérées comme dans Keizer.
+* Les joueurs qui ne sont pas là peuvent obtenir des fractions de points comme à Keizer ou en Suisse avec les bye.
+* Les joueurs qui ont des parties contre des joueurs résignés obtiennent des points complets comme en Suisse.
+* En principe, un joueur peut jouer deux fois contre un autre, comme à Keizer - ou pas, comme en Suisse. Ceci peut être entièrement géré
+par le directeur du tournoi en augmentant le paramètre « # rounds rondes avant repet. » 
+
+
+
+<br/>
+
 ### Remerciements
 
 *   Le programme a été développé à l'origine avec SharpDevelop, mais j'utilise à présent Microsoft Visual Studio Community 2022. 
@@ -219,7 +271,7 @@ Remerciements particuliers à
 
 *   Thomas Schlapp pour le développement initial de ce logiciel.
 *   Jürgen Kehr pour ses tests et ses autres précieuses informations.
-*   Pascal Golay pour ses tests et la traduction en français. 
+*   Pascal Golay pour ses tests, discussions et la traduction en français. 
 
 ### Licence
 

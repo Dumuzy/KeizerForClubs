@@ -260,6 +260,165 @@ This is a bit annoying. Especially as you can’t see from the highest
 player id the number of participants in the tournament.<br />
 You can use <em>Rebase player ids</em> to remove the holes in the
 sequence of ids.</p>
+<p><br /></p>
+<h3 id="keizer-system-and-swiss-system">Keizer System and Swiss
+System</h3>
+<h4 id="comparison-of-keizer-and-swiss-pairing-systems">Comparison of
+Keizer and Swiss Pairing Systems</h4>
+<style>
+th, td {
+    padding: 5px;
+}
+tr:hover {background-color: coral;}
+tr:nth-child(odd) {background-color: #f2f2f2;}
+</style>
+<table style="max-width: 800px">
+<colgroup>
+<col span="1" style="width: 20%;">
+<col span="1" style="width: 40%;">
+<col span="1" style="width: 40%;">
+</colgroup>
+<tr>
+<th>
+Property
+</th>
+<th>
+Keizer
+</th>
+<th>
+Swiss
+</th>
+</tr>
+<tr>
+<th>
+Pairing
+</th>
+<td>
+is done usually shortly before the round is played.
+</td>
+<td>
+may be done days or weeks before the round is played.
+</td>
+</tr>
+<tr>
+<th>
+Strong players get paired against each other
+</th>
+<td>
+from round one.
+</td>
+<td>
+only later.
+</td>
+</tr>
+<tr>
+<th>
+Player has no opponent
+</th>
+<td>
+Because pairing is done shortly before the round, this is not happening
+often.
+</td>
+<td>
+May happen often.
+</td>
+</tr>
+<tr>
+<th>
+Points for victory
+</th>
+<td>
+More points for victory against better players.
+</td>
+<td>
+One point for every victory, plus fine evaluation like <em>sum of
+opponent scores</em> or SOS.
+</td>
+</tr>
+<tr>
+<th>
+Points for loss
+</th>
+<td>
+In the original Keizer just zero. In KeizerForClubs it’s possible to
+award a toughness bonus. This replaces the SOS fine evaluation in Swiss.
+</td>
+<td>
+Zero, but counts for SOS fine evaluation.
+</td>
+</tr>
+<tr>
+<th>
+Color management
+</th>
+<td>
+Color plays no role in pairing. Who had relatively less white gets
+white. In parctice, the difference to Swiss color management is
+marginal.
+</td>
+<td>
+Ideally each round different for every player, nobody gets ever three
+times the same color in a row. This is enforced during pairing.
+</td>
+</tr>
+<tr>
+<th>
+Lacking players
+</th>
+<td>
+Usually get fractions of points.
+</td>
+<td>
+One or two <em>bye-draws</em> are often allowed.
+</td>
+</tr>
+<tr>
+<th>
+Games against resigned players
+</th>
+<td>
+Special handling used.
+</td>
+<td>
+Results may be cancelled for fine evaluation.
+</td>
+</tr>
+<tr>
+<th>
+Same opponent in later round
+</th>
+<td>
+may be allowed.
+</td>
+<td>
+is never allowed.
+</td>
+</tr>
+<tr>
+<th>
+</th>
+<td>
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h4 id="keizer-swiss-hybrid-systems">Keizer-Swiss Hybrid Systems</h4>
+<p>One can think of many different Keizer-Swiss hybrid systems. With
+KeizerForClubs, you can create lots of them. For example:</p>
+<ul>
+<li>A victory against anybody counts one point plus fine evaluation.
+Similar to Swiss.</li>
+<li>Colors are managed like in Keizer.</li>
+<li>Players that are not there can get fractions of points like in
+Keizer or Swiss with bye’s.</li>
+<li>Players which have games against resigned players get full points
+like in Swiss.</li>
+<li>Principally, a player can play against another one twice, like in
+Keizer - or not, like in Swiss. This can be managed completely by the
+tournament director by increasing the setting “# rounds before pairing
+repeat” beyond the number of rounds of the tournament.</li>
+</ul>
 <h3 id="acknowledgements">Acknowledgements</h3>
 <ul>
 <li>The program originally was developed with SharpDevelop, now I’m
@@ -272,7 +431,7 @@ href="https://github.com/Dumuzy/KeizerForClubs/releases">Github</a>.</li>
 <ul>
 <li>Thomas Schlapp for the original development of this software.</li>
 <li>Jürgen Kehr for tests and other valuable information.</li>
-<li>Pascal Golay for tests and translation to french.</li>
+<li>Pascal Golay for tests, discussions and translation to french.</li>
 </ul>
 <h3 id="license">License</h3>
 <p>The program is available for free. It comes without any warranty or

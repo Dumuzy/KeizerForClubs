@@ -276,8 +276,50 @@ Sie können _Spieler-IDs neu vergeben_ verwenden, um die Löcher in der Reihenfolg
 
 <br />
 
+### Keizer System und Schweizer System
+
+#### Vergleich von Keizer- und Schweizer Paarungssystem
+
+<style>
+th, td {
+    padding: 5px;
+}
+tr:hover {background-color: coral;}
+tr:nth-child(odd) {background-color: #f2f2f2;}
+</style>
+
+<table style="max-width: 800px">
+<colgroup>
+<col span="1" style="Breite: 20%;">
+<col span="1" style="Breite: 40%;">
+<col span="1" style="Breite: 40%;">
+</colgroup>
+<tr><th>Eigenschaft</th><th>Keizer</th><th>Schweizer</th></tr>
+<tr><th>Paarungen</th><td>werden in der Regel kurz vor der Runde gebildet.</td><td>können Tage oder Wochen vor der Runde gebildet werden.</td></tr>
+<tr><th>Starke Spieler werden gegeneinander gepaart</th><td>von der ersten Runde an.</td><td>nur später.</td></tr>
+<tr><th>Der Spieler hat keinen Gegner</th><td>Da die Paarung kurz vor der Runde erfolgt, kommt dies nicht oft vor.</td><td>Kann oft vorkommen.</td></tr>
+<tr><th>Punkte für Sieg</th><td>Mehr Punkte für Sieg gegen bessere Spieler.</td><td>Ein Punkt für jeden Sieg, 
+  plus Feinwertung wie *Summe der Gegnerpunkte* aka Buchholz.</td></tr>
+<tr><th>Punkte für Niederlagen</th><td>Im originalen Keizer einfach null. In KeizerForClubs ist es möglich, einen Härtebonus zu vergeben.
+Dieser ersetzt die Buchholz-Feinwertung. </td><td>Null, zählt aber für die Buchholz-Feinwertung.</td></tr>
+<tr><th>Farbmanagement </th><td>Farbe spielt bei der Paarung keine Rolle.  Wer relativ weniger Weiß hatte, bekommt Weiß. In der Praxis ist der Unterschied zum Schweizer Farbmanagement marginal.</td><td>Idealerweise jede Runde anders für jeden Spieler, niemand bekommt jemals dreimal die gleiche Farbe in Folge.  Dies wird bei der Paarung erzwungen. </td></tr>
+<tr><th>Fehlende Spieler</th><td>Erhalten in der Regel Bruchteile von Punkten. </td><td> Ein oder zwei *bye-remis* sind oft erlaubt.</td></tr>
+<tr><th>Spiele gegen zurückgetretene Spieler</th><td>Spezialbehandlung angewendet.</td><td>Ergebnisse können zur Feinwertung annulliert werden.</td></tr>
+<tr><th>Gleicher Gegner in späterer Runde</th><td>kann erlaubt sein.</td><td>ist nie erlaubt.</td></tr>
+</table>
+
+#### Keizer-Swiss Hybrid Systeme
+
+Man kann sich viele verschiedene Keizer-Swiss-Hybridsysteme vorstellen. Mit KeizerForClubs können Sie viele davon erstellen. Zum Beispiel:
+
+* Ein Sieg gegen jemanden zählt einen Punkt plus Feinwertung. Ähnlich wie bei Swiss.
+* Farben werden wie in Keizer verwaltet.
+* Spieler, die nicht da sind, können Bruchteile von Punkten bekommen, wie in Keizer oder Schweizer mit Bye's.
+* Spieler, die Spiele gegen ausgeschiedene Spieler haben, erhalten volle Punkte wie im Schweizer.
+* Grundsätzlich kann ein Spieler zweimal gegen einen anderen spielen, wie in Keizer - oder nicht, wie in der Schweiz. Dies kann komplett von der Turnierleitung gesteuert werden mit der Einstellung *Anz. Runden vor Paarungs-Wiederholung*.
 
 
+<br/>
 
 ### Danksagungen
 
@@ -289,7 +331,7 @@ Besonderer Dank geht
 
 *   Thomas Schlapp für die ursprüngliche Entwicklung dieser Software.
 *   Jürgen Kehr für Tests und andere wertvolle Informationen.
-*   Pascal Golay für Tests und die Übersetzung ins Französische. 
+*   Pascal Golay für Tests, Diskussionen und die Übersetzung ins Französische. 
 
 ### Lizenz
 

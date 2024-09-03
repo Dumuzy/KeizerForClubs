@@ -272,6 +272,56 @@ in KeizerForClubs may have a lot of holes in the sequence of player ids. This is
 highest player id the number of participants in the tournament.  
 You can use _Rebase player ids_ to remove the holes in the sequence of ids. 
 
+<br />
+
+### Keizer System and Swiss System 
+
+#### Comparison of Keizer and Swiss Pairing Systems
+
+<style>
+th, td {
+    padding: 5px;
+}
+tr:hover {background-color: coral;}
+tr:nth-child(odd) {background-color: #f2f2f2;}
+</style>
+
+<table style="max-width: 800px">
+<colgroup>
+<col span="1" style="width: 20%;">
+<col span="1" style="width: 40%;">
+<col span="1" style="width: 40%;">
+</colgroup>
+<tr><th>Property</th><th>Keizer</th><th>Swiss</th></tr>
+<tr><th>Pairing </th><td>is done usually shortly before the round is played.</td><td>may be done days or weeks before the round is played.</td></tr>
+<tr><th>Strong players get paired against each other</th><td>from round one.</td><td>only later.</td></tr>
+<tr><th>Player has no opponent</th><td> Because pairing is done shortly before the round, this is not happening often.</td><td>May happen often.</td></tr>
+<tr><th>Points for victory</th><td>More points for victory against better players.</td><td>One point for every victory, 
+  plus fine evaluation like *sum of opponent scores* or SOS.</td></tr>
+<tr><th>Points for loss</th><td>In the original Keizer just zero. In KeizerForClubs it's possible  to award a toughness bonus.
+This replaces the SOS fine evaluation in Swiss. </td><td>Zero, but counts for SOS fine evaluation.</td></tr>
+<tr><th> Color management </th><td>Color plays no role in pairing.  Who had relatively less white gets white. In parctice, the difference to Swiss color management is marginal.</td><td>Ideally each round different for every player, nobody gets ever three times the same color in a row.  This is enforced during pairing. </td></tr>
+<tr><th>Lacking players</th><td> Usually get fractions of points. </td><td> One or two *bye-draws* are often allowed. </td></tr>
+<tr><th>Games against resigned players</th><td>Special handling used.</td><td> Results may be cancelled for fine evaluation.</td></tr>
+<tr><th>Same opponent in later round</th><td>may be allowed.</td><td>is never allowed.</td></tr>
+<tr><th></th><td></td><td></td></tr>
+</table>
+
+
+#### Keizer-Swiss Hybrid Systems
+
+One can think of many different Keizer-Swiss hybrid systems. With KeizerForClubs, you can create lots of them. For example:
+
+* A victory against anybody counts one point plus fine evaluation. Similar to Swiss.
+* Colors are managed like in Keizer.
+* Players that are not there can get fractions of points like in Keizer or Swiss with bye's.
+* Players which have games against resigned players get full points like in Swiss.
+* Principally, a player can play against another one twice, like in Keizer - or not, like in Swiss. This can be managed completely
+by the tournament director by increasing the setting "# rounds before pairing repeat" beyond the
+number of rounds of the tournament.
+
+
+
 ### Acknowledgements
 
 *   The program originally was developed with SharpDevelop, now I'm using Microsoft Visual Studio Community 2022. 
@@ -282,7 +332,7 @@ Special thanks to
 
 *   Thomas Schlapp for the original development of this software.
 *   Jürgen Kehr for tests and other valuable information.
-*   Pascal Golay for tests and translation to french. 
+*   Pascal Golay for tests, discussions and translation to french. 
 
 ### License
 
