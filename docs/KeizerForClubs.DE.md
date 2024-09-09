@@ -173,6 +173,17 @@ denselben Spielern. Das kann für kleine Vereine lästig sein. Wenn der
 Wert nicht auf 0 gesetzt wird, sind die Farben der ersten Runde zufällig und eine 
 eine Zufallszahl zwischen 0 und dem Wert wird zum Rating jedes Spielers addiert oder subtrahiert, um die Erstrundenpaarungen zu bestimmen.
 
+#### Zufälliges Brett
+Im Schach ist es üblich, daß in Turnieren die stärksten Spieler an den vorderen Brettern spielen. Für das vor allem in Lettland und Estland gespielte Spiel Novuss (*Scheiben-Billard*) ist das nicht gut.
+
+Warum? 
+Beim Novus ist jeder Tisch ein wenig anders, weil er aus Holz ist. Beim Turnier sollen zufällige Tische vergeben werden, weil ein Spieler, wenn er zum zweiten Mal am selben Tisch spielt, den spezifischen Tisch kennt - so dass es wichtig ist, dass er beim nächsten Spiel an einem anderen Tisch spielt.
+
+Falls *Zufälliges Brett* angehakt ist, werden die Brett- bzw Tischnummern nach der Auslosung per Zufall vergeben. 
+
+
+
+
 #### Verhältnis Sieg gegen den Ersten zum Letzten
 
 Im Keizer-System gibt es für einen Sieg gegen den Erstplatzierten mehr

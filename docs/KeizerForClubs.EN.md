@@ -184,6 +184,13 @@ this value not to 0, the first round colours are random and a random
 number between 0 and the value is added or subtracted from each players
 rating for determining the first round pairings.
 
+#### Random board
+In chess, usually the strongest players play on the front boards in tournaments. This is not good for Novuss (*disc billiards*), a game played mainly in Latvia and Estonia.
+
+Why? With Novuss, every table is slightly different because it is made of wood. In the tournament, random tables should be assigned because when a player plays at the same table for the second time, he knows the specific table - so it is important that he plays at a different table in the next game.
+
+If *Random board* is checked, the board or table numbers will be randomly assigned.
+
 #### Ratio win against first to last
 
 In the Keizer system, a win against the first-ranked player gets more

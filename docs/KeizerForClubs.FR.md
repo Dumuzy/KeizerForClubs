@@ -100,14 +100,14 @@ Les valeurs en pourcentage peuvent être choisies dans l'onglet des paramètres.
 
 #### Bonus de difficulté
 
-Dans KeizerForClubs, vous pouvez obtenir une fraction de points pour avoir joué, même si vous perdez. Vous obtenez le bonus de difficulté multiplié par le nombre de Keizer-Rank-Points de votre adversaire si vous perdez une partie. Je recommande des valeurs de 2 à 5 %.  
+Dans KeizerForClubs, vous pouvez obtenir une fraction de points pour avoir joué, même si vous perdez. Vous obtenez le bonus de difficulté multiplié par le nombre de Keizer-Rank-Points de votre adversaire quand vous perdez une partie. Je recommande une valeur comprise entre 2 et 5 %.  
 
 *Raisonnement*
 
 1. Une défaite toujours égale à 0 semble un peu injuste, parce que si vous perdez contre le vainqueur du tournoi, cela signifie quelque chose de différent que si vous perdez contre le dernier du tournoi. 
 C'est pourquoi, dans le système suisse, il existe ce que l'on appelle en allemand *Buchholz*, en anglais *SOS* ou *sum of opponent scores*, en français *SPA* ou *somme des points des adversaires*. C'est la somme de tous les points de vos adversaires. Vous obtenez plus de *SPA* si vous avez perdu contre le vainqueur que si vous avez perdu contre le dernier. Le bonus de difficulté est l'équivalent pour KeizerForClubs de *Buchholz*, *SOS* ou *SPA*.
 
-2. Avec le système Keizer, les joueurs qui ne jouent pas peuvent obtenir un nombre considérable de points. Cela semble injuste pour ceux qui jouent et perdent, car les perdants obtiennent toujours zéro, alors que les évitants obtiennent toujours des points.
+2. Avec le système Keizer, les joueurs qui ne jouent pas peuvent obtenir un nombre considérable de points. Cela semble injuste pour ceux qui jouent et perdent, car les perdants obtiennent toujours zéro, alors que ceux qui feraient forfait dans le but par exemple d'éviter de jouer contre un joueur fort obtiendraient toujours des points.
 
 <br />
 
@@ -127,6 +127,13 @@ Si cette option n'est pas activée, le bye est toujours attribué au joueur le m
 #### Degré d'aléatoire pour la première ronde
 Dans le système Keizer, l'appariement de la première ronde est à chaque fois identique avec les mêmes joueurs au départ. Cela peut être gênant pour des tournois dans des petits clubs où ce sont toujours les mêmes joueurs qui jouent les tournois. Lorsque cette valeur est réglée sur un nombre différent de 0, l'attribution des couleurs lors de la première ronde devient aléatoire et un nombre aléatoire compris entre 0 et la valeur est ajouté ou soustrait du classement élo de chaque joueur pour déterminer les appariements de la première ronde.
 
+#### Table de jeu aléatoire
+Aux échecs, il est courant que, dans les tournois, les joueurs les plus forts jouent sur les premiers échiquiers. Pour le jeu Novuss (*billard à disques*), qui se joue surtout en Lettonie et en Estonie, ce n'est pas bon.
+
+Pourquoi ? Au Novuss, chaque table est un peu différente parce qu'elle est en bois. Lors d'un tournoi, les tables aléatoires doivent être attribuées parce que lorsqu'un joueur joue pour la deuxième fois à la même table, il connaît la table spécifique - il est donc important qu'il joue à une autre table lors de la prochaine partie.
+
+Si l'option *Table de jeu aléatoire* est cochée, les numéros de table seront attribués de manière aléatoire après le tirage au sort.
+
 #### Ratio du gain entre 1er et dernier
 
 Dans le système Keizer, une victoire contre le joueur classé premier du tournoi rapporte plus de points qu'une victoire contre les autres joueurs.
@@ -140,12 +147,7 @@ Si cette case est cochée, tous les points Keizer sont normalisés de sorte qu�
 dernier du classement compte pour 1 point Keizer. Cela ne change rien au calcul du classement ou 
 de l’appariement, mais cela rend les points Keizer beaucoup plus faciles à comprendre.
 
-(Dans le système Keizer original, les points Keizer attribués sont généralement de grands nombres entiers. 
-Cela a probablement été fait à l’origine dans le but de faciliter les calculs. 
-En effet, il est plus facile de calculer avec des nombres entiers si l’on n’a pas d’ordinateur.
-
-De nos jours cependant, tous les calculs sont effectués par ordinateur et nous pouvons par 
-conséquent utiliser des nombres beaucoup plus petits sous forme fractionnaire.)
+Dans le système Keizer original, les points Keizer attribués sont généralement de grands nombres entiers. Cela a probablement été fait à l’origine dans le but de faciliter les calculs. En effet, il est plus facile de calculer avec des nombres entiers si l’on n’a pas d’ordinateur. De nos jours cependant, tous les calculs sont effectués par ordinateur et nous pouvons par conséquent utiliser des nombres beaucoup plus petits sous forme fractionnaire.
 
 
 <br />
@@ -199,19 +201,17 @@ x;x;;xxx;Name;;Rating
 Ensuite, le séparateur est le point-virgule, les noms des joueurs sont dans la 5e colonne, les ratings des joueurs sont dans la 7e colonne. 
 
 #### Effacer tous
-Supprime tous les joueurs. Ceci est utile si vous voulez créer un tournoi B qui aura exactement les mêmes paramètres que le tournoi A précédent. 
-Dans ce cas, copiez A.s3db vers B.s3db, puis effacez toutes les rondes jouées, puis effacez tous les joueurs. 
+Supprime tous les joueurs. Cela est utile si vous voulez créer un tournoi B qui ait exactement les mêmes paramètres que le tournoi A précédent. 
+Dans ce cas, dupliquez A.s3db en B.s3db puis effacez toutes les rondes jouées puis effacez tous les joueurs. 
 Pour s'assurer que vous ne supprimez pas accidentellement votre tournoi actuel, la suppression de tous les joueurs n'est possible que s'il n'y a pas de parties dans la base de données.   
 
-#### Joueur Ids réattrribué
-Après avoir importé une liste de joueurs, par exemple les membres du club, puis supprimé les joueurs qui ne participent pas au tournoi, la liste des joueurs peut être 
-dans KeizerForClubs présente de nombreux trous dans l'ordre des numéros de joueurs. C'est un peu agaçant. 
-D'autant plus que l'Id de joueur le plus élevé ne permet pas de savoir combien de participants participent au tournoi.  
-Vous pouvez utiliser _Joueur Ids réattrribué_ pour supprimer les trous dans l'ordre des Id. Possible uniquement au début d'un tournoi. 
+#### Joueur Ids réattribué
+Après avoir importé une liste de joueurs, par exemple les membres du club, puis supprimé ceux qui ne participent pas au tournoi, la liste des joueurs peut comporter de nombreux trous dans l'ordre des numéros des joueurs dans KeizerForClubs. Cela est un peu ennuyeux. D'autant plus que vous ne pouvez dans ce cas-là plus déduire le nombre de participants du tournoi à partir de l'Id de joueur le plus élevé.
+Vous pouvez utiliser _Joueur Ids réattribué_ pour supprimer les trous dans l'ordre des Id. Cela est possible uniquement au début d'un tournoi. 
 
 <br/> 
 
-### Système Keizer et Système Suisse
+### Système Keizer et système Suisse
 
 #### Comparaison des systèmes d'appariement Keizer et Suisse
 
@@ -230,17 +230,15 @@ tr:nth-child(odd) {background-color: #f2f2f2;}
 <col span="1" style="width: 40%;">
 </colgroup>
 <tr><th>Propriété</th><th>Keizer</th><th>Suisse</th></tr>
-<tr><th>L'appariement </th><td>se fait généralement peu de temps avant que la manche ne soit jouée.</td><td>peut se faire des jours ou des semaines avant que la manche ne soit jouée.</td></tr>
-<tr><th>Les joueurs forts sont opposés les uns aux autres</th><td>dès le premier tour.</td><td>seulement plus tard.</td></tr>
-<tr><th>Le joueur n'a pas d'adversaire</th><td> Parce que l'appariement est fait peu de temps avant le tour, cela n'arrive pas souvent.</td><td>Peut arriver souvent.</td></tr>
-<tr><th>Points pour la victoire</th><td>Plus de points pour les victoires contre de meilleurs joueurs.</td><td>Un point pour chaque victoire, 
-  plus une évaluation fine comme *somme des points de l'adversaire* ou SPA.</td></tr>
-<tr><th>Points pour la défaite</th><td>Dans le Keizer original, juste zéro. Dans KeizerForClubs, il est possible d'attribuer un bonus de solidité.
-Cela remplace l'évaluation de l'amende SPA en Suisse. </td><td>Zéro, mais compte pour l'évaluation SPA fine.</td></tr>
-<tr><th>Gestion des couleurs </th><td>La couleur ne joue aucun rôle dans l'appariement.  Celui qui avait relativement moins de blanc obtient le blanc. En pratique, la différence avec la gestion suisse des couleurs est marginale.</td><td>Idéalement, chaque tour est différent pour chaque joueur, personne n'obtient jamais trois fois la même couleur à la suite.  Cette règle est appliquée lors de l'appariement. </td></tr>
-<tr><th>Les joueurs manquants</th><td> obtiennent généralement des fractions de points. </td><td> Un ou deux *bye-draws* sont souvent autorisés. </td></tr>
-<tr><th>Jeux contre des joueurs démissionnaires</th><td>Un traitement spécial est utilisé.</td><td>Les résultats peuvent être annulés pour une évaluation fine.</td></tr>
-<tr><th>Le même adversaire au tour suivant</th><td>peut être autorisé.</td><td>n'est jamais autorisé.</td></tr>
+<tr><th>L'appariement </th><td>se fait généralement peu de temps avant que la ronde soit jouée.</td><td>peut se faire des jours ou des semaines avant que la ronde soit jouée.</td></tr>
+<tr><th>Les joueurs forts s'affrontent entre eux</th><td>dès la première ronde.</td><td>seulement plus tard.</td></tr>
+<tr><th>Le joueur n'a pas d'adversaire</th><td>Parce que l'appariement est fait peu de temps avant le tour, cela n'arrive pas souvent.</td><td>Peut arriver souvent.</td></tr>
+<tr><th>Points pour la victoire</th><td>Plus de points pour les victoires contre les meilleurs joueurs.</td><td>Un point pour chaque victoire, plus une évaluation fine comme *somme des points de l'adversaire* ou SPA.</td></tr>
+<tr><th>Points pour la défaite</th><td>Dans le Keizer original, juste zéro. Dans KeizerForClubs, il est possible d'attribuer un bonus de difficulté. Cela remplace l'évaluation fine SPA en Suisse.</td><td>Zéro, mais compte pour l'évaluation fine SPA.</td></tr>
+<tr><th>Gestion des couleurs </th><td>La couleur ne joue aucun rôle dans l'appariement. Celui qui avait relativement moins les Blancs obtient les Blancs. En pratique, la différence avec la gestion suisse des couleurs est marginale.</td><td>Idéalement, les couleurs alternent à chaque ronde pour chaque joueur. Aucun joueur ne reçoit trois fois de suite la même couleur. Cette règle est appliquée lors de l'appariement.</td></tr>
+<tr><th>Les joueurs absents</th><td>obtiennent généralement des fractions de points.</td><td>Un ou deux *bye-draws* sont souvent autorisés.</td></tr>
+<tr><th>Parties contre des joueurs qui font forfait</th><td>Une gestion spécifique est utilisée.</td><td>Les résultats peuvent être omis pour le calcul de l'évaluation fine.</td></tr>
+<tr><th>Le même adversaire à la ronde suivante</th><td>peut être autorisé.</td><td>n'est jamais autorisé.</td></tr>
 <tr><th></th><td></td><td></td></tr>
 </table>
 
@@ -250,12 +248,11 @@ On peut imaginer de nombreux systèmes hybrides Keizer-Swiss différents. Avec K
 
 Par exemple :
 
-* Une victoire contre n'importe qui compte pour un point plus une évaluation fine. Similaire à Swiss.
-* Les couleurs sont gérées comme dans Keizer.
-* Les joueurs qui ne sont pas là peuvent obtenir des fractions de points comme à Keizer ou en Suisse avec les bye.
-* Les joueurs qui ont des parties contre des joueurs résignés obtiennent des points complets comme en Suisse.
-* En principe, un joueur peut jouer deux fois contre un autre, comme à Keizer - ou pas, comme en Suisse. Ceci peut être entièrement géré
-par le directeur du tournoi en augmentant le paramètre « # rounds rondes avant repet. » 
+* Une victoire contre n'importe quel joueur compte pour un point plus une évaluation fine. Similaire à Swiss.
+* Les couleurs sont gérées selon le système Keizer.
+* Les joueurs absents peuvent obtenir des fractions de points comme dans le système Keizer ou comme dans le système Suisse avec les byes.
+* Les joueurs qui ont joué des parties contre des joueurs qui se sont retirés obtiennent des points entiers comme dans le système Suisse.
+* En principe, un joueur peut jouer plusieurs fois contre un autre, comme dans le système Keizer, ou pas comme dans le système Suisse. Cela peut être entièrement défini par le directeur du tournoi en augmentant le paramètre « # rondes avant répét. ». 
 
 
 
