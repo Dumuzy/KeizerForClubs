@@ -148,6 +148,8 @@ Voreingestellt sind folgende Werte:
 1. Eine Niederlage, die immer 0 zählt, fühlt sich ein wenig unfair an, denn wenn man gegen den Turniersieger verliert, bedeutet das etwas anderes, als wenn man gegen den Letzten des Turniers verliert. 
 Deshalb gibt es im Schweizer System das, was man auf Deutsch *Buchholz* nennt, auf Englisch *SOS* oder *sum of opponent scores*, auf Französisch *SPA* oder *somme des points des adversaires*. Es ist die Summe aller Punkte der Gegner. Man bekommt mehr *Buchholz*, wenn man gegen den Sieger verloren hat, als wenn man gegen den Letzten verloren hat. Der Härtebonus ist das KeizerForClubs-Äquivalent zu *Buchholz*, *SOS* oder *SPA*.
 
+2. Mit dem Keizer-System können Spieler, die nicht spielen, eine beträchtliche Anzahl von Punkten erhalten. Es fühlt sich unfair gegenüber denjenigen an, die spielen und verlieren, dass die Verlierer die ganze Zeit null Punkte bekommen, aber die Vermeider immer noch Punkte bekommen.
+
 <br />
 
 ### Erklärung der Optionen
