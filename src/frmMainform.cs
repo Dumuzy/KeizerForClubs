@@ -84,6 +84,7 @@ namespace KeizerForClubs
 
         public frmMainform(string[] args)
         {
+            ExLogger.Instance.LogInfo("frmMainForm.kk 1.0");
             Args = args;
             CopyCfgDocsExport();
             InitializeComponent();
@@ -91,12 +92,16 @@ namespace KeizerForClubs
             donateButton1 = new DonateButton(btDonate1, ReadDonated(), () => numClicks, 50, () => true, 20);
             donateButton2 = new DonateButton(btDonate2, ReadDonated(), () => numClicks, 120, () => true, 20);
             IncNumClicks();
+            ExLogger.Instance.LogInfo("frmMainForm.kk 2.0");
         }
 
         protected override void OnLoad(EventArgs e)
         {
+            ExLogger.Instance.LogInfo($"frmMainForm.OnLoad 1.0");
             base.OnLoad(e);
+            ExLogger.Instance.LogInfo($"frmMainForm.OnLoad 1.1");
             RestoreWindowSettings();
+            ExLogger.Instance.LogInfo($"frmMainForm.OnLoad 2.0");
         }
 
         private void OpenStartTournamentToolStripMenuItemClick(object sender, EventArgs e)
@@ -110,6 +115,7 @@ namespace KeizerForClubs
 
         private void OpenTournament(string fileName)
         {
+            ExLogger.Instance.LogInfo($"frmMainForm.OpenTournament 1.0 file='{fileName}'");
             if (File.Exists(fileName))
                 db.OpenTournament(fileName);
             else
@@ -179,6 +185,7 @@ for determining the first round pairings.";
             // Haupt-Db. Weil die Config-Db eine an die Haupt-Db attached DB ist. 
             if (fileName != ReadDBFileName())
                 SaveDBFileName(fileName);
+            ExLogger.Instance.LogInfo($"frmMainForm.OpenTournament 2.0");
         }
 
         readonly IniFile inifile = new IniFile("cfg", "KFC2.ini");
@@ -512,6 +519,7 @@ for determining the first round pairings.";
 
         private void RestoreWindowSettings()
         {
+            ExLogger.Instance.LogInfo("RestoreWindowSettings 1.0");
             try
             {
                 var loc = new Point(db.GetConfigInt("WIN.locX"), db.GetConfigInt("WIN.locY"));
@@ -533,6 +541,7 @@ for determining the first round pairings.";
                         chkPairingOnlyPlayed.Location.Y);
             }
             catch (Exception) {  /* For first start - there'll be no saved values. */ }
+            ExLogger.Instance.LogInfo("RestoreWindowSettings 2.0");
         }
 
         private bool IsWindowPartVisible(Point loc, Size sz)
@@ -1206,10 +1215,12 @@ for determining the first round pairings.";
 
         private void CopyCfgDocsExport()
         {
+            ExLogger.Instance.LogInfo("frmMainForm.CopyCfgDocsExport 1.0");
             // This is only needed the first time after downloading KFC from Github, compiling and running.
             // A post-build step in C#. 
             foreach (var dir in cfgDocsExport)
                 CopyCdeDirectory(dir);
+            ExLogger.Instance.LogInfo("frmMainForm.CopyCfgDocsExport 2.0");
         }
 
         private void CopyCdeDirectory(string dir)

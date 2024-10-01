@@ -54,6 +54,8 @@ namespace KeizerForClubs
                         ExecTestDeleteAllRounds();
                     else if (parts[j] == "delete-round")
                         ExecTestDeleteRound();
+                    else if (parts[j] == "throw")
+                        throw new Exception("Test-Exception from test-csv.");
                 }
 
             sw.Stop();

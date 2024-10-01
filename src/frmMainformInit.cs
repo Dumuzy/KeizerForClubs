@@ -14,6 +14,7 @@ namespace KeizerForClubs
 
         private void InitializeComponent()
         {
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.0");
             tabMainWindow = new TabControl();
             this.tabPlayer = new TabPage();
             this.grdPlayers = new DataGridView();
@@ -37,6 +38,7 @@ namespace KeizerForClubs
             this.colPairingResult = new DataGridViewComboBoxColumn();
             this.tabSettings = new TabPage();
 
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.1");
             int xloc = 12;
             InitializeBonus(1, xloc, "Clubgame", ref lblBonusClub, ref tbBonusClub, ref lblBonusClubValue);
             InitializeBonus(2, xloc, "Excused", ref lblBonusExcused, ref tbBonusExcused, ref lblBonusExcusedValue);
@@ -44,6 +46,7 @@ namespace KeizerForClubs
             InitializeBonus(4, xloc, "Retired", ref lblBonusRetired, ref tbBonusRetired, ref lblBonusRetiredValue);
             InitializeBonus(5, xloc, "Freilos", ref lblBonusFreilos, ref tbBonusFreilos, ref lblBonusFreilosValue);
             InitializeBonus(6, xloc, "Verlust", ref lblBonusVerlust, ref tbBonusVerlust, ref lblBonusVerlustValue);
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.2");
 
             this.lblRoundsGameRepeat = new Label();
             this.lblRatioFirst2Last = new Label();
@@ -128,6 +131,7 @@ namespace KeizerForClubs
             this.tabPlayer.UseVisualStyleBackColor = true;
             this.tabPlayer.Leave += TabPlayerLeave;
 
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.3");
             this.grdPlayers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.grdPlayers.Columns.AddRange((DataGridViewColumn)this.colPlayerID, (DataGridViewColumn)this.colPlayerName, (DataGridViewColumn)this.colRating, (DataGridViewColumn)this.colPlayerState);
             this.grdPlayers.Dock = DockStyle.Fill;
@@ -241,6 +245,7 @@ namespace KeizerForClubs
             this.colPairingResult.HeaderText = "Result";
             this.colPairingResult.Name = "colPairingResult";
             this.colPairingResult.Width = 140;
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.4");
 
             this.tabSettings.Controls.Add(this.lblRoundsGameRepeat);
             this.tabSettings.Controls.Add(this.lblRatioFirst2Last);
@@ -299,6 +304,7 @@ namespace KeizerForClubs
             this.chkNovusRandomBoard.TabIndex = 9;
             this.chkNovusRandomBoard.UseVisualStyleBackColor = true;
             this.chkNovusRandomBoard.TextAlign = ContentAlignment.MiddleRight;
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.5");
 
 
             yOutput += 23;
@@ -424,6 +430,7 @@ Keizer points much more graspable.
 
             this.mnuPlayersRebaseIds.Size = new Size(218, 22);
             this.mnuPlayersRebaseIds.Click += new EventHandler(this.MnuPlayersRebaseIdsClickTa);
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.6");
 
             this.mnuPlayers.DropDownItems.AddRange(new ToolStripItem[]
                     { mnuPlayersImport, mnuPlayersDeleteAll, mnuPlayersRebaseIds});
@@ -524,6 +531,7 @@ Keizer points much more graspable.
             this.mnuMainmenu.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.7");
 
             try
             {
@@ -534,8 +542,10 @@ Keizer points much more graspable.
             }
             catch (Exception ex)
             {
+                ExLogger.Instance.LogException("frmMainForm.IniComp 1.8", ex);
                 MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
             }
+            ExLogger.Instance.LogInfo("frmMainForm.IniComp 2.0");
         }
 
         private void InitializeBonus(int num, int xloc, string name, ref Label lblText, ref TrackBar tb, ref Label lblValue)

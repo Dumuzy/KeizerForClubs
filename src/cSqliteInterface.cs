@@ -810,7 +810,10 @@ namespace KeizerForClubs
             {
                 m = Convert.ToInt16(sqlCommand.ExecuteScalar());
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                ExLogger.Instance.LogException(ex);
+            }
             return m;
         }
 
@@ -1283,7 +1286,10 @@ namespace KeizerForClubs
                             }
                         }
                 }
-                catch (Exception) { }
+                catch (Exception ex) 
+                {
+                    ExLogger.Instance.LogException(ex);
+                }
             }
             return table;
         }

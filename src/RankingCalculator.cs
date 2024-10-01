@@ -7,9 +7,11 @@ namespace KeizerForClubs
     {
         public RankingCalculator(SqliteInterface db, frmMainform mainform, bool shallUseReporting)
         {
+            ExLogger.Instance.LogInfo("RankingCalculator.kk 1.0");
             this.db = db;
             this.form = mainform;
             cReportingUnit = shallUseReporting ? new ReportingUnit("qwert", "qwert", db) : null;
+            ExLogger.Instance.LogInfo("RankingCalculator.kk 2.0");
         }
 
         /// <summary> Sets all KeizerPts of all games of all rounds to zero and recalculates all again. </summary>

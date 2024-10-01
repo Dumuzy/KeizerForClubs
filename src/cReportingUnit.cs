@@ -46,6 +46,7 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
+                ExLogger.Instance.LogException(ex);
                 MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
@@ -112,6 +113,7 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
+                ExLogger.Instance.LogException(ex);
                 MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
@@ -172,6 +174,7 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
+                ExLogger.Instance.LogException(ex);
                 MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
@@ -289,6 +292,7 @@ namespace KeizerForClubs
             }
             catch (Exception ex)
             {
+                ExLogger.Instance.LogException(ex);
                 int num = (int)MessageBox.Show(ex.Message, db.Locl_GetText("GUI_TEXT", "FehlerAufgetreten"), MessageBoxButtons.OK);
                 return false;
             }
