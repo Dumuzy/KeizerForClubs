@@ -36,7 +36,7 @@ namespace PuzzleKnocker
             var numClicks = getNumClicks();
             if (shallShowNow() && numClicks >= minNumClicksForShowing && !HasDonated())
             {
-                var colors = new Color[] { Color.FromArgb(192, 0, 0), Color.AliceBlue, Color.Black, 
+                var colors = new Color[] { Color.FromArgb(192, 0, 0), Color.AliceBlue, Color.Black,
                     Color.FromArgb(0, 192, 0), Color.CornflowerBlue, Color.MediumVioletRed, Color.DarkOrange };
                 btDonate.Visible = true;
                 var divisor = clicksTillColorChange * colors.Length;
@@ -56,7 +56,7 @@ namespace PuzzleKnocker
         bool HasDonated()
         {
             if (!hasDonated.HasValue)
-                hasDonated = !string.IsNullOrEmpty(iniDonated) && 
+                hasDonated = !string.IsNullOrEmpty(iniDonated) &&
                     GetMACAddresses().ContainsIgnoreCase(iniDonated);
             return hasDonated.Value;
         }
@@ -64,8 +64,19 @@ namespace PuzzleKnocker
         Li<string> GetMACAddresses()
         {
             Li<string> macAddresses = new Li<string>();
-            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
-                macAddresses.Add(nic.GetPhysicalAddress().ToString());
+            //foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            //    macAddresses.Add(nic.GetPhysicalAddress().ToString());
+            // 
+            // Getting the mac adresses might be the problem for the virus scanner programs. 
+            // And so maybe the reason for issues #13 and #82.
+            // I'll try it without them. And use the current (year*2+11) in hex instead. 
+            var currYear = Helper.ToInt(DateTime.Now.ToString("yyyy"));
+            for (int i = 2; i >= 0; --i)
+            {
+                int y = currYear - i;
+                var dateStr = (y * 2 + 11).ToString("X4");
+                macAddresses.Add(dateStr);
+            }
             return macAddresses;
         }
 
