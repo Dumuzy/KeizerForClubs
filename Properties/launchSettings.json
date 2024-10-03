@@ -2,7 +2,7 @@
   "profiles": {
     "KFC2": {
       "commandName": "Project",
-      "commandLineArgs": ""
+      "commandLineArgs": "-d"
     }
   }
 }

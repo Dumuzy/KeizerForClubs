@@ -9,7 +9,16 @@ namespace KeizerForClubs
         [STAThread]
         private static void Main(string[] args)
         {
-            ExLogger.Create(".", "KFC2", null, null, null);
+            if (args.Length > 0 && args[0] == "-d")
+            {
+                ExLogger.Create(".", "KFC2", null, null, null);
+                var largs = new Li<string>(args);
+                largs.RemoveAt(0);
+                args = largs.ToArray();
+            }
+            else
+                ExLogger.Create(null, null, null, null, null);
+
             if (!File.Exists(ExLogger.Instance.LogfilePath))
             {
                 ExLogger.Destroy();
