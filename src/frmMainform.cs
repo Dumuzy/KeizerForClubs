@@ -869,7 +869,9 @@ for determining the first round pairings.";
                 if (db.CntPlayersBoardGames(players[i].Id) == 0)
                 {
                     var cbcell = (DataGridViewComboBoxCell)grdPlayers.Rows[i].Cells[grdPlayersStateCol];
-                    cbcell.Items.Add(db.Locl_GetPlayerStateText(SqliteInterface.PlayerState.Deleted));
+                    var deleted = db.Locl_GetPlayerStateText(SqliteInterface.PlayerState.Deleted);
+                    if (!cbcell.Items.Contains(deleted))
+                        cbcell.Items.Add(deleted);
                 }
             }
         }
