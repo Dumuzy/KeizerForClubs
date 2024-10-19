@@ -53,9 +53,9 @@ namespace KeizerForClubs
             return true;
         }
 
-        TableW2Headers fReportPaarungenTable(int runde)
+        TableW3Headers fReportPaarungenTable(int runde)
         {
-            var t = new TableW2Headers(sTurnier, TableType.Paarungen, runde);
+            var t = new TableW3Headers(sTurnier, TableType.Paarungen, runde);
             t.Header2 = db.Locl_GetText("GUI_MENU", "Paarungen") + " " +
                 db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
             t.AddRow("Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis".Split().
@@ -97,7 +97,7 @@ namespace KeizerForClubs
         {
             try
             {
-                TableW2Headers table = runde != db.GetMaxRound() ?
+                TableW3Headers table = runde != db.GetMaxRound() ?
                     db.ReadTableWHeadersFromDb(TableType.Stand, runde) : fReportTabellenstandTable(false, flags);
                 if (runde != db.GetMaxRound())
                 {
@@ -140,7 +140,7 @@ namespace KeizerForClubs
             return true;
         }
 
-        void FilterStandingsTableForPlayersCategory(TableW2Headers table, string category, int runde)
+        void FilterStandingsTableForPlayersCategory(TableW3Headers table, string category, int runde)
         {
             var newRows = new Li<Li<string>>();
             var tcopy = table.DeepTClone();
@@ -158,7 +158,7 @@ namespace KeizerForClubs
                     table.AddRow(li);
                 }
             }
-            table.Header2 += $" <span>{GetLongCategory(category)}</span>";
+            table.Header3 = GetLongCategory(category);
         }
 
         string GetLongCategory(string abbrev)
@@ -169,9 +169,9 @@ namespace KeizerForClubs
             return value;
         }
 
-        TableW2Headers fReportTabellenstandTable(bool isWithPlayerId, ReportingFlags flags)
+        TableW3Headers fReportTabellenstandTable(bool isWithPlayerId, ReportingFlags flags)
         {
-            var t = new TableW2Headers(sTurnier, TableType.Stand, db.GetMaxRound());
+            var t = new TableW3Headers(sTurnier, TableType.Stand, db.GetMaxRound());
             string str2 = db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde;
             t.Header2 = (Ext.HasFlag(flags, ReportingFlags.Podium) ?
                             db.Locl_GetText("GUI_MENU", "Listen.Podium") :
@@ -210,7 +210,7 @@ namespace KeizerForClubs
         {
             try
             {
-                TableW2Headers tableVoll = runde != db.GetMaxRound() ?
+                TableW3Headers tableVoll = runde != db.GetMaxRound() ?
                         db.ReadTableWHeadersFromDb(TableType.Kreuz, runde) : fReportTabellenstandVollTable();
 
                 var fileBaseVoll = GetFileTabellenstandExBasename(runde);
@@ -236,9 +236,9 @@ namespace KeizerForClubs
         private string GetFileTabellenstandExBasename(int runde) =>
              Basename + "_" + db.Locl_GetText("GUI_MENU", "Listen.Calc") + "Ex-" + runde;
 
-        TableW2Headers fReportTabellenstandVollTable()
+        TableW3Headers fReportTabellenstandVollTable()
         {
-            var t = new TableW2Headers(sTurnier, TableType.Kreuz, db.GetMaxRound());
+            var t = new TableW3Headers(sTurnier, TableType.Kreuz, db.GetMaxRound());
             SqliteInterface.stPairing[] pList4 = new SqliteInterface.stPairing[1];
             var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", t.Runde);
 
@@ -329,7 +329,7 @@ namespace KeizerForClubs
         {
             try
             {
-                TableW2Headers table = fReportTeilnehmerTable(runde);
+                TableW3Headers table = fReportTeilnehmerTable(runde);
 
                 var fileBase = GetTeilnehmerBasename(db, runde);
                 if (db.GetConfigBool("OPTION.Xml"))
@@ -352,9 +352,9 @@ namespace KeizerForClubs
         }
 
 
-        TableW2Headers fReportTeilnehmerTable(int runde)
+        TableW3Headers fReportTeilnehmerTable(int runde)
         {
-            var t = new TableW2Headers(sTurnier, TableType.Spieler, db.GetMaxRound());
+            var t = new TableW3Headers(sTurnier, TableType.Spieler, db.GetMaxRound());
             t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
                 db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde;
 
@@ -374,9 +374,9 @@ namespace KeizerForClubs
             return t;
         }
 
-        TableW2Headers fReportTeilnehmerTableOld(SqliteInterface sqlintf)
+        TableW3Headers fReportTeilnehmerTableOld(SqliteInterface sqlintf)
         {
-            var t = new TableW2Headers(sTurnier, TableType.Spieler, db.GetMaxRound());
+            var t = new TableW3Headers(sTurnier, TableType.Spieler, db.GetMaxRound());
             t.Header2 = sqlintf.Locl_GetText("GUI_MENU", "Listen.Teilnehmer") + " " +
                 db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde;
 

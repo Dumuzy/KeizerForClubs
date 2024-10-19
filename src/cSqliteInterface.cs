@@ -1273,7 +1273,7 @@ namespace KeizerForClubs
         #region Tabelle
         const string tableSplitter = "§";
 
-        public void WriteTableWHeaders2Db(TableType tt, int runde, TableW2Headers table)
+        public void WriteTableWHeaders2Db(TableType tt, int runde, TableW3Headers table)
         {
             var tn = TabWHName(tt, runde);
             var sql = new Li<string>();
@@ -1291,10 +1291,10 @@ namespace KeizerForClubs
             sqlCommand.ExecuteNonQuery();
         }
 
-        public TableW2Headers ReadTableWHeadersFromDb(TableType tt, int runde)
+        public TableW3Headers ReadTableWHeadersFromDb(TableType tt, int runde)
         {
             var tn = TabWHName(tt, runde);
-            var table = new TableW2Headers("", tt, runde);
+            var table = new TableW3Headers("", tt, runde);
             if (runde > 0)
             {
                 sqlCommand.CommandText = $"SELECT line FROM {tn} ORDER BY id;";

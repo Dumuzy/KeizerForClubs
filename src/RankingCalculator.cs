@@ -128,9 +128,9 @@ namespace KeizerForClubs
             return nkStellen;
         }
 
-        TableW2Headers GetTableDbCacheForRound(int runde)
+        TableW3Headers GetTableDbCacheForRound(int runde)
         {
-            TableW2Headers table = runde != db.GetMaxRound() ?
+            TableW3Headers table = runde != db.GetMaxRound() ?
                 db.ReadTableWHeadersFromDb(TableType.Stand, runde) : null;
             return table;
         }
@@ -138,7 +138,7 @@ namespace KeizerForClubs
         /// <summary> Gibt T zurück, falls das ging, F andernfalls. Setzt Rank, KeizerStartPts und KeizerSumPts
         /// in die Player-Liste der DB, falls aus DB-Cache ermittelbar. </summary>
         /// <param name="runde">Stand nach dieser Runde gewünscht, 1-basiert. </param>
-        bool AllPlayersSetRankAndStartPtsFromDbCacheTa(int runde, TableW2Headers table)
+        bool AllPlayersSetRankAndStartPtsFromDbCacheTa(int runde, TableW3Headers table)
         {
             if (table == null || table.Count == 0)
                 table = GetTableDbCacheForRound(runde);

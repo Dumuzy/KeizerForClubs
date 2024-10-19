@@ -185,7 +185,6 @@ Falls *Zufälliges Brett* angehakt ist, werden die Brett- bzw Tischnummern nach d
 
 
 
-
 #### Verhältnis Sieg gegen den Ersten zum Letzten
 
 Im Keizer-System gibt es für einen Sieg gegen den Erstplatzierten mehr
@@ -194,6 +193,7 @@ Punkte als für einen Sieg gegen die anderen Spieler.
 Dieser Wert ist gleich dem Verhältnis der Punkte, die Sie für einen Sieg gegen den Erstplatzierten erhalten würden geteilt durch die Punkte, die man für einen Sieg gegen den letztplatzierten Spieler erhalten würde.
 Je niedriger dieser Wert ist, desto näher sind sich das Keizer-System und das Schweizer System. Drei ist der Standardwert. Je höher die Zahl ist, desto mehr bleiben die besseren Spieler unter sich. Ich empfehle niedrigere Werte für Turniere mit
 weniger als 20 Spielern. 
+
 
 #### Sieg-Normalisierung
 
@@ -211,6 +211,24 @@ Heutzutage werden alle Berechnungen vom Computer durchgeführt, und so können wir
 kleinere, aber gebrochene Zahlen verwenden.)
 
 
+#### Kategorien
+
+Stellen sie sich vor, sie haben ein Turnier, bei dem sie getrennte Wertungstabellen für verschiedene 
+Kategorien von Spielern, z. B. Jugendliche oder Spieler unter 1500 haben wollen. In diesem Fall 
+können Sie die Option Kategorien verwenden. Hier müssen Sie Ihre Kategorien zusammen mit 
+einer Abkürzung für jede Kategorie definieren. 
+Angenommen, Sie möchten die Kategorien "Rating < 1500" und "Frauen" haben.
+Dann könnten Sie diese Kategorien und ihre Abkürzungen hier wie folgt definieren
+```
+r15=Bewertung < 1500, f=Frauen
+``` 
+Sie müssen hier Kommas verwenden, um verschiedene Kategorien zu trennen, und sie müssen das Gleichheitszeichen 
+verwenden, um die Abkürzung vom vollständigen Kategorienamen zu trennen. 
+Die Abkürzungen werden in der Spielertabelle verwendet, um einem Spieler eine 
+oder mehrere Kategorien zuzuordnen. Außerdem werden die Abkürzungen in den Dateinamen 
+für die Berichte verwendet. Die vollständigen Kategorienamen werden in der Kopfzeile der Berichte 
+verwendet. Die Abkürzungen dürfen keine Leerzeichen, Kommas oder andere Sonderzeichen enthalten. 
+Nur a-z, A-Z und 0-9 sind erlaubt. 
 
 <br />
 

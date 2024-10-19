@@ -218,6 +218,20 @@ It's easier to calculate with whole numbers if you don't have a computer.
 Nowadays, all the calculation is done by the computer and so we can use much 
 smaller but broken numbers.) 
 
+#### Categories
+Imagine you've got a tournament where you want to have separate standings tables for different 
+categories of players, e.g. youngsters or below rating 1500. In this case, you can use the 
+categories option. Here you have to define your categories together with an abbreviation for 
+every category. Say you want to have the categories "Rating < 1500" and "Female".
+Then you could define these categories and their abbreviations here as
+```
+r15=Rating < 1500, f=Females
+``` 
+You must use commas here to separate different categories and you must use the equality sign to separate
+abbreviation from full category name. The abbreviations shall be used in the players table to assign one 
+or more categories to a player. Also the abbreviations are used in the filenames for the reports. 
+The full category names are used in the header of the reports. The abbreviations must not contain any
+spaces or commas or other special characters. Only a-z, A-Z and 0-9 are allowed. 
 
 <br />
 
@@ -227,7 +241,8 @@ selected on the _Settings_ tab.
 
 #### Html Output
 The html output consists of general css which is the same for every table and html which contains the real data. 
-The css is taken from the file _export/keizer.css_. You can change the css to match your own needs if you want to. 
+The css is taken from the file _export/keizer.css_ which should stay untouched. 
+You can change the user.css to match your own needs if you want to. 
 
 The data tables get the following tags, where the stuff in _{}_ is replaced by real data:
 ```

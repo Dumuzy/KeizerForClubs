@@ -9,20 +9,22 @@ using KeizerForClubs;
 namespace AwiUtils
 {
     [Flags]
-    public enum ReportingFlags { None, 
+    public enum ReportingFlags
+    {
+        None,
         Ex, // Kreuztabelle statt normalem Tabellenstand 
         Podium, // Podiumstablle statt normalem Tabellenstand 
     }
 
     public class ReportingBase
     {
-        public string ExportAsTxt(TableW2Headers t, string fileBase, int[] paddings)
+        public string ExportAsTxt(TableW3Headers t, string fileBase, int[] paddings)
         {
             string fileName = fileBase + ".txt";
             using (var swExport = new StreamWriter(fileName))
             {
                 swExport.WriteLine(t.Header1);
-                swExport.WriteLine(t.Header2);
+                swExport.WriteLine(t.Header2 + t.Header3IfThere);
                 swExport.WriteLine(" ");
                 for (int i = 0; i < t.Count; ++i)
                 {
@@ -46,7 +48,7 @@ namespace AwiUtils
             return fileName;
         }
 
-        public string ExportAsCsv(TableW2Headers t, string fileBase)
+        public string ExportAsCsv(TableW3Headers t, string fileBase)
         {
             var sb = ToStringBuilderAsCsv(t);
             string fileName = fileBase + ".csv";
@@ -54,11 +56,11 @@ namespace AwiUtils
             return fileName;
         }
 
-        public StringBuilder ToStringBuilderAsCsv(TableW2Headers t)
+        public StringBuilder ToStringBuilderAsCsv(TableW3Headers t)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(t.Header1);
-            sb.AppendLine(t.Header2);
+            sb.AppendLine(t.Header2 + t.Header3IfThere);
             sb.AppendLine("");
             for (int i = 0; i < t.Count; ++i)
             {
@@ -70,7 +72,7 @@ namespace AwiUtils
             return sb;
         }
 
-        public string ExportAsHtml(TableW2Headers t, string fileBase,
+        public string ExportAsHtml(TableW3Headers t, string fileBase,
             ReportingFlags flags = ReportingFlags.None,
             IList<string> headerTitles = null)
         {
@@ -79,7 +81,8 @@ namespace AwiUtils
             {
                 AddHtmlHeader(swExport, t, flags);
                 swExport.WriteLine($"<h1 class='kfc-h1'><span>{t.Header1}</span></h1>");
-                swExport.WriteLine($"<h2 class='kfc-h2'><span>{t.Header2}</span></h2>");
+                swExport.WriteLine($"<h2 class='kfc-h2'><span class='kfc-h2-s1'>{t.Header2}</span>" +
+                        (string.IsNullOrEmpty(t.Header3) ? "</h2>" : " " + $" <span class='kfc-h2-s2'>{t.Header3}</span></h2>"));
                 swExport.WriteLine("<table>");
                 swExport.WriteLine("<colgroup>");
                 for (int i = 0; i < t.ColsCount; ++i)
@@ -107,7 +110,7 @@ namespace AwiUtils
             return fileName;
         }
 
-        public string ExportAsXml(TableW2Headers t, string fileBase, string toplevelName,
+        public string ExportAsXml(TableW3Headers t, string fileBase, string toplevelName,
                 string rowName, IList<string> tdnames)
         {
             var fileName = fileBase + ".xml";
@@ -118,7 +121,7 @@ namespace AwiUtils
                 swExport.WriteLine($"<{toplevelName}>");
                 swExport.WriteLine("<export>");
                 swExport.WriteLine($"<tournament>{t.Header1}</tournament>");
-                swExport.WriteLine($"<title>{t.Header2}</title>");
+                swExport.WriteLine($"<title>{t.Header2 + t.Header3IfThere}</title>");
                 for (int i = 0; i < t.Count; ++i)
                 {
                     swExport.Write($"<{rowName}>");
@@ -184,14 +187,14 @@ namespace AwiUtils
         static readonly Dictionary<string, string> TableType2Id = Helper.ToDictionary(@"None none 
             Stand stand Kreuz cross Spieler player Paarungen pairs");
 
-        protected string GetHtmlId(TableW2Headers t)
+        protected string GetHtmlId(TableW3Headers t)
         {
             var tt = TableType2Id[t.TableType.ToString()];
             var s = RemoveProblematicChars($"kfc-{t.Header1}-{tt}-{t.Runde}");
             return s;
         }
 
-        protected void AddHtmlHeader(StreamWriter sw, TableW2Headers t,
+        protected void AddHtmlHeader(StreamWriter sw, TableW3Headers t,
             ReportingFlags flags = ReportingFlags.None)
         {
             var ex = Ext.HasFlag(flags, ReportingFlags.Ex) ? "ex" : "";
@@ -222,15 +225,16 @@ namespace AwiUtils
         public Li<string> this[int i] { get; }
     }
 
-    public class TableW2Headers : ISimpleTable
+    public class TableW3Headers : ISimpleTable
     {
-        public TableW2Headers(string header1, TableType tt, int runde)
+        public TableW3Headers(string header1, TableType tt, int runde)
         {
             Header1 = header1;
             TableType = tt;
             Runde = runde;
         }
-        public string Header1, Header2;
+        public string Header1, Header2, Header3;
+        public string Header3IfThere => string.IsNullOrEmpty(Header3) ? "" : " " + Header3;
         public readonly TableType TableType;
         public readonly int Runde;
         public Li<string> Footer;

@@ -202,6 +202,23 @@ the caclculations easier. It’s easier to calculate with whole numbers if
 you don’t have a computer.</p>
 <p>Nowadays, all the calculation is done by the computer and so we can
 use much smaller but broken numbers.)</p>
+<h4 id="categories">Categories</h4>
+<p>Imagine you’ve got a tournament where you want to have separate
+standings tables for different categories of players, e.g. youngsters or
+below rating 1500. In this case, you can use the categories option. Here
+you have to define your categories together with an abbreviation for
+every category. Say you want to have the categories “Rating &lt; 1500”
+and “Female”. Then you could define these categories and their
+abbreviations here as</p>
+<pre><code>r15=Rating &lt; 1500, f=Females</code></pre>
+<p>You must use commas here to separate different categories and you
+must use the equality sign to separate abbreviation from full category
+name. The abbreviations shall be used in the players table to assign one
+or more categories to a player. Also the abbreviations are used in the
+filenames for the reports. The full category names are used in the
+header of the reports. The abbreviations must not contain any spaces or
+commas or other special characters. Only a-z, A-Z and 0-9 are
+allowed.</p>
 <p><br /></p>
 <h3 id="lists-menu">Lists menu</h3>
 <p>By selecting an entry in the lists menu, output lists will be
@@ -210,8 +227,8 @@ generated can be selected on the <em>Settings</em> tab.</p>
 <h4 id="html-output">Html Output</h4>
 <p>The html output consists of general css which is the same for every
 table and html which contains the real data. The css is taken from the
-file <em>export/keizer.css</em>. You can change the css to match your
-own needs if you want to.</p>
+file <em>export/keizer.css</em> which should stay untouched. You can
+change the user.css to match your own needs if you want to.</p>
 <p>The data tables get the following tags, where the stuff in
 <em>{}</em> is replaced by real data:</p>
 <pre><code>id=&#39;kfc-{tournament name}-{table type}-{current round}&#39;

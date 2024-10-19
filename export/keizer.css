@@ -41,6 +41,7 @@ th {
   width: clamp(350px, 80%, 700px);
 }
 
+.kfc-h2-s2 { font-size: 80%; }
 
 .kfc-exwrapper-01 { font-size: 12pt; }
 .kfc-exwrapper-02 { font-size: 12pt; }
