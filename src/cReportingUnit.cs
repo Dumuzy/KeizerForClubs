@@ -78,15 +78,17 @@ namespace KeizerForClubs
         #endregion Paarungen 
 
         #region Tabellenstand
-        private string GetFileTabellenstandBasename(int runde) =>
-            Basename + "_" + db.Locl_GetText("GUI_MENU", "Listen.Calc") + "-" + runde;
+        private string GetFileTabellenstandBasename(int runde, ReportingFlags flags) =>
+            Basename + "_" + (
+                Ext.HasFlag(flags, ReportingFlags.Podium) ? db.Locl_GetText("GUI_MENU", "Listen.Podium") 
+                            : db.Locl_GetText("GUI_MENU", "Listen.Calc") ) + "-" + runde;
 
-        public bool fReport_Tabellenstand(int runde)
+        public bool fReport_Tabellenstand(int runde, ReportingFlags flags = ReportingFlags.None)
         {
             try
             {
                 TableW2Headers table = runde != db.GetMaxRound() ?
-                    db.ReadTableWHeadersFromDb(TableType.Stand, runde) : fReportTabellenstandTable(false);
+                    db.ReadTableWHeadersFromDb(TableType.Stand, runde) : fReportTabellenstandTable(false, flags);
                 if (runde != db.GetMaxRound())
                 {
                     // The playerIdIdx is only in the table to be used for fast calculation. Therefore, 
@@ -97,7 +99,13 @@ namespace KeizerForClubs
                     if (playerIdIdx != -1)
                         table.RemoveColAt(playerIdIdx);
                 }
-                var fileBase = GetFileTabellenstandBasename(runde);
+
+                if (Ext.HasFlag(flags, ReportingFlags.Podium))
+                    while (table.Count > 4)
+                        table.RemoveRowAt(table.Count - 1);
+
+
+                var fileBase = GetFileTabellenstandBasename(runde, flags);
 
                 if (db.GetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
@@ -105,7 +113,7 @@ namespace KeizerForClubs
                     ExportAsCsv(table, fileBase);
                 if (db.GetConfigBool("OPTION.Html"))
                 {
-                    var file = ExportAsHtml(table, fileBase);
+                    var file = ExportAsHtml(table, fileBase, flags);
                     frmMainform.OpenWithDefaultApp(file);
                 }
                 if (db.GetConfigBool("OPTION.Txt"))
@@ -120,11 +128,14 @@ namespace KeizerForClubs
             return true;
         }
 
-        TableW2Headers fReportTabellenstandTable(bool isWithPlayerId)
+        TableW2Headers fReportTabellenstandTable(bool isWithPlayerId, ReportingFlags flags)
         {
             var t = new TableW2Headers(sTurnier, TableType.Stand, db.GetMaxRound());
             string str2 = db.Locl_GetText("GUI_LABEL", "Runde") + " " + t.Runde;
-            t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.Calc") + " " + str2;
+            t.Header2 = (Ext.HasFlag(flags, ReportingFlags.Podium) ?
+                            db.Locl_GetText("GUI_MENU", "Listen.Podium") :
+                            db.Locl_GetText("GUI_MENU", "Listen.Calc"))
+                        + " " + str2;
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
             var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc ", t.Runde);
             var lih = new Li<string>(new string[] { "", db.Locl_GetText("GUI_TEXT", "Name"),
@@ -167,7 +178,7 @@ namespace KeizerForClubs
                     ExportAsCsv(tableVoll, fileBaseVoll);
                 if (db.GetConfigBool("OPTION.Html"))
                 {
-                    var file = ExportAsHtml(tableVoll, fileBaseVoll, true,
+                    var file = ExportAsHtml(tableVoll, fileBaseVoll, ReportingFlags.Ex,
                         $",,Keizer rank points before round {runde}.,Keizer sum points after round {runde}.".Split(','));
                     frmMainform.OpenWithDefaultApp(file);
                 }
@@ -353,7 +364,7 @@ namespace KeizerForClubs
             int maxRound = db.GetMaxRound();
             if (maxRound > 0)
             {
-                db.WriteTableWHeaders2Db(TableType.Stand, maxRound, fReportTabellenstandTable(true));
+                db.WriteTableWHeaders2Db(TableType.Stand, maxRound, fReportTabellenstandTable(true, ReportingFlags.None));
                 db.WriteTableWHeaders2Db(TableType.Kreuz, maxRound, fReportTabellenstandVollTable());
             }
         }

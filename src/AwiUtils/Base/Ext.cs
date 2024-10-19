@@ -150,6 +150,12 @@ namespace AwiUtils
             return (flags & flag) == flag;
         }
 
+
+        public static bool HasFlag(object flags, object flag)
+        {
+            return ((int)flags & (int)flag) == (int)flag;
+        }
+
         // erst ab C# 7.3 erlaubt. 
         //public static bool HasFlag<T>(T flags, T flag) where T : System.Enum
         //{

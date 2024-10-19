@@ -1142,6 +1142,11 @@ namespace KeizerForClubs
                 sqlCommand.Parameters.AddWithValue("pKey", (object)key);
                 sqlCommand.Prepare();
                 s = Convert.ToString(sqlCommand.ExecuteScalar());
+                if (string.IsNullOrEmpty(s))
+                {
+                    sqlCommand.Parameters.AddWithValue("pCode", "EN");
+                    s = Convert.ToString(sqlCommand.ExecuteScalar());
+                }
             }
             catch (Exception)
             {
@@ -1286,7 +1291,7 @@ namespace KeizerForClubs
                             }
                         }
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     ExLogger.Instance.LogException(ex);
                 }

@@ -8,6 +8,12 @@ using KeizerForClubs;
 
 namespace AwiUtils
 {
+    [Flags]
+    public enum ReportingFlags { None, 
+        Ex, // Kreuztabelle statt normalem Tabellenstand 
+        Podium, // Podiumstablle statt normalem Tabellenstand 
+    }
+
     public class ReportingBase
     {
         public string ExportAsTxt(TableW2Headers t, string fileBase, int[] paddings)
@@ -64,21 +70,27 @@ namespace AwiUtils
             return sb;
         }
 
-        public string ExportAsHtml(TableW2Headers t, string fileBase, bool isExWrapper = false, 
+        public string ExportAsHtml(TableW2Headers t, string fileBase,
+            ReportingFlags flags = ReportingFlags.None,
             IList<string> headerTitles = null)
         {
             string fileName = fileBase + ".html";
             using (var swExport = new StreamWriter(fileName))
             {
-                AddHtmlHeader(swExport, t, isExWrapper);
-                swExport.WriteLine($"<h1>{t.Header1}</h1>");
-                swExport.WriteLine($"<h2>{t.Header2}</h2>");
+                AddHtmlHeader(swExport, t, flags);
+                swExport.WriteLine($"<h1 class='kfc-h1'><span>{t.Header1}</span></h1>");
+                swExport.WriteLine($"<h2 class='kfc-h2'><span>{t.Header2}</span></h2>");
                 swExport.WriteLine("<table>");
+                swExport.WriteLine("<colgroup>");
+                for (int i = 0; i < t.ColsCount; ++i)
+                    swExport.Write($"<col class='kfc-col{i + 1}' />");
+                swExport.WriteLine("</colgroup>");
                 for (int i = 0; i < t.Count; ++i)
                 {
                     var row = t[i];
-                    swExport.Write("<tr>");
-                    for(int j = 0; j < row.Count; ++j)
+                    var n = i > 3 ? "n" : i.ToString();
+                    swExport.Write($"<tr class='kfc-place-{n}'>");
+                    for (int j = 0; j < row.Count; ++j)
                     {
                         var td = "<td>";
                         if (i == 0 && headerTitles != null && headerTitles.Count > j && headerTitles[j] != "")
@@ -130,11 +142,42 @@ namespace AwiUtils
 
         private string GetCss()
         {
-            if (css == null)
-                css = File.ReadAllText("export/keizer.css");
-            return css;
+            var fn = "export/keizer.css";
+            if (File.Exists(fn))
+                if (css == null || cssDateTime < File.GetLastWriteTime(fn))
+                {
+                    css = File.ReadAllText(fn);
+                    cssDateTime = File.GetLastWriteTime(fn);
+                }
+            return css ?? "";
         }
-        static string css = null;
+
+        private string GetPodiumCss()
+        {
+            var fn = "export/podium.css";
+            if (File.Exists(fn))
+                if (podiumCss == null || podiumCssDateTime < File.GetLastWriteTime(fn))
+                {
+                    podiumCss = File.ReadAllText(fn);
+                    podiumCssDateTime = File.GetLastWriteTime(fn);
+                }
+            return podiumCss ?? "";
+        }
+
+        private string GetUserCss()
+        {
+            var fn = "export/user.css";
+            if (File.Exists(fn))
+                if (userCss == null || userCssDateTime < File.GetLastWriteTime(fn))
+                {
+                    userCss = File.ReadAllText(fn);
+                    userCssDateTime = File.GetLastWriteTime(fn);
+                }
+            return userCss ?? "";
+        }
+
+        static string css = null, podiumCss = null, userCss = null;
+        static DateTime cssDateTime = new DateTime(), podiumCssDateTime = new DateTime(), userCssDateTime = new DateTime();
 
         protected string RemoveProblematicChars(string s) => Regex.Replace(s, "[^-_A-Za-z0-9]", "");
 
@@ -148,14 +191,18 @@ namespace AwiUtils
             return s;
         }
 
-        protected void AddHtmlHeader(StreamWriter sw, TableW2Headers t, bool isEx = false)
+        protected void AddHtmlHeader(StreamWriter sw, TableW2Headers t,
+            ReportingFlags flags = ReportingFlags.None)
         {
-            var ex = isEx ? "ex" : "";
+            var ex = Ext.HasFlag(flags, ReportingFlags.Ex) ? "ex" : "";
+            var podium = Ext.HasFlag(flags, ReportingFlags.Podium) ? GetPodiumCss() : "";
 
             sw.WriteLine($@"
 <!DOCTYPE html><html><head><meta charset='UTF-8'>
 <style>
 {GetCss()}
+{podium}
+{GetUserCss()}
 </style></head>
 <body>
 
@@ -177,7 +224,8 @@ namespace AwiUtils
 
     public class TableW2Headers : ISimpleTable
     {
-        public TableW2Headers(string header1, TableType  tt, int runde) {
+        public TableW2Headers(string header1, TableType tt, int runde)
+        {
             Header1 = header1;
             TableType = tt;
             Runde = runde;
@@ -193,6 +241,7 @@ namespace AwiUtils
                 foreach (var li in rows)
                     li.RemoveAt(idx);
         }
+        public void RemoveRowAt(int row) => rows.RemoveAt(row);
         public int Count => rows.Count;
         public Li<string> this[int i] { get { return rows[i]; } }
         public int ColsCount => rows.FirstOrDefault()?.Count ?? 0;

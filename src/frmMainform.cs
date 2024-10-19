@@ -561,6 +561,7 @@ for determining the first round pairings.";
             ru.fReport_Tabellenstand(SelectedRound);
             ru.fReport_TabellenstandVoll(SelectedRound);
             ru.fReport_Teilnehmer(SelectedRound);
+            ru.fReport_Tabellenstand(SelectedRound, ReportingFlags.Podium);
         }
         private void RecalcIfNeeded()
         {
