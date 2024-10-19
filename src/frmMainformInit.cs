@@ -20,6 +20,7 @@ namespace KeizerForClubs
             this.grdPlayers = new DataGridView();
             this.colPlayerID = new DataGridViewTextBoxColumn();
             this.colPlayerName = new DataGridViewTextBoxColumn();
+            this.colPlayerCategories = new DataGridViewTextBoxColumn();
             this.colRating = new DataGridViewTextBoxColumn();
             this.colPlayerState = new DataGridViewComboBoxColumn();
             this.tabPairings = new TabPage();
@@ -54,6 +55,8 @@ namespace KeizerForClubs
             this.lblOutputTo = new Label();
             this.lblNiceName = new Label();
             this.tbNiceName = new TextBox();
+            this.lblCategories = new Label();
+            this.tbCategories = new TextBox();
             this.numRoundsGameRepeat = new NumericUpDown();
             this.ddlRatioFirst2Last = new ComboBox();
             this.ddlFirstRoundRandom = new ComboBox();
@@ -87,6 +90,7 @@ namespace KeizerForClubs
             this.mnuPaarungDropLast = new ToolStripMenuItem();
             this.mnuListen = new ToolStripMenuItem();
             this.mnuListenPairing = new ToolStripMenuItem();
+            this.mnuListenPodium = new ToolStripMenuItem();
             this.mnuListenAll = new ToolStripMenuItem();
             this.mnuListenStanding = new ToolStripMenuItem();
             this.mnuListenStandingFull = new ToolStripMenuItem();
@@ -133,7 +137,7 @@ namespace KeizerForClubs
 
             ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.3");
             this.grdPlayers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.grdPlayers.Columns.AddRange((DataGridViewColumn)this.colPlayerID, (DataGridViewColumn)this.colPlayerName, (DataGridViewColumn)this.colRating, (DataGridViewColumn)this.colPlayerState);
+            this.grdPlayers.Columns.AddRange(colPlayerID, colPlayerName, colRating, colPlayerCategories, colPlayerState);
             this.grdPlayers.Dock = DockStyle.Fill;
             this.grdPlayers.Location = new Point(3, 3);
             this.grdPlayers.Name = "grdPlayers";
@@ -150,6 +154,7 @@ namespace KeizerForClubs
             this.colPlayerName.HeaderText = "Name";
             this.colPlayerName.Name = "colPlayerName";
             this.colPlayerName.Width = 200;
+            this.colPlayerCategories.Width = 30;
             this.colRating.HeaderText = "Rating";
             this.colRating.Name = "colRating";
             this.colPlayerState.HeaderText = "State";
@@ -262,8 +267,7 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add(this.chkCsv);
             this.tabSettings.Controls.Add(this.chkWickerNormalization);
             this.tabSettings.Controls.Add(this.lblOutputTo);
-            this.tabSettings.Controls.Add(this.lblNiceName);
-            this.tabSettings.Controls.Add(this.tbNiceName);
+            this.tabSettings.Controls.AddRange(new Control[] { lblNiceName, tbNiceName, lblCategories, tbCategories });
 
             this.tabSettings.Location = new Point(4, 4);
             this.tabSettings.Name = "tabSettings";
@@ -306,8 +310,9 @@ namespace KeizerForClubs
             this.chkNovusRandomBoard.TextAlign = ContentAlignment.MiddleRight;
             ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.5");
 
+            int dy = 23;
 
-            yOutput += 23;
+            yOutput += dy;
             this.lblRoundsGameRepeat.Location = new Point(xloc - 5, yOutput);
             this.lblRoundsGameRepeat.Size = new Size(159, 23);
             this.lblRoundsGameRepeat.TabIndex = 10;
@@ -327,7 +332,7 @@ namespace KeizerForClubs
             this.ddlRatioFirst2Last.DataSource = list;
 
 
-            yOutput += 23;
+            yOutput += dy;
             this.lblOutputTo.Location = new Point(xloc, yOutput);
             this.lblOutputTo.Size = new Size(154, 23);
             this.lblOutputTo.TextAlign = ContentAlignment.MiddleRight;
@@ -384,12 +389,20 @@ Keizer points much more graspable.
             this.tooltip.SetToolTip(chkWickerNormalization, ttwn);
 
 
-            yOutput += 23;
+            yOutput += dy;
             this.lblNiceName.Location = new Point(xloc, yOutput);
             this.lblNiceName.Size = new Size(154, 23);
             this.lblNiceName.TextAlign = ContentAlignment.MiddleRight;
             this.tbNiceName.Location = new Point(xloc + 158, yOutput + 2);
             this.tbNiceName.Size = new Size(362, 23);
+
+            yOutput += dy;
+            this.lblCategories.Location = new Point(xloc, yOutput);
+            this.lblCategories.Size = new Size(154, 23);
+            this.lblCategories.TextAlign = ContentAlignment.MiddleRight;
+            this.tbCategories.Location = new Point(xloc + 158, yOutput + 2);
+            this.tbCategories.Size = new Size(362, 23);
+
 
 
             this.btDonate1.Location = new Point(43, 330);
@@ -461,7 +474,7 @@ Keizer points much more graspable.
             this.mnuPaarungDropLast.Text = "Drop last round";
             this.mnuPaarungDropLast.Click += new EventHandler(this.MnuPairingDropLastClick);
             this.mnuListen.DropDownItems.AddRange(new ToolStripItem[]
-                 {  mnuListenAll, mnuListenPairing, mnuListenStanding, mnuListenStandingFull, mnuListenParticipants });
+                 {  mnuListenAll, mnuListenPairing, mnuListenStanding, mnuListenStandingFull, mnuListenParticipants, mnuListenPodium });
             this.mnuListen.Enabled = false;
             this.mnuListen.Name = "mnuListen";
             this.mnuListen.Size = new Size(42, 20);
@@ -478,6 +491,7 @@ Keizer points much more graspable.
             this.mnuListenStanding.Size = new Size(158, 22);
             this.mnuListenStanding.Text = "Standing";
             this.mnuListenStanding.Click += new EventHandler(this.MnuListenStandingClick);
+            this.mnuListenPodium.Click += new EventHandler(this.MnuListenStandingClick);
             this.mnuListenStandingFull.Name = "mnuListenStandingFull";
             this.mnuListenStandingFull.Size = new Size(158, 22);
             this.mnuListenStandingFull.Text = "Standing Full";

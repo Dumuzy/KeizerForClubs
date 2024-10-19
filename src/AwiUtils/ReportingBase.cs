@@ -242,6 +242,7 @@ namespace AwiUtils
                     li.RemoveAt(idx);
         }
         public void RemoveRowAt(int row) => rows.RemoveAt(row);
+        public void ClearRows() => rows.Clear();
         public int Count => rows.Count;
         public Li<string> this[int i] { get { return rows[i]; } }
         public int ColsCount => rows.FirstOrDefault()?.Count ?? 0;

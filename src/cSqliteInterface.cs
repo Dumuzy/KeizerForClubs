@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.SQLite;
+using System.Text.RegularExpressions;
 using AwiUtils;
 
 namespace KeizerForClubs
@@ -75,7 +76,7 @@ namespace KeizerForClubs
         public struct stPlayer
         {
             public int Id;
-            public string Name;
+            public string Name, Categories;
             public int Rating;
             public int RatingWDelta;  // Original Rating plus delta, if FirstRoundRandom.
             public int Rank;
@@ -163,13 +164,15 @@ namespace KeizerForClubs
             ");";
             sqlCommand.ExecuteNonQuery();
 
-            // Adding these two columns in a try catch, as they might already be there. SQLite seems not to
+            // Adding these columns in a try catch, as they might already be there. SQLite seems not to
             // have ALTER .. IF. One workaround is to just create the columns and catch the exception
             // that arise if the column already exist. 
             Li<string> addColumnSql = new Li<string>
             {
                     "ALTER TABLE Player ADD COLUMN RatingWDelta INTEGER NOT NULL DEFAULT 0",
-                    "ALTER TABLE Player ADD COLUMN Keizer_PrevPts FLOAT"
+                    "ALTER TABLE Player ADD COLUMN Keizer_PrevPts FLOAT",
+                    "ALTER TABLE Player ADD COLUMN Categories VARCHAR(90)"
+
             };
             foreach (var cmd in addColumnSql)
                 try
@@ -305,6 +308,28 @@ namespace KeizerForClubs
                 sqlCommand.ExecuteNonQuery();
             }
         }
+
+        public Dictionary<string, string> GetCategoriesDict()
+        {
+            var cats = GetOptionsCategoriesText();
+            if (cats.StartsWith("#"))
+                cats = "";
+            var dict = Helper.ToDictionary3(cats, ",", "=");
+
+            return dict;
+        }
+
+        public string GetOptionsCategoriesText() => CleanOptionsCategoriesText(GetConfigText("OPTION.Categories"));
+
+        public string CleanOptionsCategoriesText(string ct)
+        {
+            if (!ct.StartsWith("#"))
+            {
+                var cats = ct.Split(',').Select(p => p.Split('=', 2)).ToLi();
+                ct = string.Join(", ", cats.Select(p => Regex.Replace(p[0], "[^-_A-Za-z0-9]", "") + "=" + p[1].Trim()));
+            }
+            return ct;
+        }
         #endregion Config
 
         #region Player
@@ -332,13 +357,14 @@ namespace KeizerForClubs
             EndTransaction();
         }
 
-        public bool UpdPlayer(int id, string name, int rtg, int status)
+        public bool UpdPlayer(int id, string name, int rtg, int status, string categories)
         {
-            sqlCommand.CommandText = " UPDATE Player  SET name=@pName,  Rating=@pRtg,  State=@pState  WHERE ID=@pID ";
+            sqlCommand.CommandText = " UPDATE Player  SET name=@pName,  Rating=@pRtg,  State=@pState,  Categories=@cat  WHERE ID=@pID ";
             sqlCommand.Parameters.AddWithValue("pName", name);
             sqlCommand.Parameters.AddWithValue("pRtg", rtg);
             sqlCommand.Parameters.AddWithValue("pState", status);
             sqlCommand.Parameters.AddWithValue("pID", id);
+            sqlCommand.Parameters.AddWithValue("cat", categories);
             sqlCommand.Prepare();
             sqlCommand.ExecuteNonQuery();
             return true;
@@ -984,7 +1010,7 @@ namespace KeizerForClubs
                                 WHERE result in {NonBoardResultsSql} GROUP BY pid_w) f on f.PID_W = p.id ";
             int playerCount = 0;
             sqlCommand.CommandText = @" SELECT p.id, p.name, p.rating, p.state, p.Keizer_StartPts, p.Keizer_SumPts, 
-                                p.Keizer_PrevPts, p.rank, f.frei, p.ratingWDelta FROM Player p 
+                                p.Keizer_PrevPts, p.rank, f.frei, p.ratingWDelta, p.Categories FROM Player p 
                                 " + sFrei + sWhere + sSortorder;
             using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
             {
@@ -1005,6 +1031,8 @@ namespace KeizerForClubs
                             pList[playerCount].Rank = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
                             pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
                             pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(9) ? 0 : (int)sqLiteDataReader.GetInt16(9);
+                            pList[playerCount].Categories = sqLiteDataReader.IsDBNull(10) ? "" : sqLiteDataReader.GetString(10);
+
                             ++playerCount;
                         }
                         else

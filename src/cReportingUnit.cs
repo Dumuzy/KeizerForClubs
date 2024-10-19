@@ -78,12 +78,22 @@ namespace KeizerForClubs
         #endregion Paarungen 
 
         #region Tabellenstand
-        private string GetFileTabellenstandBasename(int runde, ReportingFlags flags) =>
+        private string GetFileTabellenstandBasename(int runde, ReportingFlags flags, string category) =>
             Basename + "_" + (
                 Ext.HasFlag(flags, ReportingFlags.Podium) ? db.Locl_GetText("GUI_MENU", "Listen.Podium") 
-                            : db.Locl_GetText("GUI_MENU", "Listen.Calc") ) + "-" + runde;
+                            : db.Locl_GetText("GUI_MENU", "Listen.Calc") ) + "-" + runde + 
+                        (string.IsNullOrEmpty(category) ? "" : "-" + category);
 
-        public bool fReport_Tabellenstand(int runde, ReportingFlags flags = ReportingFlags.None)
+
+        public bool fReport_TabellenstandAllCats(int runde, ReportingFlags flags = ReportingFlags.None)
+        {
+            bool ok = fReport_Tabellenstand(runde, null, flags);
+            foreach (var cat in db.GetCategoriesDict().Keys)
+                ok &= fReport_Tabellenstand(runde, cat, flags);
+            return ok;
+        }
+
+        private bool fReport_Tabellenstand(int runde, string category, ReportingFlags flags = ReportingFlags.None)
         {
             try
             {
@@ -100,12 +110,14 @@ namespace KeizerForClubs
                         table.RemoveColAt(playerIdIdx);
                 }
 
+                if (!string.IsNullOrEmpty(category))
+                    FilterStandingsTableForPlayersCategory(table, category, runde);
+
                 if (Ext.HasFlag(flags, ReportingFlags.Podium))
                     while (table.Count > 4)
                         table.RemoveRowAt(table.Count - 1);
 
-
-                var fileBase = GetFileTabellenstandBasename(runde, flags);
+                var fileBase = GetFileTabellenstandBasename(runde, flags, category);
 
                 if (db.GetConfigBool("OPTION.Xml"))
                     ExportAsXml(table, fileBase, "keizer_simpletable", "player", "nr name keizer_sum game_pts".Split());
@@ -126,6 +138,35 @@ namespace KeizerForClubs
                 return false;
             }
             return true;
+        }
+
+        void FilterStandingsTableForPlayersCategory(TableW2Headers table, string category, int runde)
+        {
+            var newRows = new Li<Li<string>>();
+            var tcopy = table.DeepTClone();
+            table.ClearRows();
+            table.AddRow(tcopy[0]);
+            var players = db.GetPlayerLi("", "", runde);
+            for (int i = 1, n = 1; i < tcopy.Count; ++i)
+            {
+                var li = tcopy[i];
+                var name = li[1];
+                var player = players.FirstOrDefault(p => p.Name == name);
+                if (player.Categories?.SplitToWords(" ,".ToCharArray())?.Contains(category) ?? false)
+                {
+                    li[0] = n++.ToString() + ".";
+                    table.AddRow(li);
+                }
+            }
+            table.Header2 += $" <span>{GetLongCategory(category)}</span>";
+        }
+
+        string GetLongCategory(string abbrev)
+        {
+            var d = db.GetCategoriesDict();
+            if (!d.TryGetValue(abbrev, out string value))
+                value = "abbrev";
+            return value;
         }
 
         TableW2Headers fReportTabellenstandTable(bool isWithPlayerId, ReportingFlags flags)

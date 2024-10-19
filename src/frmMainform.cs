@@ -28,12 +28,12 @@ namespace KeizerForClubs
 
         private ToolStripMenuItem mnuListenParticipants;
         private ToolStripMenuItem mnuListenStanding, mnuListenStandingFull;
-        private ToolStripMenuItem mnuListenPairing, mnuListenAll;
+        private ToolStripMenuItem mnuListenPairing, mnuListenAll, mnuListenPodium;
         private NumericUpDown numRoundsGameRepeat;
         private ComboBox ddlRatioFirst2Last, ddlFirstRoundRandom;
         private ToolTip tooltip;
-        private Label lblRoundsGameRepeat, lblOutputTo, lblNiceName, lblRatioFirst2Last, lblFirstRoundRandom;
-        private TextBox tbNiceName;
+        private Label lblRoundsGameRepeat, lblOutputTo, lblNiceName, lblCategories, lblRatioFirst2Last, lblFirstRoundRandom;
+        private TextBox tbNiceName, tbCategories;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
         private CheckBox chkFreilosVerteilen, chkNovusRandomBoard;
@@ -50,12 +50,9 @@ namespace KeizerForClubs
         private Label lblRunde;
         private NumericUpDown numRoundSelect;
         private Panel pnlPairingPanel;
-        private DataGridViewTextBoxColumn colRating;
-        private DataGridViewTextBoxColumn colPlayerName;
-        private DataGridViewTextBoxColumn colPlayerID;
+        private DataGridViewTextBoxColumn colRating, colPlayerName, colPlayerID, colPlayerCategories;
         private OpenFileDialog dlgOpenTournament;
-        private DataGridViewComboBoxColumn colPairingResult;
-        private DataGridViewComboBoxColumn colPlayerState;
+        private DataGridViewComboBoxColumn colPairingResult, colPlayerState;
         private Label lblBonusClubValue, lblBonusExcusedValue, lblBonusUnexcusedValue, lblBonusRetiredValue,
             lblBonusFreilosValue, lblBonusVerlustValue;
         internal TrackBar tbBonusClub, tbBonusExcused, tbBonusUnexcused, tbBonusRetired, tbBonusFreilos, tbBonusVerlust;
@@ -180,6 +177,7 @@ for determining the first round pairings.";
             numClicks = db.GetConfigInt("INTERNAL.NumClicks");
             numRoundSelect.Value = (Decimal)db.GetMaxRound();
             tbNiceName.Text = db.GetConfigText("OPTION.NiceName");
+            tbCategories.Text = db.GetOptionsCategoriesText();
             // Der Name des db-Files ist einem ini-File gemerkt, alle anderen Settings in 
             // der Config-Datenbank. Weil die Config-Db nur schwer geöffnet werden kann ohne die 
             // Haupt-Db. Weil die Config-Db eine an die Haupt-Db attached DB ist. 
@@ -479,6 +477,10 @@ for determining the first round pairings.";
                     db.SetConfigText("OPTION.NiceName", this.tbNiceName.Text);
                     SetTurnierAndFilename(this.tbNiceName.Text);
                 }
+                var cleanedCatsText = db.CleanOptionsCategoriesText(tbCategories.Text);
+                db.SetConfigText("OPTION.Categories", cleanedCatsText);
+                if (cleanedCatsText != tbCategories.Text)
+                    tbCategories.Text = cleanedCatsText;
             }
             SaveWindowSettings();
         }
@@ -514,6 +516,7 @@ for determining the first round pairings.";
             db.SetConfigInt("WIN.colPairingNameWhite.wid", colPairingNameWhite.Width);
             db.SetConfigInt("WIN.colPairingNameBlack.wid", colPairingNameBlack.Width);
             db.SetConfigInt("WIN.colPlayerName.wid", colPlayerName.Width);
+            db.SetConfigInt("WIN.colPlayerCats.wid", colPlayerCategories.Width);
             db.SetConfigInt("WIN.chkPairingOnlyPlayed.locX", chkPairingOnlyPlayed.Location.X);
         }
 
@@ -537,6 +540,7 @@ for determining the first round pairings.";
                 colPairingNameWhite.Width = db.GetConfigInt("WIN.colPairingNameWhite.wid");
                 colPairingNameBlack.Width = db.GetConfigInt("WIN.colPairingNameBlack.wid");
                 colPlayerName.Width = db.GetConfigInt("WIN.colPlayerName.wid");
+                colPlayerCategories.Width = db.GetConfigInt("WIN.colPlayerCats.wid", 30);
                 chkPairingOnlyPlayed.Location = new Point(db.GetConfigInt("WIN.chkPairingOnlyPlayed.locX"),
                         chkPairingOnlyPlayed.Location.Y);
             }
@@ -558,11 +562,12 @@ for determining the first round pairings.";
             IncNumClicks(db.GetPlayerCount());
             var ru = new ReportingUnit(sTurniername, sFilename, db);
             ru.fReport_Paarungen(SelectedRound);
-            ru.fReport_Tabellenstand(SelectedRound);
+            ru.fReport_TabellenstandAllCats(SelectedRound);
             ru.fReport_TabellenstandVoll(SelectedRound);
             ru.fReport_Teilnehmer(SelectedRound);
-            ru.fReport_Tabellenstand(SelectedRound, ReportingFlags.Podium);
+            ru.fReport_TabellenstandAllCats(SelectedRound, ReportingFlags.Podium);
         }
+
         private void RecalcIfNeeded()
         {
             if (SelectedRound >= db.GetMaxRound())
@@ -580,9 +585,11 @@ for determining the first round pairings.";
             RecalcIfNeeded();
             IncNumClicks(db.GetPlayerCount());
             if (sender == mnuListenStanding)
-                new ReportingUnit(sTurniername, sFilename, db).fReport_Tabellenstand(SelectedRound);
+                new ReportingUnit(sTurniername, sFilename, db).fReport_TabellenstandAllCats(SelectedRound);
             else if (sender == mnuListenStandingFull)
                 new ReportingUnit(sTurniername, sFilename, db).fReport_TabellenstandVoll(SelectedRound);
+            else if (sender == mnuListenPodium)
+                new ReportingUnit(sTurniername, sFilename, db).fReport_TabellenstandAllCats(SelectedRound,  ReportingFlags.Podium);
         }
 
         private void MnuListenParticipantsClick(object sender, EventArgs e) =>
@@ -678,9 +685,9 @@ for determining the first round pairings.";
         private void GrdPlayersCellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             var row = this.grdPlayers.Rows[e.RowIndex];
-            if (row.Cells[1].Value == null)  // kein Name
+            if (row.Cells[grdPlayersNameCol].Value == null)  // kein Name
                 return;
-            string newPlayerName = row.Cells[1].Value.ToString().Trim();
+            string newPlayerName = row.Cells[grdPlayersNameCol].Value.ToString().Trim();
             newPlayerName = Regex.Replace(newPlayerName, @"(\s\s+)", " ");
             // Paragraph sign is not allowed in name, as it is used as splitting char. 
             newPlayerName = Regex.Replace(newPlayerName, "§", "$");
@@ -691,24 +698,26 @@ for determining the first round pairings.";
 
             if (isNewPlayer)
             {
-                if (row.Cells[2].Value == null)
-                    row.Cells[2].Value = 0;
+                if (row.Cells[grdPlayersRatingCol].Value == null)
+                    row.Cells[grdPlayersRatingCol].Value = 0;
                 if (row.Cells[grdPlayersStateCol].Value == null)
                     row.Cells[grdPlayersStateCol].Value = db.Locl_GetPlayerStateText(SqliteInterface.PlayerState.Available);
 
-                db.InsPlayerNew(newPlayerName, Convert.ToInt16(row.Cells[2].Value));
+                db.InsPlayerNew(newPlayerName, Convert.ToInt16(row.Cells[grdPlayersRatingCol].Value));
                 int playerId = db.GetPlayerID(newPlayerName);
                 row.Cells[0].Value = playerId;
                 db.UpdPlayer(playerId, newPlayerName,
-                            Helper.ToInt(row.Cells[2].Value),
-                            db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()));
+                            Helper.ToInt(row.Cells[grdPlayersRatingCol].Value),
+                            db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()),
+                            row.Cells[grdPlayersCatsCol].Value.ToString());
                 HandleLateStarter(playerId);
             }
             else
                 db.UpdPlayer(gridPlayerId, newPlayerName,
-                    Helper.ToInt((row.Cells[2].Value?.ToString() ?? "").Trim()),
-                    db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()));
-            row.Cells[1].Value = newPlayerName;
+                    Helper.ToInt((row.Cells[grdPlayersRatingCol].Value?.ToString() ?? "").Trim()),
+                    db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()),
+                    row.Cells[grdPlayersCatsCol].Value.ToString());
+            row.Cells[grdPlayersNameCol].Value = newPlayerName;
         }
 
         private void HandleLateStarter(int playerId)
@@ -734,7 +743,7 @@ for determining the first round pairings.";
                     grdPlayers.EndEdit();
                 }
         }
-        const int grdPlayersStateCol = 3, grdPairingsResultCol = 7;
+        const int grdPlayersNameCol = 1, grdPlayersRatingCol = 2, grdPlayersCatsCol = 3, grdPlayersStateCol = 4, grdPairingsResultCol = 7;
 
         private void GrdPairingsCellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
@@ -793,6 +802,7 @@ for determining the first round pairings.";
             colPlayerState.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Status");
             colRating.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Rating");
             colPlayerName.HeaderText = db.Locl_GetText("GUI_COLS", "Sp.Name");
+            colPlayerCategories.HeaderText = db.Locl_GetText("GUI_LABEL", "Categories");
             colPairgBoard.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Brett");
             colPairingNameWhite.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.Weiss");
             colPairingWhiteAddinfo.HeaderText = db.Locl_GetText("GUI_COLS", "Pa.WeissAdd");
@@ -813,6 +823,7 @@ for determining the first round pairings.";
             mnuListenStanding.Text = db.Locl_GetText("GUI_MENU", "Listen.Calc");
             mnuListenStandingFull.Text = db.Locl_GetText("GUI_MENU", "Listen.CalcFull");
             mnuListenPairing.Text = db.Locl_GetText("GUI_MENU", "Listen.Paarungen");
+            mnuListenPodium.Text = db.Locl_GetText("GUI_MENU", "Listen.Podium");
             mnuListenAll.Text = db.Locl_GetText("GUI_MENU", "Listen.Alle");
             mnuListenParticipants.Text = db.Locl_GetText("GUI_MENU", "Listen.Teilnehmer");
             mnuHelp.Text = db.Locl_GetText("GUI_MENU", "Hilfe");
@@ -839,6 +850,7 @@ for determining the first round pairings.";
             lblFirstRoundRandom.Text = db.Locl_GetText("GUI_LABEL", "FirstRoundRandom");
             lblOutputTo.Text = db.Locl_GetText("GUI_LABEL", "OutputTo");
             lblNiceName.Text = db.Locl_GetText("GUI_LABEL", "NiceName");
+            lblCategories.Text = db.Locl_GetText("GUI_LABEL", "Categories");
             chkWickerNormalization.Text = db.Locl_GetText("GUI_LABEL", "WickerNorm");
             btDonate1.Text = btDonate2.Text = db.Locl_GetText("GUI_TEXT", "Donate");
         }
@@ -862,10 +874,12 @@ for determining the first round pairings.";
             {
                 grdPlayers.Rows.Add();
                 grdPlayers.Rows[i].Cells[0].Value = players[i].Id;
-                grdPlayers.Rows[i].Cells[1].Value = players[i].Name;
-                grdPlayers.Rows[i].Cells[2].Value = players[i].Rating.ToString();
+                grdPlayers.Rows[i].Cells[grdPlayersNameCol].Value = players[i].Name;
+                grdPlayers.Rows[i].Cells[grdPlayersRatingCol].Value = players[i].Rating.ToString();
                 grdPlayers.Rows[i].Cells[grdPlayersStateCol].Value =
                         db.Locl_GetPlayerStateText(players[i].State);
+                grdPlayers.Rows[i].Cells[grdPlayersCatsCol].Value = players[i].Categories.ToString();
+
                 if (db.CntPlayersBoardGames(players[i].Id) == 0)
                 {
                     var cbcell = (DataGridViewComboBoxCell)grdPlayers.Rows[i].Cells[grdPlayersStateCol];
