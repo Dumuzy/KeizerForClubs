@@ -323,10 +323,12 @@ namespace KeizerForClubs
 
         public string CleanOptionsCategoriesText(string ct)
         {
-            if (!ct.StartsWith("#"))
+            if (!string.IsNullOrWhiteSpace(ct) && !ct.StartsWith("#"))
             {
-                var cats = ct.Split(',').Select(p => p.Split('=', 2)).ToLi();
-                ct = string.Join(", ", cats.Select(p => Regex.Replace(p[0], "[^-_A-Za-z0-9]", "") + "=" + p[1].Trim()));
+                var cats = ct.Split(',').Select(p => p.Split('=', 2)).Where(q => q.Length == 2).ToLi();
+                var cats2 = cats.Select(p => Regex.Replace(p[0], "[^-_A-Za-z0-9]", "") + "=" + p[1].Trim())
+                        .Where(q => !q.StartsWith("=")).ToLi();
+                ct = string.Join(", ", cats2);
             }
             return ct;
         }
