@@ -149,6 +149,21 @@ de l’appariement, mais cela rend les points Keizer beaucoup plus faciles à co
 
 Dans le système Keizer original, les points Keizer attribués sont généralement de grands nombres entiers. Cela a probablement été fait à l’origine dans le but de faciliter les calculs. En effet, il est plus facile de calculer avec des nombres entiers si l’on n’a pas d’ordinateur. De nos jours cependant, tous les calculs sont effectués par ordinateur et nous pouvons par conséquent utiliser des nombres beaucoup plus petits sous forme fractionnaire.
 
+#### Catégories
+
+Imaginez que vous avez un tournoi pour lequel vous souhaitez avoir des tableaux de classement 
+séparés pour différentes catégories de joueurs, par exemple les jeunes ou les joueurs dont le classement 
+est inférieur à 1500. Dans ce cas, vous pouvez utiliser l'option catégories. Ici, vous devez définir vos catégories ainsi qu'une abréviation pour chaque catégorie. Supposons que vous souhaitiez avoir les catégories « Classement < 1500 » et « Femme ».
+Vous pouvez alors définir ces catégories et leurs abréviations comme suit.
+```
+r15=classement < 1500, f=femmes.
+```
+Vous devez utiliser des virgules pour séparer les différentes catégories, et vous devez utiliser le signe égal pour séparer l'abréviation du nom complet de la catégorie.
+Les abréviations sont utilisées dans le tableau des joueurs pour attribuer une ou plusieurs catégories à un joueur.
+Les abréviations sont également utilisées dans les noms de fichiers des tableaux.
+Les noms complets des catégories sont utilisés dans l'en-tête des classements. Les abréviations ne peuvent pas contenir d'espaces, de virgules ou d'autres caractères spéciaux.
+Seuls les caractères a-z, A-Z et 0-9 sont autorisés.
+
 
 <br />
 
