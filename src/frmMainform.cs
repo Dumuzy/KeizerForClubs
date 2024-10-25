@@ -708,15 +708,15 @@ for determining the first round pairings.";
                 row.Cells[0].Value = playerId;
                 db.UpdPlayer(playerId, newPlayerName,
                             Helper.ToInt(row.Cells[grdPlayersRatingCol].Value),
-                            db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()),
-                            row.Cells[grdPlayersCatsCol].Value.ToString());
+                            db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value as string),
+                            row.Cells[grdPlayersCatsCol].Value as string);
                 HandleLateStarter(playerId);
             }
             else
                 db.UpdPlayer(gridPlayerId, newPlayerName,
                     Helper.ToInt((row.Cells[grdPlayersRatingCol].Value?.ToString() ?? "").Trim()),
-                    db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value.ToString()),
-                    row.Cells[grdPlayersCatsCol].Value.ToString());
+                    db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value as string),
+                    row.Cells[grdPlayersCatsCol].Value as string);
             row.Cells[grdPlayersNameCol].Value = newPlayerName;
         }
 
