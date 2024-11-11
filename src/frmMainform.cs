@@ -262,7 +262,9 @@ for determining the first round pairings.";
 
         void NumRoundSelectValueChanged(object sender, EventArgs e) => LoadPairingList();
 
-        void MnuPairingClick(object sender, EventArgs e)
+        void MnuPairingClick(object sender, EventArgs e) => SwitchToPairingTab();
+
+        void SwitchToPairingTab()
         {
             if (tabMainWindow.SelectedTab != tabPairings)
                 tabMainWindow.SelectedTab = tabPairings;
@@ -271,6 +273,7 @@ for determining the first round pairings.";
         void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
             IncNumClicks();
+            SwitchToPairingTab();
             DelDeletedPlayers();
             new ReportingUnit(sTurniername, sFilename, db).WriteCurrentTablesToDb();
             if (db.GetPairings_NoResult() == 0)
@@ -283,6 +286,7 @@ for determining the first round pairings.";
         void MnuPairingManualClick(object sender, EventArgs e)
         {
             IncNumClicks();
+            SwitchToPairingTab();
             DelDeletedPlayers();
             int maxRound = db.GetMaxRound();
             new ReportingUnit(sTurniername, sFilename, db).WriteCurrentTablesToDb();
@@ -305,6 +309,7 @@ for determining the first round pairings.";
 
         void MnuPairingDropLastClick(object sender, EventArgs e)
         {
+            SwitchToPairingTab();
             if (SelectedRound != 0)
             {
                 IncNumClicks();
