@@ -53,16 +53,16 @@ I am   keizer@atlantis44.de   at Paypal.");
             if (!isDonate)
                 t = @"Originally written by T. Schlapp. He's got a whole website dedicated to the Keizer system, 
 including a nice example tournament. Improved and put to Github by me. Contact me:
-Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions or bug reports. Many thanks to pascalg@Lichess for testing 
+Dumuzy@Github aka Alakaluf@Lichess for questions, suggestions, bug reports or chess lessons for players with a Lichess speed rating below 1750. Many thanks to pascalg@Lichess for testing 
 and translation.";
             else
                 t = @"
 
-If you like this software and want to support its maintainenance ... I would be delighted if you'd buy me a coffee! :-)
-I am   keizer@atlantis44.de   at Paypal.
+If you like this software and want to support its maintainenance ...   You would be delighted if you'd buy me a coffee! :-)
+I am   keizer@atlantis44.de   at Paypal. And I would be very thankful.
 
 Also, I'm giving chess lessons for players with a Lichess rapid rating below 1750. 
-Only 5 Eu per hour in deutsch or english. Contact Alakaluf at Lichess.";
+Only 10 Eu per hour in deutsch (or english with a heavy german accent). Contact Alakaluf at Lichess.";
             return t;
         }
 

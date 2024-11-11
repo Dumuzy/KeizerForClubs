@@ -222,9 +222,6 @@ for determining the first round pairings.";
         private void TabMainWindowSelectedIndexChanged(object sender, EventArgs e)
         {
             IncNumClicks();
-            TabPage selectedTab = this.tabMainWindow.SelectedTab;
-            TabPage tabPlayer = this.tabPlayer;
-            this.mnuPaarungen.Enabled = this.tabMainWindow.SelectedTab == this.tabPairings;
             this.mnuListen.Enabled = this.tabMainWindow.SelectedTab != tabSettings;
         }
 
@@ -264,6 +261,12 @@ for determining the first round pairings.";
         void MnuHelpFAQClick(object sender, EventArgs e) => OpenWithDefaultAppByLanguage("docs\\KeizerForClubs.FAQ.%LNG%.%X%");
 
         void NumRoundSelectValueChanged(object sender, EventArgs e) => LoadPairingList();
+
+        void MnuPairingClick(object sender, EventArgs e)
+        {
+            if (tabMainWindow.SelectedTab != tabPairings)
+                tabMainWindow.SelectedTab = tabPairings;
+        }
 
         void MnuPairingNextRoundClick(object sender, EventArgs e)
         {
@@ -329,6 +332,14 @@ for determining the first round pairings.";
             this.ApplyLanguageText();
             this.LoadPlayerList();
             this.LoadPairingList();
+        }
+
+
+
+        void MnuPlayersClick(object sender, EventArgs e)
+        {
+            if (tabMainWindow.SelectedTab != tabPlayer)
+                tabMainWindow.SelectedTab = tabPlayer;
         }
 
         void MnuPlayersImportClick(object sender, EventArgs e)

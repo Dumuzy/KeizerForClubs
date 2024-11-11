@@ -447,14 +447,16 @@ Keizer points much more graspable.
 
             this.mnuPlayers.DropDownItems.AddRange(new ToolStripItem[]
                     { mnuPlayersImport, mnuPlayersDeleteAll, mnuPlayersRebaseIds});
+            this.mnuPlayers.Click += new EventHandler(this.MnuPlayersClick);
 
 
             this.mnuPaarungen.DropDownItems.AddRange(new ToolStripItem[]
                 { mnuPaarungNext, toolStripMenuItem2, mnuPaarungManuell, mnuPaarungThisMan, toolStripMenuItem3, mnuPaarungDropLast });
-            this.mnuPaarungen.Enabled = false;
+            this.mnuPaarungen.Enabled = true;
             this.mnuPaarungen.Name = "mnuPaarungen";
             this.mnuPaarungen.Size = new Size(56, 20);
             this.mnuPaarungen.Text = "Pairing";
+            this.mnuPaarungen.Click += new EventHandler(this.MnuPairingClick);
             this.mnuPaarungNext.Name = "mnuPaarungNext";
             this.mnuPaarungNext.Size = new Size(183, 22);
             this.mnuPaarungNext.Text = "Next round";
