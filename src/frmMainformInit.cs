@@ -111,7 +111,7 @@ namespace KeizerForClubs
             this.numRoundsGameRepeat.BeginInit();
             this.mnuMainmenu.SuspendLayout();
             this.SuspendLayout();
-            this.tabMainWindow.Alignment = TabAlignment.Bottom;
+            this.tabMainWindow.Alignment = TabAlignment.Left;
             this.tabMainWindow.Controls.Add((Control)this.tabPlayer);
             this.tabMainWindow.Controls.Add((Control)this.tabPairings);
             this.tabMainWindow.Controls.Add((Control)this.tabSettings);
