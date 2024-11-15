@@ -29,7 +29,7 @@ Les étapes essentielles en bref:
 L'interface du programme est assez explicite, quelques lignes d'explication suffisent...
 
 -   Pour commencer, un tournoi doit être créé avec *Start...*. Après, vous pourrez passer à un autre tournoi avec *Start...*.
--   Les trois onglets en bas de l'interface peuvent ensuite être sélectionnés (*Joueurs*, *Appariements*, *Paramètres*).
+-   Les trois onglets en gauche de l'interface peuvent ensuite être sélectionnés (*Joueurs*, *Appariements*, *Paramètres*).
 -   Pour ajouter des joueurs, il suffit d'inscrire leur nom et leur classement élo dans le tableau. Choisissez le statut dans la dernière colonne en cliquant sur *la flèche vers le bas* et sélectionnez une option dans la liste. L'ID est attribué automatiquement.
 -   Pour apparier une nouvelle ronde, sélectionnez l'une des possibilités du menu *Appariements*. Les explications concernant l'appariement manuel se trouvent plus bas.
 -   Le menu pour les appariements n'est actif que lorsque l'onglet des appariements est sélectionné.

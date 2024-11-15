@@ -38,7 +38,7 @@ Das Programm sollte selbsterklärend sein, hier nur einige kurze Hinweise...
 
 - Am Anfang ist alles deaktiviert, zuerst muss mit *Start...* ein Turnier gewählt
     oder begonnen werden.
-- Dann sind die drei Reiter unten auswählbar: *Spieler*, *Paarungen*,
+- Dann sind die drei Reiter links auswählbar: *Spieler*, *Paarungen*,
     *Einstellungen*.
 - Um Spieler einzutragen, schreibt man Name und Rating in die Felder der Tabelle.
     Den Status wählt man in der letzten Spalte durch Anklicken von *Pfeil nach

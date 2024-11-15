@@ -43,7 +43,7 @@ lines...
 -   In the beginning with *Start...* a tournament shall be created.
     Later you can switch to another tournament with
     *Start...*
--   Then at the bottom the three tabs can be selected: *Players*, *Pairings*,
+-   Then at the left the three tabs can be selected: *Players*, *Pairings*,
     *Settings*.
 -   In order to add participants, just write the name and rating into
     the table. Choose the status in the last column by clicking the
