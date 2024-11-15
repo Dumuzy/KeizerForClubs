@@ -7,10 +7,11 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x86</PlatformTarget>
-    <VersionPrefix>2.0.0.2</VersionPrefix>
+    <VersionPrefix>2.0.0.3</VersionPrefix>
     <Version>$(VersionPrefix)</Version>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>sgKey.snk</AssemblyOriginatorKeyFile>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
 
