@@ -364,3 +364,7 @@ FodyWeavers.xsd
 /VM-SCI-2022-23.s3db
 /Schnell-SCI-2023.s3db
 /TEST-Schnell-SCI-2023.s3db
+/System.Data.SQLite.old.dll
+/System.Data.SQLite.w32.dll
+/System.Data.SQLite.x64.dll
+/T82.txt
