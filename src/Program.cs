@@ -6,6 +6,8 @@ namespace KeizerForClubs
 {
     internal sealed class Program
     {
+        public static string AssemblyVersion => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
         [STAThread]
         private static void Main(string[] args)
         {
@@ -19,13 +21,16 @@ namespace KeizerForClubs
             else
                 ExLogger.Create(null, null, null, null, null);
 
+            ExLogger.Instance.LogInfo("Program.Main 1.01");
             if (!File.Exists(ExLogger.Instance.LogfilePath))
             {
                 ExLogger.Destroy();
                 ExLogger.Create(Helper.GetTempDir(), "KFC2", null, null, null);
                 ExLogger.Instance.LogWarning("Could not create log file in current directory.");
             }
-            ExLogger.Instance.LogInfo("Program.Main 1.1");
+            ExLogger.Instance.LogInfo($"Program.Main 1.11 KFC2 Version={AssemblyVersion}");
+            LogOsInfo();
+
             try
             {
                 Application.EnableVisualStyles();
@@ -40,5 +45,19 @@ namespace KeizerForClubs
             }
             ExLogger.Instance.LogInfo("Program.Main 2.0");
         }
+
+        static void LogOsInfo()
+        {
+            OperatingSystem os = Environment.OSVersion;
+
+            Version ov = os.Version;
+            string versionString = $"{os.VersionString} (Version {ov.Major}.{ov.Minor}.{ov.Build}.{ov.Revision})";
+
+            ExLogger.Instance.LogInfo("OSInfo Operating System: " + os.Platform);
+            ExLogger.Instance.LogInfo("OSInfo Version: " + versionString);
+            ExLogger.Instance.LogInfo("OSInfo Service Pack: " + os.ServicePack);
+            ExLogger.Instance.LogInfo($"OSInfo is x64={Environment.Is64BitOperatingSystem}");
+        }
+
     }
 }
