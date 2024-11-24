@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 using AwiUtils;
 
@@ -48,15 +49,13 @@ namespace KeizerForClubs
 
         static void LogOsInfo()
         {
-            OperatingSystem os = Environment.OSVersion;
+            var os = new RealOSInfo();
+            ExLogger.Instance.LogInfo("OSInfo       Cmd Version=" + os.CmdVersion);
+            ExLogger.Instance.LogInfo("OSInfo      WMIC Caption=" + os.WmicCaption);
+            ExLogger.Instance.LogInfo("OSInfo      WMIC Version=" + os.WmicVersion);
+            ExLogger.Instance.LogInfo("OSInfo  WMIC Architecture=" + os.WmicOSArchitecture);
+            ExLogger.Instance.LogInfo("OSInfo  WMIC ServicePacks=" + os.WmicServicePack);
 
-            Version ov = os.Version;
-            string versionString = $"{os.VersionString} (Version {ov.Major}.{ov.Minor}.{ov.Build}.{ov.Revision})";
-
-            ExLogger.Instance.LogInfo("OSInfo Operating System: " + os.Platform);
-            ExLogger.Instance.LogInfo("OSInfo Version: " + versionString);
-            ExLogger.Instance.LogInfo("OSInfo Service Pack: " + os.ServicePack);
-            ExLogger.Instance.LogInfo($"OSInfo is x64={Environment.Is64BitOperatingSystem}");
         }
 
     }
