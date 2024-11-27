@@ -254,25 +254,7 @@ namespace AwiUtils
 
         private string GetRawUrlShortInfo()
         {
-            string ru = getRawUrlFunc != null ? getRawUrlFunc() : "//?si=-----&way=-&editway=-";
-            var parts = ru.Split("?&".ToCharArray());
-            // Erster Teil ist die Adresse, die ignorier ich hier. Restliche Teile sind Parameter. 
-            var kvSplitter = "=".ToCharArray();
-            string[] values = new string[] { "-----", "-", "-" };
-            foreach (var part in parts)
-            {
-                var kv = part.Split(kvSplitter, 2);
-                if (kv.Length == 2)
-                    switch (kv[0])
-                    {
-                        case "si": values[0] = kv[1]; break;
-                        case "way": values[1] = kv[1]; break;
-                        case "editway": values[2] = kv[1]; break;
-                    }
-            }
-
-            string s = values[0].Substring(0, Math.Min(5, values[0].Length)) + ".." + values[1] + values[2];
-            return s;
+            return "";
         }
 
         private string Decorate(string message)
