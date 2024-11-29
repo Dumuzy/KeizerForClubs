@@ -551,7 +551,7 @@ Keizer points much more graspable.
 
             try
             {
-                if (Args.Length > 0)
+                if (!Args.IsEmpty)
                     OpenTournament(Args[0]);
                 else if (File.Exists(ReadDBFileName()))
                     OpenTournament(ReadDBFileName());

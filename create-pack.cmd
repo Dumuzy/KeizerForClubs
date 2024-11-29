@@ -33,6 +33,12 @@ copy KFC2.exe  %tempdir%\KeizerForClubs.exe
 copy ..\..\..\..\cfg\* cfg
 robocopy ..\..\..\..\docs\ docs *.html *.png *.pdf *.txt /E
 
+rem This is only for debugging T82.
+@echo on
+copy ..\..\..\..\System.Data.SQLite.w32.dll .
+copy ..\..\..\..\System.Data.SQLite.x64.dll .
+@echo off
+
 
 robocopy .  %tempdir% *.dll *.json *.s3db Keizer*.html *.ini *.png *.pdf *.txt *.css *.xsl /E
 

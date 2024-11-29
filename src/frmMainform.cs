@@ -76,10 +76,10 @@ namespace KeizerForClubs
         private Button btDonate1, btDonate2;
         private DonateButton donateButton1, donateButton2;
         private int numClicks;
-        private readonly string[] Args;
+        private readonly Li<string> Args;
         private readonly Random random = new Random();
 
-        public frmMainform(string[] args)
+        public frmMainform(Li<string> args)
         {
             ExLogger.Instance.LogInfo("frmMainForm.kk 1.0");
             Args = args;

@@ -43,6 +43,8 @@ namespace AwiUtils
             }
         }
 
+        public static void CreateDummy() => Create(null, null, null, null, null);
+
         /// <summary> Must be called before a new one can be created with the Create function. </summary>
         public static void Destroy() { instance.getUserAddressFunc = null; }
 
