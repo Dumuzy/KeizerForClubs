@@ -7,13 +7,18 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x86</PlatformTarget>
-    <VersionPrefix>2.0.0.6</VersionPrefix>
+    <VersionPrefix>2.0.0.7</VersionPrefix>
     <Version>$(VersionPrefix)</Version>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>sgKey.snk</AssemblyOriginatorKeyFile>
     <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="System.Data.SQLite.old.dll" />
+    <None Remove="System.Data.SQLite.w32.dll" />
+    <None Remove="System.Data.SQLite.x64.dll" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="System.Data.SQLite">

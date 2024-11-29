@@ -13,6 +13,8 @@ namespace KeizerForClubs
         [STAThread]
         private static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+
             if (args.Contains("-d"))
             {
                 ExLogger.Create(".", "KFC2", null, null, null);
@@ -33,7 +35,7 @@ namespace KeizerForClubs
             }
             ExLogger.Instance.LogInfo($"Program.Main 1.11 KFC2 Version={AssemblyVersion}");
             LogOsInfo();
-            TryLoadSqliteDll("");
+            sqliteAssembly = TryLoadSqliteDll(null);
 
             try
             {
@@ -75,23 +77,37 @@ namespace KeizerForClubs
             TryLoadSqliteDll(".x64");
         }
 
-        static void TryLoadSqliteDll(string endOfName)
+        static Assembly TryLoadSqliteDll(string endOfName, string name = null)
         {
+            Assembly a0 = null;
             try
             {
-                string file = "System.Data.SQLite" + endOfName + ".dll";
+                string file = name ?? "System.Data.SQLite" + (endOfName ?? "") + ".dll";
                 var assembly = Assembly.GetExecutingAssembly();
                 string p = Path.GetDirectoryName(assembly.Location);
                 string fullPath = Path.Combine(p, file);
                 ExLogger.Instance.LogInfo($"Trying to load {fullPath} by Assembly.LoadFile.");
-                var a0 = Assembly.LoadFile(fullPath);
+                a0 = Assembly.LoadFrom(fullPath);
                 ExLogger.Instance.LogInfo($"Succeeded loading {file} by Assembly.LoadFile.");
             }
             catch (Exception ex)
             {
                 ExLogger.Instance.LogException(ex);
             }
+            return a0;
         }
 
+        static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (args.Name.StartsWith("System.Data.SQLite"))
+            {
+                // Load the renamed SQLite DLL
+                return TryLoadSqliteDll("");
+            }
+            return null;
+        }
+
+        static Assembly sqliteAssembly;
     }
+
 }
