@@ -35,8 +35,8 @@ robocopy ..\..\..\..\docs\ docs *.html *.png *.pdf *.txt /E
 
 rem This is only for debugging T82.
 @echo on
-copy ..\..\..\..\System.Data.SQLite.w32.dll .
-copy ..\..\..\..\System.Data.SQLite.x64.dll .
+rem copy ..\..\..\..\System.Data.SQLite.w32.dll .
+rem copy ..\..\..\..\System.Data.SQLite.x64.dll .
 @echo off
 
 
