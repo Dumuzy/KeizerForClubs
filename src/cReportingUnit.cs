@@ -278,6 +278,7 @@ namespace KeizerForClubs
                 line.Add(player.KeizerPrevPts.ToString(kppFormat));
                 line.Add(player.KeizerSumPts.ToString("0.00"));
                 line.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
+                line.Add(Ext.ToDebug(db.GetPlayersRatingPerformance(player.Id)));
 
                 for (int runde = 1; runde <= t.Runde; ++runde)
                 {

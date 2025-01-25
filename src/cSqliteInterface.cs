@@ -60,6 +60,7 @@ namespace KeizerForClubs
         public static readonly Results[] WhiteWinResults = new Results[] { Results.WinWhite, Results.WinWhiteForfeit };
         public static readonly Results[] BlackWinResults = new Results[] { Results.WinBlack, Results.WinBlackForfeit };
         public static readonly Results[] DrawishResults = new Results[] { Results.Draw, Results.Adjourned };
+        public static readonly Results[] ReallyPlayedResults = new Results[] { Results.WinWhite, Results.Draw, Results.WinBlack };
 
         /// <summary> T falls es sich um ein Resultat ohne Brett bzw einem Spieler handelt, also sowas 
         /// wie Freilos, Entschuldigt, ... </summary>
@@ -452,6 +453,32 @@ namespace KeizerForClubs
             return li.Count;
         }
 
+        /// <summary> Gibt die Ratings Performance der gespielten Spiele des Spielers mit der id zurück. Also solchen, 
+        /// wo 2 Leute am Spiel beteiligt waren und echt gespielt wurde. </summary>
+        public int? GetPlayersRatingPerformance(int id)
+        {
+            var sWhere = $" where ((PID_W={id} or PID_B={id}) AND Result in {ReallyPlayedResultsSql}) ";
+            var li = GetPairingLi(sWhere, "");
+            int ratingSum = 0, cnt = li.Count;
+            double ptsSum = 0;
+
+            var players = GetPlayerLi("", "", -1);
+            foreach (var pair in li)
+            {
+                var oppoId = pair.IdW == id ? pair.IdB : pair.IdW;
+                var oppo = players.FirstOrDefault(pl => pl.Id == oppoId);
+
+                ratingSum += oppo.Rating;
+                ptsSum += (pair.Result == Results.WinWhite && pair.IdW == id)
+                    || (pair.Result == Results.WinBlack && pair.IdB == id) ? 1
+                    : pair.Result == Results.Draw ? 0.5 : 0;
+            }
+
+            var perf = Rating.CalcPerformance(ratingSum, ptsSum, cnt);
+            return perf;
+        }
+
+
         // Farbverteilung eines Spieler abfragen:
         //  Gibt die Differenz aus Weiß- und Schwarzpartien des Spielers zurück. 
         public int GetPlayerWeissUeberschuss(int ID)
@@ -646,6 +673,7 @@ namespace KeizerForClubs
         static readonly string DrawishResultsSql = GetResultsInSql(DrawishResults);
         static readonly string BoardResultsSql = GetResultsInSql(BoardResults);
         static readonly string NonBoardResultsSql = GetResultsInSql(NonBoardResults);
+        static readonly string ReallyPlayedResultsSql = GetResultsInSql(ReallyPlayedResults);
 
 
         private bool HasColumn(string tableName, string colName)
