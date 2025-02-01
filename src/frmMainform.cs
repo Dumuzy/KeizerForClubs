@@ -233,6 +233,19 @@ for determining the first round pairings.";
             fileopener.Start();
         }
 
+        public static void CallScript(string justCreatedFileName)
+        {
+            var path = justCreatedFileName.Replace('\\', '/');
+            var script = "script\\kfcpost.cmd";
+            if (File.Exists(script))
+            {
+                using Process fileopener = new Process();
+                fileopener.StartInfo.FileName = "cmd";
+                fileopener.StartInfo.Arguments = "/c " + script + " \"" + path + "\"";
+                fileopener.Start();
+            }
+        }
+
         void OpenWithDefaultAppByLanguage(string pathWithPlaceholder)
         {
             IncNumClicks();

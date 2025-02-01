@@ -107,6 +107,7 @@ namespace AwiUtils
                 swExport.WriteLine("</table>");
                 AddHtmlFooter(swExport);
             }
+            frmMainform.CallScript(fileName);
             return fileName;
         }
 
