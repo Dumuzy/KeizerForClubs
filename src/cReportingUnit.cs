@@ -288,7 +288,7 @@ namespace KeizerForClubs
                     {
                         var pair = pList4[0];
                         (var pWhite, var pBlack) = db.GetPlayerBaseById(pair.IdW, pair.IdB);
-                        string str4 = db.Locl_GetGameResultShort(pair.Result) + " ";
+                        string str4 = GetGameResultShortForCrosstable(player.Id, pair);
                         if (SqliteInterface.IsNonBoardResult(pair.Result))
                         {
                             str3 = str4 + " - - p=" + pair.PtsW.ToString(kppFormat);
@@ -321,6 +321,21 @@ namespace KeizerForClubs
             }
             t.Footer = TableFooter;
             return t;
+        }
+
+        string GetGameResultShortForCrosstable(int playerId, stPairing pair)
+        {
+            string s;
+            if (pair.Result.IsContainedIn(ReallyPlayedResults) && pair.Result != Results.Draw)
+            {
+                s = (pair.Result == Results.WinWhite && pair.IdW == playerId) ||
+                    (pair.Result == Results.WinBlack && pair.IdB == playerId) ?
+                    "1" : "0";
+            }
+            else 
+                s = db.Locl_GetGameResultShort(pair.Result);
+            s += " ";
+            return s;
         }
 
         #endregion TabellenstandVoll
