@@ -61,6 +61,7 @@ namespace KeizerForClubs
         public static readonly Results[] BlackWinResults = new Results[] { Results.WinBlack, Results.WinBlackForfeit };
         public static readonly Results[] DrawishResults = new Results[] { Results.Draw, Results.Adjourned };
         public static readonly Results[] ReallyPlayedResults = new Results[] { Results.WinWhite, Results.Draw, Results.WinBlack };
+        public static readonly Results[] ForfeitResults = new Results[] {  Results.WinWhiteForfeit, Results.WinBlackForfeit, Results.ForfeitForfeit };
 
         /// <summary> T falls es sich um ein Resultat ohne Brett bzw einem Spieler handelt, also sowas 
         /// wie Freilos, Entschuldigt, ... </summary>

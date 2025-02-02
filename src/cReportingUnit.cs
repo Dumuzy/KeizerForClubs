@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Reflection.Metadata.Ecma335;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using AwiUtils;
 using static System.Net.Mime.MediaTypeNames;
@@ -80,8 +81,8 @@ namespace KeizerForClubs
         #region Tabellenstand
         private string GetFileTabellenstandBasename(int runde, ReportingFlags flags, string category) =>
             Basename + "_" + (
-                Ext.HasFlag(flags, ReportingFlags.Podium) ? db.Locl_GetText("GUI_MENU", "Listen.Podium") 
-                            : db.Locl_GetText("GUI_MENU", "Listen.Calc") ) + "-" + runde + 
+                Ext.HasFlag(flags, ReportingFlags.Podium) ? db.Locl_GetText("GUI_MENU", "Listen.Podium")
+                            : db.Locl_GetText("GUI_MENU", "Listen.Calc")) + "-" + runde +
                         (string.IsNullOrEmpty(category) ? "" : "-" + category);
 
 
@@ -328,13 +329,32 @@ namespace KeizerForClubs
             string s;
             if (pair.Result.IsContainedIn(ReallyPlayedResults) && pair.Result != Results.Draw)
             {
-                s = (pair.Result == Results.WinWhite && pair.IdW == playerId) ||
-                    (pair.Result == Results.WinBlack && pair.IdB == playerId) ?
+                s = (pair.Result == Results.WinWhite && playerId == pair.IdW) ||
+                    (pair.Result == Results.WinBlack && playerId == pair.IdB ) ?
                     "1" : "0";
             }
-            else 
+            else if (pair.Result.IsContainedIn(ForfeitResults))
+            {
+                s = db.Locl_GetGameResultShort(pair.Result);
+                s = TakeNthValueOfForfeitResult(s, playerId == pair.IdW ? 1 : 2);
+            }
+            else
                 s = db.Locl_GetGameResultShort(pair.Result);
             s += " ";
+            return s;
+        }
+
+        string TakeNthValueOfForfeitResult(string s, int n)
+        {
+            var m = Regex.Match(s, @"\(([+-]) ([+-])\)");
+            if (m.Success)
+                s = $"({m.Groups[n].Value})";
+            else
+            {
+                m = m = Regex.Match(s, @"([1F]).([1F])");
+                if (m.Success)
+                    s = $"({m.Groups[n].Value})";
+            }
             return s;
         }
 
