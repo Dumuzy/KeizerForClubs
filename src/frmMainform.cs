@@ -242,6 +242,8 @@ for determining the first round pairings.";
                 using Process fileopener = new Process();
                 fileopener.StartInfo.FileName = "cmd";
                 fileopener.StartInfo.Arguments = "/c " + script + " \"" + path + "\"";
+                fileopener.StartInfo.UseShellExecute = false;
+                fileopener.StartInfo.CreateNoWindow = true;
                 fileopener.Start();
             }
         }
