@@ -347,6 +347,21 @@ tournoi à partir de l’Id de joueur le plus élevé. Vous pouvez utiliser
 <em>Joueur Ids réattribué</em> pour supprimer les trous dans l’ordre des
 Id. Cela est possible uniquement au début d’un tournoi.</p>
 <p><br/></p>
+<h3 id="post-traitement-automatisé-des-tableaux">Post-traitement
+automatisé des tableaux</h3>
+<p>Il peut être souhaitable que quelque chose soit fait automatiquement
+avec les tableaux créés, juste après leur création. Par exemple, il se
+peut que l’on veuille télécharger les tableaux quelque part ou que l’on
+veuille les modifier ou les compléter d’une manière ou d’une autre. On
+peut imaginer beaucoup de choses.</p>
+<p>Dans KeizerForClubs, il y a une interface pour cela : s’il y a un
+répertoire <code>script</code> qui se trouve à côté du répertoire
+<code>export</code> et dans lequel se trouve un fichier appelé
+<code>kfcpost.cmd</code>, ce fichier est appelé comme fichier batch et
+le chemin vers le tableau qui vient d’être créé est transmis comme
+paramètre. On peut bien sûr appeler toutes sortes d’autres commandes à
+partir de ce fichier cmd.</p>
+<p><br/></p>
 <h3 id="système-keizer-et-système-suisse">Système Keizer et système
 Suisse</h3>
 <h4

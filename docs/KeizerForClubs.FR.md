@@ -226,6 +226,14 @@ Vous pouvez utiliser _Joueur Ids réattribué_ pour supprimer les trous dans l'o
 
 <br/> 
 
+### Post-traitement automatisé des tableaux
+Il peut être souhaitable que quelque chose soit fait automatiquement avec les tableaux créés, juste après leur création. Par exemple, il se peut que l'on veuille télécharger les tableaux quelque part ou que l'on veuille les modifier ou les compléter d'une manière ou d'une autre. On peut imaginer beaucoup de choses. 
+
+Dans KeizerForClubs, il y a une interface pour cela : s'il y a un répertoire `script` qui se trouve à côté du répertoire `export` et dans lequel se trouve un fichier appelé `kfcpost.cmd`, ce fichier est appelé comme fichier batch et le chemin vers le tableau qui vient d'être créé est transmis comme paramètre. 
+On peut bien sûr appeler toutes sortes d'autres commandes à partir de ce fichier cmd. 
+
+<br/> 
+
 ### Système Keizer et système Suisse
 
 #### Comparaison des systèmes d'appariement Keizer et Suisse

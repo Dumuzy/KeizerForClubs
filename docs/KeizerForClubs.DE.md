@@ -304,6 +304,13 @@ Nach dem Importieren einer Spielerliste, z. B. der Vereinsmitglieder, und dem an
 in KeizerForClubs viele Löcher in der Reihenfolge der Spielernummern haben. Das ist ein bisschen ärgerlich. Zumal man an der höchsten Spieler-ID nicht erkennen kann, wie viele Teilnehmer am Turnier teilnehmen.  
 Sie können _Spieler-IDs neu vergeben_ verwenden, um die Löcher in der Reihenfolge der IDs zu entfernen. Nur möglich am Anfang eines Turniers. 
 
+<br />
+
+### Automatisierte Nachbearbeitung von Tabellen
+Es kann wünschenswert sein, daß mit erzeugten Tabellen irgendwas automatisch getan wird, direkt nachdem sie erzeugt wurden. Zum Beispiel will man die Tabellen vielleicht irgendwo hochladen oder man will die Tabellen in der einen oder anderen Weise ändern oder ergänzen. Man kann sich vieles vorstellen. 
+
+In KeizerForClubs gibt es eine Schnittstelle dafür: Falls es ein Verzeichnis `script` gibt, das neben dem Verzeichnis `export` liegt und in dem Verzechnis eine Datei namens `kfcpost.cmd` liegt, so wird diese Datei als Batch-Datei aufgerufen und der Pfad zur gerade erzeugten Tabelle wird als Parameter übergeben. 
+Man kann aus dieser cmd-Datei natürlich alle möglichen anderen Kommandos aufrufen. 
 
 <br />
 

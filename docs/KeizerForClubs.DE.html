@@ -341,6 +341,21 @@ Sie können <em>Spieler-IDs neu vergeben</em> verwenden, um die Löcher in
 der Reihenfolge der IDs zu entfernen. Nur möglich am Anfang eines
 Turniers.</p>
 <p><br /></p>
+<h3 id="automatisierte-nachbearbeitung-von-tabellen">Automatisierte
+Nachbearbeitung von Tabellen</h3>
+<p>Es kann wünschenswert sein, daß mit erzeugten Tabellen irgendwas
+automatisch getan wird, direkt nachdem sie erzeugt wurden. Zum Beispiel
+will man die Tabellen vielleicht irgendwo hochladen oder man will die
+Tabellen in der einen oder anderen Weise ändern oder ergänzen. Man kann
+sich vieles vorstellen.</p>
+<p>In KeizerForClubs gibt es eine Schnittstelle dafür: Falls es ein
+Verzeichnis <code>script</code> gibt, das neben dem Verzeichnis
+<code>export</code> liegt und in dem Verzechnis eine Datei namens
+<code>kfcpost.cmd</code> liegt, so wird diese Datei als Batch-Datei
+aufgerufen und der Pfad zur gerade erzeugten Tabelle wird als Parameter
+übergeben. Man kann aus dieser cmd-Datei natürlich alle möglichen
+anderen Kommandos aufrufen.</p>
+<p><br /></p>
 <h3 id="keizer-system-und-schweizer-system">Keizer System und Schweizer
 System</h3>
 <h4 id="vergleich-von-keizer--und-schweizer-paarungssystem">Vergleich

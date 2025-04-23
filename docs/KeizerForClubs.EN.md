@@ -296,6 +296,14 @@ You can use _Rebase player ids_ to remove the holes in the sequence of ids.
 
 <br />
 
+### Automated post-processing of tables
+It may be desirable to do something automatically with generated tables immediately after they have been created. For example, you may want to upload the tables somewhere or you may want to change or add to the tables in one way or another. You can imagine many things. 
+
+In KeizerForClubs there is an interface for this: If there is a `script` directory next to the `export` directory and there is a file called `kfcpost.cmd` in the directory, this file is called as a batch file and the path to the table just created is passed as a parameter. 
+You can of course call all other possible commands from this cmd file. 
+
+<br />
+
 ### Keizer System and Swiss System 
 
 #### Comparison of Keizer and Swiss Pairing Systems

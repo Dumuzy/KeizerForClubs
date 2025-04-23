@@ -289,6 +289,19 @@ player id the number of participants in the tournament.<br />
 You can use <em>Rebase player ids</em> to remove the holes in the
 sequence of ids.</p>
 <p><br /></p>
+<h3 id="automated-post-processing-of-tables">Automated post-processing
+of tables</h3>
+<p>It may be desirable to do something automatically with generated
+tables immediately after they have been created. For example, you may
+want to upload the tables somewhere or you may want to change or add to
+the tables in one way or another. You can imagine many things.</p>
+<p>In KeizerForClubs there is an interface for this: If there is a
+<code>script</code> directory next to the <code>export</code> directory
+and there is a file called <code>kfcpost.cmd</code> in the directory,
+this file is called as a batch file and the path to the table just
+created is passed as a parameter. You can of course call all other
+possible commands from this cmd file.</p>
+<p><br /></p>
 <h3 id="keizer-system-and-swiss-system">Keizer System and Swiss
 System</h3>
 <h4 id="comparison-of-keizer-and-swiss-pairing-systems">Comparison of

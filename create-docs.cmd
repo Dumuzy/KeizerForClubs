@@ -1,14 +1,14 @@
 
 set pandoc=pandoc.exe
 
-cd bin\Debug\net6.0-windows\docs
+cd bin\x86\Debug\net6.0-windows\docs
 rm *.html *.md
 
-cd ..\..\..\Release\net6.0-windows\docs
+cd ..\..\..\..\Release\x86\net6.0-windows\docs
 rm *.html *.md
 
 
-cd ..\..\..\..\docs
+cd ..\..\..\..\..\docs
 %pandoc% -f markdown -o KeizerForClubs.FAQ.EN.html KeizerForClubs.FAQ.EN.md
 %pandoc% -f markdown -o KeizerForClubs.FAQ.DE.html KeizerForClubs.FAQ.DE.md
 %pandoc% -f markdown -o KeizerForClubs.FAQ.FR.html KeizerForClubs.FAQ.FR.md
