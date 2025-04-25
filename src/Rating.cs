@@ -30,7 +30,7 @@ namespace KeizerForClubs
 
         /// <summary> Berechnet näherungsweise die Performance eines Spielers in einem Turnier. </summary>
         /// <param name="gegnerRatings">Ein Array, das die DWZ der Gegner enthält.</param>
-        /// <param name="ergebnisse">Ein Array, das die ergebnisse gegnen die Gegner enthält, jeweils 1, 0.5 oder 0.</param>
+        /// <param name="ergebnisse">Ein Array, das die Ergebnisse gegen die Gegner enthält, jeweils 1, 0.5 oder 0.</param>
         /// <remarks>Von da:https://de.wikipedia.org/wiki/Elo-Zahl.  Diese näherungsweise Performance weicht z.T. 
         /// deutlich ab von der Performance, die auf der BSV-Seite angegeben ist, habe bis zu 30 Punkten gesehen. </remarks>
         public static int? CalcPerformance(IList<int> gegnerRatings, IList<double> ergebnisse)

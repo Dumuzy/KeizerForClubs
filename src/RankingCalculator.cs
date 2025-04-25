@@ -120,7 +120,7 @@ namespace KeizerForClubs
         {
             int nkStellen = -1;
             var dkpl0 = kp0 - kp1;
-            for (int i = 0; i < 10  && nkStellen == -1; ++i)
+            for (int i = 0; i < 10 && nkStellen == -1; ++i)
                 if (dkpl0 > Math.Pow(10, -i))
                     nkStellen = i;
             if (nkStellen == -1)
@@ -228,6 +228,9 @@ namespace KeizerForClubs
             Stopwatches.Stop($"OneRoundAllPairingsSetKeizerPtsTa-1");
             if (pairings.Count == 0)
                 return false;
+            float percBonusVerlust = form.tbBonusVerlust.Value / 100.0f;
+            float percBonusRetired = form.tbBonusRetired.Value / 100.0f;
+
             for (int index = 0; index < pairings.Count; ++index)
             {
                 var pair = pairings[index];
@@ -239,8 +242,8 @@ namespace KeizerForClubs
                 if (SqliteInterface.IsWhiteWin(pair.Result))
                 {
                     erg_w = pBlack.KeizerStartPts;
-                    if(pair.Result != SqliteInterface.Results.WinWhiteForfeit)
-                        erg_s = pWhite.KeizerStartPts * form.tbBonusVerlust.Value / 100.0f;
+                    if (pair.Result != SqliteInterface.Results.WinWhiteForfeit)
+                        erg_s = pWhite.KeizerStartPts * percBonusVerlust;
                 }
                 else if (SqliteInterface.IsDrawish(pair.Result))
                 {
@@ -251,7 +254,7 @@ namespace KeizerForClubs
                 {
                     erg_s = pWhite.KeizerStartPts;
                     if (pair.Result != SqliteInterface.Results.WinBlackForfeit)
-                        erg_w = pBlack.KeizerStartPts * form.tbBonusVerlust.Value / 100.0f;
+                        erg_w = pBlack.KeizerStartPts * percBonusVerlust;
                 }
                 else if (pair.Result == SqliteInterface.Results.Excused)
                     erg_w = pWhite.KeizerStartPts * form.tbBonusExcused.Value / 100.0f;
@@ -265,22 +268,24 @@ namespace KeizerForClubs
                     erg_w = pWhite.KeizerStartPts * form.tbBonusUnexcused.Value / 100.0f;
                 if (pWhite.State == SqliteInterface.PlayerState.Retired)
                 {
+                    var fullValue = pBlack.KeizerStartPts * percBonusRetired;
                     if (SqliteInterface.IsBlackWin(pair.Result))
-                        erg_s = pBlack.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
+                        erg_s = 1.0f * fullValue;
                     else if (SqliteInterface.IsDrawish(pair.Result))
-                        erg_s = 0.5f * pBlack.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
+                        erg_s = 0.5f * fullValue;
                     else
-                        erg_s = 0;
+                        erg_s = percBonusVerlust * fullValue;
                     erg_w = 0;
                 }
                 if (pBlack.State == SqliteInterface.PlayerState.Retired)
                 {
+                    var fullValue = pWhite.KeizerStartPts * percBonusRetired;
                     if (SqliteInterface.IsWhiteWin(pair.Result))
-                        erg_w = pWhite.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
+                        erg_w = 1.0f * fullValue;
                     else if (SqliteInterface.IsDrawish(pair.Result))
-                        erg_w = 0.5f * pWhite.KeizerStartPts * form.tbBonusRetired.Value / 100.0f;
+                        erg_w = 0.5f * fullValue;
                     else
-                        erg_w = 0;
+                        erg_w = percBonusVerlust * fullValue;
                     erg_s = 0;
                 }
                 Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-3");
