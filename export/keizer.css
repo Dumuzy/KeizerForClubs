@@ -12,27 +12,26 @@ html {
   margin: 10px;
 }
  
-table {
+.kfc-table {
   border-collapse: collapse;
   text-align: center;
-    width: 100%;
+  width: 100%;
 }
 
-td, th {
+.kfc-table td, .kfc-table th {
   border: 1px solid #ddd;
-  padding: 5px;
+  padding: 0.9ex;
+  text-align: center;
 }
 
-tr:nth-child(even){background-color: #f2f2f2;}
+.kfc-table tr:nth-child(even){background-color: #f2f2f2;}
 
-tr:hover {background-color: #ddd;}
+.kfc-table tr:hover {background-color: #ddd;}
 
-th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #04AA6D;
-  color: white;
+.kfc-table .kfc-place-0 td {
+  padding-top: 1.5ex;
+  padding-bottom: 1.5ex;
+  background-color: aliceblue;
 }
 
 .kfc-wrapper {

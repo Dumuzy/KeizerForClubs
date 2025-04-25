@@ -83,7 +83,7 @@ namespace AwiUtils
                 swExport.WriteLine($"<h1 class='kfc-h1'><span>{t.Header1}</span></h1>");
                 swExport.WriteLine($"<h2 class='kfc-h2'><span class='kfc-h2-s1'>{t.Header2}</span>" +
                         (string.IsNullOrEmpty(t.Header3) ? "</h2>" : " " + $" <span class='kfc-h2-s2'>{t.Header3}</span></h2>"));
-                swExport.WriteLine("<table>");
+                swExport.WriteLine("<table class='kfc-table'>");
                 swExport.WriteLine("<colgroup>");
                 for (int i = 0; i < t.ColsCount; ++i)
                     swExport.Write($"<col class='kfc-col{i + 1}' />");
