@@ -667,6 +667,15 @@ namespace KeizerForClubs
             return Convert.ToSingle(sqlCommand.ExecuteScalar());
         }
 
+        /// <summary> Returns the number of "excused" games of the player with id up until runde. </summary>
+        public int GetPlayer_CountOfExcused(int id, int runde)
+        {
+            sqlCommand.CommandText = $@" SELECT Count(1) from Pairing 
+                    where rnd <= {runde} and PID_W={id} and result={(int)Results.Excused} ";
+            sqlCommand.Prepare();
+            return Convert.ToInt32(sqlCommand.ExecuteScalar());
+        }
+
         static string GetResultsInSql(Results[] rr) =>
             "(" + string.Join(",", rr.Select(r => ((int)r).ToString())) + ")";
 
@@ -1042,7 +1051,7 @@ namespace KeizerForClubs
             string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) noshow from Pairing  
                                     WHERE result in {NotShownUpResultsSql} GROUP BY pid_w) f on f.PID_W = p.id 
                                 LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
-                                    WHERE result = {(int)Results.FreeWin} GROUP BY pid_w) g on g.PID_W = p.id "; 
+                                    WHERE result = {(int)Results.FreeWin} GROUP BY pid_w) g on g.PID_W = p.id ";
 
             int playerCount = 0;
             sqlCommand.CommandText = @" SELECT p.id, p.name, p.rating, p.state, p.Keizer_StartPts, p.Keizer_SumPts, 
@@ -1103,7 +1112,7 @@ namespace KeizerForClubs
         static private int ComparePlayersForResultsList(stPlayer a, stPlayer b)
         {
             var k = Math.Round(a.KeizerSumPts, 2) - Math.Round(b.KeizerSumPts, 2);
-            var cmp =  k > 0 ? 1 : k < 0 ? -1 : 0;
+            var cmp = k > 0 ? 1 : k < 0 ? -1 : 0;
             if (k == 0)
             {
                 k = a.GamePts - b.GamePts;

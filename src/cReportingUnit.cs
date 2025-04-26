@@ -276,7 +276,7 @@ namespace KeizerForClubs
                     line.Add("(ret)");
                 line.Add(player.Name);
                 // str1.Add(player.rating.ToString());
-                line.Add(player.KeizerPrevPts.ToString(kppFormat));
+                line.Add(player.KeizerPrevPts.ToString(kppFormat2));
                 line.Add(player.KeizerSumPts.ToString("0.00"));
                 line.Add(player.GamePts.ToString());
                 line.Add(Ext.ToDebug(db.GetPlayersRatingPerformance(player.Id)));
@@ -292,7 +292,7 @@ namespace KeizerForClubs
                         string str4 = GetGameResultShortForCrosstable(player.Id, pair);
                         if (SqliteInterface.IsNonBoardResult(pair.Result))
                         {
-                            str3 = str4 + " - - p=" + pair.PtsW.ToString(kppFormat);
+                            str3 = str4 + " - - p=" + pair.PtsW.ToString(kppFormat2);
                         }
                         else
                         {

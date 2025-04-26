@@ -257,7 +257,10 @@ namespace KeizerForClubs
                         erg_w = pBlack.KeizerStartPts * percBonusVerlust;
                 }
                 else if (pair.Result == SqliteInterface.Results.Excused)
-                    erg_w = pWhite.KeizerStartPts * form.tbBonusExcused.Value / 100.0f;
+                {
+                    float multi = GetExcusedMultiplikator(pWhite.Id, runde);
+                    erg_w = multi * pWhite.KeizerStartPts * form.tbBonusExcused.Value / 100.0f;
+                }
                 else if (pair.Result == SqliteInterface.Results.Unexcused)
                     erg_w = pWhite.KeizerStartPts * form.tbBonusUnexcused.Value / 100.0f;
                 else if (pair.Result == SqliteInterface.Results.Hindered)
@@ -302,6 +305,17 @@ namespace KeizerForClubs
             CheckPairingsValuesTa(runde, endRundeWhichIsCalculated);
             Stopwatches.Stop("OneRoundAllPairingsSetKeizerPtsTa-6");
             return true;
+        }
+
+        float GetExcusedMultiplikator(int playerId, int runde)
+        {
+            float multi = 1.0f;
+            if (false)  // TODO T80. Implement user interface. 
+            {
+                var nExcused = db.GetPlayer_CountOfExcused(playerId, runde);
+                multi = nExcused > 0 ? 1.0f / nExcused : 1.0f;
+            }
+            return multi;
         }
 
         /// <summary> Prüft, ob ein Sieg gegen X auch in jeder Runde dasselbe zählt, wenn die
