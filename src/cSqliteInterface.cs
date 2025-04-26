@@ -61,7 +61,7 @@ namespace KeizerForClubs
         public static readonly Results[] BlackWinResults = new Results[] { Results.WinBlack, Results.WinBlackForfeit };
         public static readonly Results[] DrawishResults = new Results[] { Results.Draw, Results.Adjourned };
         public static readonly Results[] ReallyPlayedResults = new Results[] { Results.WinWhite, Results.Draw, Results.WinBlack };
-        public static readonly Results[] ForfeitResults = new Results[] {  Results.WinWhiteForfeit, Results.WinBlackForfeit, Results.ForfeitForfeit };
+        public static readonly Results[] ForfeitResults = new Results[] { Results.WinWhiteForfeit, Results.WinBlackForfeit, Results.ForfeitForfeit };
 
         /// <summary> T falls es sich um ein Resultat ohne Brett bzw einem Spieler handelt, also sowas 
         /// wie Freilos, Entschuldigt, ... </summary>
@@ -83,7 +83,7 @@ namespace KeizerForClubs
             public int RatingWDelta;  // Original Rating plus delta, if FirstRoundRandom.
             public int Rank;
             public PlayerState State;
-            public float KeizerStartPts, KeizerSumPts, KeizerPrevPts;
+            public float KeizerStartPts, KeizerSumPts, KeizerPrevPts, GamePts;
             public int FreeCnt;	// Anzahl Freilose; nur für Auslosung aufgenommen      
             public override string ToString()
             {
@@ -1077,11 +1077,45 @@ namespace KeizerForClubs
         /// <summary> Spielerliste aus der DB abfragen.  Auch Tabellenstand möglich über SortOrder.
         /// Aber Achtung. Spieler-State ist in RUnde N durch die Pairing-Tabelle definiert, wenn Runde n
         /// schon gelost ist.  </summary>
-        public Li<stPlayer> GetPlayerLi(string sWhere, string sSortorder, int runde)
+        public Li<stPlayer> GetPlayerLi(string sWhere, string sSortorder, int runde, bool isWithGamePts = false)
         {
             SqliteInterface.stPlayer[] arr = new stPlayer[100];
             int playerCount = GetPlayerList(ref arr, sWhere, sSortorder, runde);
+            if (isWithGamePts)
+                for (int i = 0; i < playerCount; ++i)
+                    arr[i].GamePts = GetPlayer_PartiePunkte(arr[i].Id);
+
+
             return new Li<stPlayer>(arr.Take(playerCount));
+        }
+
+        /// <summary> Vergleichsfunktion, um die SPielerliste für die Tabelle zu sortieren. 
+        /// ABsteigend nach KeizerSum, GamePts, Rating. </summary>
+        static private int ComparePlayersForResultsList(stPlayer a, stPlayer b)
+        {
+            var k = Math.Round(a.KeizerSumPts, 2) - Math.Round(b.KeizerSumPts, 2);
+            var cmp =  k > 0 ? 1 : k < 0 ? -1 : 0;
+            if (k == 0)
+            {
+                k = a.GamePts - b.GamePts;
+                cmp = k > 0 ? 1 : k < 0 ? -1 : 0;
+                if (k == 0)
+                {
+                    k = a.Rating - b.Rating;
+                    cmp = k > 0 ? 1 : k < 0 ? -1 : 0;
+                }
+
+            }
+            return -cmp;
+        }
+
+        /// <summary> Gibt die Spielerliste sortiert für die Tabelle zurück. 
+        /// Sortiert wird absteigend nach KeizerSum, GamePts, Rating. </summary>
+        public Li<stPlayer> GetPlayerLiOrderedForResults(int runde)
+        {
+            var players = GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", runde, true);
+            Ext.ShellSort(players, ComparePlayersForResultsList);
+            return players;
         }
 
         /// <summary> Gibt die Liste der Spieler aus früheren Runden zurück. Nur Id, Name, Rating 

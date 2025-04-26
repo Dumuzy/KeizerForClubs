@@ -179,7 +179,7 @@ namespace KeizerForClubs
                             db.Locl_GetText("GUI_MENU", "Listen.Calc"))
                         + " " + str2;
             SqliteInterface.stPlayer[] pList = new SqliteInterface.stPlayer[100];
-            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc ", t.Runde);
+            var players = db.GetPlayerLiOrderedForResults(t.Runde);
             var lih = new Li<string>(new string[] { "", db.Locl_GetText("GUI_TEXT", "Name"),
                 db.Locl_GetText("GUI_TEXT", "Keizer-Punkte"), db.Locl_GetText("GUI_TEXT", "Spiel-Punkte") });
             if (isWithPlayerId)
@@ -194,7 +194,7 @@ namespace KeizerForClubs
                     li.Add(num1++.ToString() + ".");
                     li.Add(player.Name);
                     li.Add(player.KeizerSumPts.ToString("0.00"));
-                    li.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
+                    li.Add(player.GamePts.ToString());
                     if (isWithPlayerId)
                         li.Add(player.Id.ToString());
                     t.AddRow(li);
@@ -241,7 +241,7 @@ namespace KeizerForClubs
         {
             var t = new TableW3Headers(sTurnier, TableType.Kreuz, db.GetMaxRound());
             SqliteInterface.stPairing[] pList4 = new SqliteInterface.stPairing[1];
-            var players = db.GetPlayerLi("", " ORDER BY Keizer_SumPts desc, Rating desc ", t.Runde);
+            var players = db.GetPlayerLiOrderedForResults(t.Runde);
 
             string strr = db.Locl_GetText("GUI_LABEL", "Runde") + " " + db.GetMaxRound();
             t.Header2 = db.Locl_GetText("GUI_MENU", "Listen.CalcFull") + " " + strr;
@@ -278,7 +278,7 @@ namespace KeizerForClubs
                 // str1.Add(player.rating.ToString());
                 line.Add(player.KeizerPrevPts.ToString(kppFormat));
                 line.Add(player.KeizerSumPts.ToString("0.00"));
-                line.Add(db.GetPlayer_PartiePunkte(player.Id).ToString());
+                line.Add(player.GamePts.ToString());
                 line.Add(Ext.ToDebug(db.GetPlayersRatingPerformance(player.Id)));
 
                 for (int runde = 1; runde <= t.Runde; ++runde)
