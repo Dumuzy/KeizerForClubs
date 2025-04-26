@@ -968,17 +968,25 @@ for determining the first round pairings.";
             }
         }
 
+        /// <summary> Returniert das Minimum von FreeCount aller PairingPlayers. </summary>
+        private int GetPairingPlayersMinFreeCount()
+        {
+            var minFreeCount = 9999;
+            for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
+            {
+                if (this.pPairingPlayerList[index].FreeCnt < minFreeCount)
+                    minFreeCount = this.pPairingPlayerList[index].FreeCnt;
+            }
+            return minFreeCount;
+        }
+
         private bool ExecutePairing()
         {
             Stopwatches.Start("ExecutePairing-1");
             var currRunde = db.GetMaxRound() + 1;  // currRunde ist die aktuell ausgeloste Runde. 
             this.iPairingPlayerCntAvailable = db.GetPlayerList_Available(ref this.pPairingPlayerList, "", currRunde);
-            this.iPairingMinFreeCnt = 999;
-            for (int index = 0; index < this.iPairingPlayerCntAvailable; ++index)
-            {
-                if (this.pPairingPlayerList[index].FreeCnt < this.iPairingMinFreeCnt)
-                    this.iPairingMinFreeCnt = this.pPairingPlayerList[index].FreeCnt;
-            }
+            this.iPairingMinFreeCnt = GetPairingPlayersMinFreeCount();
+
             Stopwatches.Next("ExecutePairing-2");
             fSetFirstRoundRandomRating(currRunde, iPairingPlayerCntAvailable);
             this.ranking.AllPlayersAllRoundsCalculateTa();

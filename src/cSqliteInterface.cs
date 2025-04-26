@@ -55,6 +55,7 @@ namespace KeizerForClubs
         };
 
         public static readonly Results[] NonBoardResults = new Results[] { Results.FreeWin, Results.Hindered, Results.Excused, Results.Unexcused, Results.LateStart };
+        public static readonly Results[] NotShownUpResults = new Results[] { Results.Hindered, Results.Excused, Results.Unexcused, Results.LateStart };
         public static readonly Results[] BoardResults = new Results[] { Results.ErrUndefined, Results.WinWhite, Results.Draw,
             Results.WinBlack, Results.WinWhiteForfeit, Results.WinBlackForfeit, Results.ForfeitForfeit, Results.Adjourned };
         public static readonly Results[] WhiteWinResults = new Results[] { Results.WinWhite, Results.WinWhiteForfeit };
@@ -674,6 +675,7 @@ namespace KeizerForClubs
         static readonly string DrawishResultsSql = GetResultsInSql(DrawishResults);
         static readonly string BoardResultsSql = GetResultsInSql(BoardResults);
         static readonly string NonBoardResultsSql = GetResultsInSql(NonBoardResults);
+        static readonly string NotShownUpResultsSql = GetResultsInSql(NotShownUpResults);
         static readonly string ReallyPlayedResultsSql = GetResultsInSql(ReallyPlayedResults);
 
 
@@ -1037,11 +1039,14 @@ namespace KeizerForClubs
         /// <returns>Number of players.</returns>
         public int GetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder, int runde)
         {
-            string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
-                                WHERE result in {NonBoardResultsSql} GROUP BY pid_w) f on f.PID_W = p.id ";
+            string sFrei = $@"LEFT JOIN(SELECT pid_w, COUNT(1) noshow from Pairing  
+                                    WHERE result in {NotShownUpResultsSql} GROUP BY pid_w) f on f.PID_W = p.id 
+                                LEFT JOIN(SELECT pid_w, COUNT(1) frei from Pairing  
+                                    WHERE result = {(int)Results.FreeWin} GROUP BY pid_w) g on g.PID_W = p.id "; 
+
             int playerCount = 0;
             sqlCommand.CommandText = @" SELECT p.id, p.name, p.rating, p.state, p.Keizer_StartPts, p.Keizer_SumPts, 
-                                p.Keizer_PrevPts, p.rank, f.frei, p.ratingWDelta, p.Categories FROM Player p 
+                                p.Keizer_PrevPts, p.rank, f.noshow, g.frei, p.ratingWDelta, p.Categories FROM Player p 
                                 " + sFrei + sWhere + sSortorder;
             using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
             {
@@ -1061,8 +1066,9 @@ namespace KeizerForClubs
                             pList[playerCount].KeizerPrevPts = sqLiteDataReader.IsDBNull(6) ? 0.0f : sqLiteDataReader.GetFloat(6);
                             pList[playerCount].Rank = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
                             pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
-                            pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(9) ? 0 : (int)sqLiteDataReader.GetInt16(9);
-                            pList[playerCount].Categories = sqLiteDataReader.IsDBNull(10) ? "" : sqLiteDataReader.GetString(10);
+                            pList[playerCount].FreeCnt += FreeWinMulti * (sqLiteDataReader.IsDBNull(9) ? 0 : (int)sqLiteDataReader.GetInt16(9));
+                            pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(10) ? 0 : (int)sqLiteDataReader.GetInt16(10);
+                            pList[playerCount].Categories = sqLiteDataReader.IsDBNull(11) ? "" : sqLiteDataReader.GetString(11);
 
                             ++playerCount;
                         }
@@ -1074,6 +1080,10 @@ namespace KeizerForClubs
             return playerCount;
         }
 
+        /// <summary> Multiplikator für Freilos, damit niemand 2 Freilose kriegt, solange noch andre da sind, 
+        /// die noch keins gekriegt haben. Könnte jede Zahl sein, die größer ist, als die max. Rundenzahl. </summary>
+        const int FreeWinMulti = 777;
+
         /// <summary> Spielerliste aus der DB abfragen.  Auch Tabellenstand möglich über SortOrder.
         /// Aber Achtung. Spieler-State ist in RUnde N durch die Pairing-Tabelle definiert, wenn Runde n
         /// schon gelost ist.  </summary>
@@ -1084,7 +1094,6 @@ namespace KeizerForClubs
             if (isWithGamePts)
                 for (int i = 0; i < playerCount; ++i)
                     arr[i].GamePts = GetPlayer_PartiePunkte(arr[i].Id);
-
 
             return new Li<stPlayer>(arr.Take(playerCount));
         }
