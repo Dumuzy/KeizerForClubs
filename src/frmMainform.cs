@@ -290,7 +290,6 @@ for determining the first round pairings.";
             IncNumClicks();
             SwitchToPairingTab();
             DelDeletedPlayers();
-            new ReportingUnit(sTurniername, sFilename, db).WriteCurrentTablesToDb();
             if (db.GetPairings_NoResult() == 0)
                 ExecutePairing();
             else
@@ -304,7 +303,6 @@ for determining the first round pairings.";
             SwitchToPairingTab();
             DelDeletedPlayers();
             int maxRound = db.GetMaxRound();
-            new ReportingUnit(sTurniername, sFilename, db).WriteCurrentTablesToDb();
             if (sender == mnuPaarungManuell)
             {
                 if (db.GetPairings_NoResult() == 0)
@@ -788,6 +786,10 @@ for determining the first round pairings.";
                     int pid1 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[1].Value);
                     int pid2 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[4].Value);
                     db.UpdPairingResult(Convert.ToInt16(numRoundSelect.Value), pid1, pid2, gameResult);
+
+                    if(db.IsRoundLastAndFinished(Helper.ToInt(numRoundSelect.Value)))
+                        new ReportingUnit(sTurniername, sFilename, db).WriteCurrentTablesToDb();
+
                 }
             }
         }

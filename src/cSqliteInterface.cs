@@ -118,6 +118,7 @@ namespace KeizerForClubs
             }
             public const int FirstNonPlayingBoard = 100;
             public bool IsNonPlayingBoard => Board >= FirstNonPlayingBoard;
+            public bool IsPlayingBoard => Board < FirstNonPlayingBoard;
         };
 
         public class clPairing
@@ -885,6 +886,20 @@ namespace KeizerForClubs
             return m;
         }
 
+        public bool IsRoundLastAndFinished(int round)
+        {
+            bool ok = false;
+            if (round == GetMaxRound())
+            {
+                SQLiteCommand sqlCmd = new SQLiteCommand(SQLiteMyDB);
+                sqlCmd.CommandText = $@" SELECT Count(1) FROM Pairing 
+                          WHERE Rnd={round} AND result={(int)Results.ErrUndefined}  ;";
+                int n = Convert.ToInt32(sqlCmd.ExecuteScalar());
+                ok = n == 0;
+            }
+            return ok;
+        }
+
         public bool InsPairingNew(int runde, int brett, int idw, int ids)
         {
             sqlCommand.CommandText = " INSERT INTO Pairing  (Rnd, board, PID_W, PID_B, Result, Pts_W,Pts_B)  " +
@@ -1042,8 +1057,8 @@ namespace KeizerForClubs
 
         #region Playerlist
         /// <summary> Spielerliste aus der DB abfragen.  Auch Tabellenstand möglich über SortOrder.
-        /// Aber Achtung. Spieler-State ist in RUnde N durch die Pairing-Tabelle definiert, wenn Runde n
-        /// schon gelost ist. 
+        /// Aber Achtung. Spieler-State ist in RUnde N durch die Pairing-Tabelle definiert, 
+        /// wenn Runde N schon gelost ist. 
         /// </summary>
         /// <returns>Number of players.</returns>
         public int GetPlayerList(ref stPlayer[] pList, string sWhere, string sSortorder, int runde)
@@ -1087,6 +1102,49 @@ namespace KeizerForClubs
                 }
             }
             return playerCount;
+        }
+
+        /// <summary> Gets the state of the player with the playerId from a pairings list. The pairings list 
+        /// must be the pairings of a certain round. </summary>
+        /// <param name="clPairs"> The pairings. </param>
+        /// <exception cref="VAException"></exception>
+        PlayerState GetPlayerStateFromPairings(Li<SqliteInterface.clPairing> clPairs, int playerId)
+        {
+            PlayerState st = PlayerState.ErrUndefined;
+            foreach (var pair in clPairs)
+                if (pair.P.IdW == playerId || pair.P.IdB == playerId)
+                {
+                    var res = pair.P.Result;
+                    if (pair.P.IsPlayingBoard)
+                    {
+                        if (BoardResults.Contains(res))
+                            st = PlayerState.Paired;
+                        else
+                            throw new VAException("Invalid state 1.");
+                    }
+                    else
+                    {
+                        if (res == Results.FreeWin)
+                            st = PlayerState.Freilos;
+                        else if (res == Results.Excused)
+                            st = PlayerState.Excused;
+                        else if (res == Results.Unexcused)
+                            st = PlayerState.Unexcused;
+                        else if (res == Results.Hindered)
+                            st = PlayerState.Hindered;
+                        else if (res == Results.LateStart)
+                            st = PlayerState.NotYetStarted;
+                        else
+                            throw new VAException("Invalid state 2.");
+                    }
+
+                    if (st != PlayerState.ErrUndefined)
+                        break;
+                }
+
+            if (st == PlayerState.ErrUndefined)
+                st = PlayerState.Retired;
+            return st;
         }
 
         /// <summary> Multiplikator für Freilos, damit niemand 2 Freilose kriegt, solange noch andre da sind, 
