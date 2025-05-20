@@ -306,11 +306,33 @@ Sie können _Spieler-IDs neu vergeben_ verwenden, um die Löcher in der Reihenfolg
 
 <br />
 
-### Automatisierte Nachbearbeitung von Tabellen
+### Spezialfunktionen
+
+#### Automatisierte Nachbearbeitung von Tabellen
 Es kann wünschenswert sein, daß mit erzeugten Tabellen irgendwas automatisch getan wird, direkt nachdem sie erzeugt wurden. Zum Beispiel will man die Tabellen vielleicht irgendwo hochladen oder man will die Tabellen in der einen oder anderen Weise ändern oder ergänzen. Man kann sich vieles vorstellen. 
 
 In KeizerForClubs gibt es eine Schnittstelle dafür: Falls es ein Verzeichnis `script` gibt, das neben dem Verzeichnis `export` liegt und in dem Verzechnis eine Datei namens `kfcpost.cmd` liegt, so wird diese Datei als Batch-Datei aufgerufen und der Pfad zur gerade erzeugten Tabelle wird als Parameter übergeben. 
 Man kann aus dieser cmd-Datei natürlich alle möglichen anderen Kommandos aufrufen. 
+
+<br />
+
+#### Zeitbonus berechnen und anzeigen
+Das Programm bietet die Möglichkeit, verschiedene Bedenkzeiten zum Ausgleich von Rating-Unterschieden zu berechnen. 
+Das Programm berechnet diese folgendermaßen: 
+```
+diff = Math.Abs(Rating1 - Rating2);
+TIMEstronger = (int)Math.Round(tbMin + (tbSum - 2 * tbMin) / (1 + Math.Exp(0.006 * diff)), 0);
+TIMEweaker = tbSum - TIMEstronger;
+```
+Es gilt dann immer: 
+
+   * Die summierte Bedenkzeit beider Spieler ist gleich `tbSum`.  
+   * Bei sehr großer Rating-Differenz hat der stärkere Spieler `tbMin` Bedenkzeit und der schwächere bekommt `tbSum - tbMin`. 
+   
+Derzeit gibt es dafür kein User Interface, man muß die Werte tbSum und tbMin direkt in der Datenbank eintragen.
+Es sind dies in der ConfigTab die Werte tbSum = OPTION.TimeBonusSum und tbMin = OPTION.TimeBonusMin. 
+
+Die berechneten Zeiten werden nur angezeigt in der Paarungstabelle, die man über den Menüpunkt Listen/Paarungen/Ergebnisse bekommt. 
 
 <br />
 

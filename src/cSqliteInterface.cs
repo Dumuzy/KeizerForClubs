@@ -510,6 +510,30 @@ namespace KeizerForClubs
             return sqlCommand.ExecuteScalar()?.ToString() ?? null;
         }
 
+        public bool HasTimeBonus => GetTimeBonusSum() != 0;
+
+        private int GetTimeBonusSum() => GetConfigInt("OPTION.TimeBonusSum", 0);
+        private int GetTimeBonusMin() => GetConfigInt("OPTION.TimeBonusMin", 0);
+
+        public Tuple<string, string> GetPlayerTimes(int idW, int idB)
+        {
+            if (idW < 0 || idB < 0)
+                return new Tuple<string, string>("NN", "NN");
+            sqlCommand.CommandText = $" Select rating name from player  where ID={idW} ";
+            var ratingW = Helper.ToDouble(sqlCommand.ExecuteScalar());
+            sqlCommand.CommandText = $" Select rating name from player  where ID={idB} ";
+            var ratingB = Helper.ToDouble(sqlCommand.ExecuteScalar());
+            var diff = Math.Abs(ratingW - ratingB);
+            var tbSum = GetTimeBonusSum();
+            var tbMin = GetTimeBonusMin();
+            var timeStronger = (int)Math.Round(tbMin + (tbSum - 2*tbMin) / (1 + Math.Exp(0.006 * diff)), 0);
+            var timeWeaker = tbSum - timeStronger;
+            var timeW = ratingW >= ratingB ? timeStronger : timeWeaker;
+            var timeB = ratingW >= ratingB ? timeWeaker : timeStronger;
+
+            return new Tuple<string, string>(timeW.ToString(), timeB.ToString());
+        }
+
 
         public PlayerState GetPlayerState(int id)
         {
@@ -874,7 +898,7 @@ namespace KeizerForClubs
         public int GetMaxRound()
         {
             int m = 0;
-            sqlCommand.CommandText = " Select Max(rnd) from pairing ";
+            sqlCommand.CommandText = " Select COALESCE(Max(rnd), 0) from pairing ";
             try
             {
                 m = Convert.ToInt16(sqlCommand.ExecuteScalar());

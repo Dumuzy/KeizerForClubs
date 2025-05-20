@@ -341,8 +341,9 @@ Sie können <em>Spieler-IDs neu vergeben</em> verwenden, um die Löcher in
 der Reihenfolge der IDs zu entfernen. Nur möglich am Anfang eines
 Turniers.</p>
 <p><br /></p>
-<h3 id="automatisierte-nachbearbeitung-von-tabellen">Automatisierte
-Nachbearbeitung von Tabellen</h3>
+<h3 id="spezialfunktionen">Spezialfunktionen</h3>
+<h4 id="automatisierte-nachbearbeitung-von-tabellen">Automatisierte
+Nachbearbeitung von Tabellen</h4>
 <p>Es kann wünschenswert sein, daß mit erzeugten Tabellen irgendwas
 automatisch getan wird, direkt nachdem sie erzeugt wurden. Zum Beispiel
 will man die Tabellen vielleicht irgendwo hochladen oder man will die
@@ -355,6 +356,30 @@ Verzeichnis <code>script</code> gibt, das neben dem Verzeichnis
 aufgerufen und der Pfad zur gerade erzeugten Tabelle wird als Parameter
 übergeben. Man kann aus dieser cmd-Datei natürlich alle möglichen
 anderen Kommandos aufrufen.</p>
+<p><br /></p>
+<h4 id="zeitbonus-berechnen-und-anzeigen">Zeitbonus berechnen und
+anzeigen</h4>
+<p>Das Programm bietet die Möglichkeit, verschiedene Bedenkzeiten zum
+Ausgleich von Rating-Unterschieden zu berechnen. Das Programm berechnet
+diese folgendermaßen:</p>
+<pre><code>diff = Math.Abs(Rating1 - Rating2);
+TIMEstronger = (int)Math.Round(tbMin + (tbSum - 2 * tbMin) / (1 + Math.Exp(0.006 * diff)), 0);
+TIMEweaker = tbSum - TIMEstronger;</code></pre>
+<p>Es gilt dann immer:</p>
+<ul>
+<li>Die summierte Bedenkzeit beider Spieler ist gleich
+<code>tbSum</code>.<br />
+</li>
+<li>Bei sehr großer Rating-Differenz hat der stärkere Spieler
+<code>tbMin</code> Bedenkzeit und der schwächere bekommt
+<code>tbSum - tbMin</code>.</li>
+</ul>
+<p>Derzeit gibt es dafür kein User Interface, man muß die Werte tbSum
+und tbMin direkt in der Datenbank eintragen. Es sind dies in der
+ConfigTab die Werte tbSum = OPTION.TimeBonusSum und tbMin =
+OPTION.TimeBonusMin.</p>
+<p>Die berechneten Zeiten werden nur angezeigt in der Paarungstabelle,
+die man über den Menüpunkt Listen/Paarungen/Ergebnisse bekommt.</p>
 <p><br /></p>
 <h3 id="keizer-system-und-schweizer-system">Keizer System und Schweizer
 System</h3>

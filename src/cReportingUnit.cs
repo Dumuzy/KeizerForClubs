@@ -59,17 +59,25 @@ namespace KeizerForClubs
             var t = new TableW3Headers(sTurnier, TableType.Paarungen, runde);
             t.Header2 = db.Locl_GetText("GUI_MENU", "Paarungen") + " " +
                 db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
-            t.AddRow("Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis".Split().
-                    Select(s => db.Locl_GetText("GUI_COLS", s)).ToLi());
+            var hasTimeBonus = db.HasTimeBonus;
+            var colsHeadsIds = hasTimeBonus ? "Pa.Brett Pa.Weiss Pa.TiWeiss Pa.Schwarz Pa.TiSchwarz Pa.Ergebnis" : 
+                    "Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis";
+            t.AddRow(colsHeadsIds.Split().Select(s => db.Locl_GetText("GUI_COLS", s)).ToLi());
 
             SqliteInterface.stPairing[] pList = new SqliteInterface.stPairing[50];
             int pairingList = db.GetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
             for (int index = 0; index < pairingList; ++index)
             {
+                var playerTimes = hasTimeBonus ? db.GetPlayerTimes(pList[index].IdW, pList[index].IdB) : null;
+
                 var r = new Li<string>();
                 r.Add((index + 1).ToString() + ".");
                 r.Add(db.GetPlayerName(pList[index].IdW));
+                if(hasTimeBonus)
+                    r.Add(playerTimes.Item1);
                 r.Add(db.GetPlayerName(pList[index].IdB));
+                if (hasTimeBonus)
+                    r.Add(playerTimes.Item2);
                 r.Add(db.Locl_GetGameResultText(pList[index].Result));
                 t.AddRow(r);
             }
