@@ -32,8 +32,9 @@ namespace KeizerForClubs
         private NumericUpDown numRoundsGameRepeat;
         private ComboBox ddlRatioFirst2Last, ddlFirstRoundRandom;
         private ToolTip tooltip;
-        private Label lblRoundsGameRepeat, lblOutputTo, lblNiceName, lblCategories, lblRatioFirst2Last, lblFirstRoundRandom;
-        private TextBox tbNiceName, tbCategories;
+        private Label lblRoundsGameRepeat, lblOutputTo, lblNiceName, lblCategories, lblTimeBonus,
+            lblRatioFirst2Last, lblFirstRoundRandom;
+        private TextBox tbNiceName, tbCategories, tbTimeBonus;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
         private CheckBox chkFreilosVerteilen, chkNovusRandomBoard;
@@ -178,6 +179,7 @@ for determining the first round pairings.";
             numRoundSelect.Value = (Decimal)db.GetMaxRound();
             tbNiceName.Text = db.GetConfigText("OPTION.NiceName");
             tbCategories.Text = db.GetOptionsCategoriesText();
+            tbTimeBonus.Text = db.GetConfigText("OPTION.TimeBonus");
             // Der Name des db-Files ist einem ini-File gemerkt, alle anderen Settings in 
             // der Config-Datenbank. Weil die Config-Db nur schwer geöffnet werden kann ohne die 
             // Haupt-Db. Weil die Config-Db eine an die Haupt-Db attached DB ist. 
@@ -510,6 +512,11 @@ for determining the first round pairings.";
                 db.SetConfigText("OPTION.Categories", cleanedCatsText);
                 if (cleanedCatsText != tbCategories.Text)
                     tbCategories.Text = cleanedCatsText;
+
+                var cleanedTimeBonusText = TimeBonus.CleanOptionsTimeBonusText(tbTimeBonus.Text);
+                db.SetConfigText("OPTION.TimeBonus", cleanedTimeBonusText);
+                if (cleanedTimeBonusText != tbTimeBonus.Text)
+                    tbTimeBonus.Text = cleanedTimeBonusText;
             }
             SaveWindowSettings();
         }
@@ -884,6 +891,7 @@ for determining the first round pairings.";
             lblOutputTo.Text = db.Locl_GetText("GUI_LABEL", "OutputTo");
             lblNiceName.Text = db.Locl_GetText("GUI_LABEL", "NiceName");
             lblCategories.Text = db.Locl_GetText("GUI_LABEL", "Categories");
+            lblTimeBonus.Text = db.Locl_GetText("GUI_LABEL", "TimeBonus");
             chkWickerNormalization.Text = db.Locl_GetText("GUI_LABEL", "WickerNorm");
             btDonate1.Text = btDonate2.Text = db.Locl_GetText("GUI_TEXT", "Donate");
         }

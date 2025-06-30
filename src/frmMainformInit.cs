@@ -57,6 +57,8 @@ namespace KeizerForClubs
             this.tbNiceName = new TextBox();
             this.lblCategories = new Label();
             this.tbCategories = new TextBox();
+            this.lblTimeBonus = new Label();
+            this.tbTimeBonus = new TextBox();
             this.numRoundsGameRepeat = new NumericUpDown();
             this.ddlRatioFirst2Last = new ComboBox();
             this.ddlFirstRoundRandom = new ComboBox();
@@ -267,7 +269,8 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add(this.chkCsv);
             this.tabSettings.Controls.Add(this.chkWickerNormalization);
             this.tabSettings.Controls.Add(this.lblOutputTo);
-            this.tabSettings.Controls.AddRange(new Control[] { lblNiceName, tbNiceName, lblCategories, tbCategories });
+            this.tabSettings.Controls.AddRange(new Control[] { lblNiceName, tbNiceName, lblCategories, tbCategories, 
+                lblTimeBonus, tbTimeBonus });
 
             this.tabSettings.Location = new Point(4, 4);
             this.tabSettings.Name = "tabSettings";
@@ -403,6 +406,12 @@ Keizer points much more graspable.
             this.tbCategories.Location = new Point(xloc + 158, yOutput + 2);
             this.tbCategories.Size = new Size(362, 23);
 
+            yOutput += dy;
+            this.lblTimeBonus.Location = new Point(xloc, yOutput);
+            this.lblTimeBonus.Size = new Size(154, 23);
+            this.lblTimeBonus.TextAlign = ContentAlignment.MiddleRight;
+            this.tbTimeBonus.Location = new Point(xloc + 158, yOutput + 2);
+            this.tbTimeBonus.Size = new Size(362, 23);
 
 
             this.btDonate1.Location = new Point(43, 330);

@@ -59,7 +59,8 @@ namespace KeizerForClubs
             var t = new TableW3Headers(sTurnier, TableType.Paarungen, runde);
             t.Header2 = db.Locl_GetText("GUI_MENU", "Paarungen") + " " +
                 db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
-            var hasTimeBonus = db.HasTimeBonus;
+            var timeBonus = db.GetOptionsTimeBonus();
+            var hasTimeBonus = timeBonus != null;
             var colsHeadsIds = hasTimeBonus ? "Pa.Brett Pa.Weiss Pa.TiWeiss Pa.Schwarz Pa.TiSchwarz Pa.Ergebnis" : 
                     "Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis";
             t.AddRow(colsHeadsIds.Split().Select(s => db.Locl_GetText("GUI_COLS", s)).ToLi());
@@ -68,7 +69,7 @@ namespace KeizerForClubs
             int pairingList = db.GetPairingList(ref pList, " WHERE rnd=" + runde.ToString(), " ORDER BY board ");
             for (int index = 0; index < pairingList; ++index)
             {
-                var playerTimes = hasTimeBonus ? db.GetPlayerTimes(pList[index].IdW, pList[index].IdB) : null;
+                var playerTimes = hasTimeBonus ? db.GetPlayerTimes(pList[index].IdW, pList[index].IdB, timeBonus) : null;
 
                 var r = new Li<string>();
                 r.Add((index + 1).ToString() + ".");
