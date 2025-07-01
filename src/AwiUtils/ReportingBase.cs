@@ -123,11 +123,11 @@ namespace AwiUtils
                 swExport.WriteLine("<export>");
                 swExport.WriteLine($"<tournament>{t.Header1}</tournament>");
                 swExport.WriteLine($"<title>{t.Header2 + t.Header3IfThere}</title>");
-                for (int i = 0; i < t.Count; ++i)
+                for (int line = 0; line < t.Count; ++line)
                 {
                     swExport.Write($"<{rowName}>");
-                    for (int j = 0; j < t[i].Count; ++j)
-                        swExport.Write($"<{tdnames[j]}>{t[i][j]}</{tdnames[j]}>");
+                    for (int col = 0; col < t[line].Count; ++col)
+                        swExport.Write($"<{tdnames[col]}>{t[line][col]}</{tdnames[col]}>");
                     swExport.WriteLine($"</{rowName}>");
                 }
                 swExport.WriteLine("<footer>");

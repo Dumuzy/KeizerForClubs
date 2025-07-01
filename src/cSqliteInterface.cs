@@ -337,7 +337,7 @@ namespace KeizerForClubs
             return ct;
         }
 
-        public TimeBonus GetOptionsTimeBonus()
+        public TimeBonus GetTimeBonus()
         {
             var res = TimeBonus.Create(GetConfigText("OPTION.TimeBonus"));
             return res;

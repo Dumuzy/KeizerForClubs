@@ -33,17 +33,21 @@ namespace KeizerForClubs
         {
             try
             {
+                var timeBonus = db.GetTimeBonus();
+                var hasTimeBonus = timeBonus != null;
                 var table = fReportPaarungenTable(runde);
                 var fileBase = GetPaarungenBasename(runde);
                 if (db.GetConfigBool("OPTION.Xml"))
-                    ExportAsXml(table, fileBase, "keizer_pairing", "board", "nr w b res".Split());
+                    ExportAsXml(table, fileBase, "keizer_pairing", "board",
+                        hasTimeBonus ? "nr w w_t b b_t res".Split() : "nr w b res".Split());
                 if (db.GetConfigBool("OPTION.Html"))
                 {
                     var file = ExportAsHtml(table, fileBase);
                     frmMainform.OpenWithDefaultApp(file);
                 }
                 if (db.GetConfigBool("OPTION.Txt"))
-                    ExportAsTxt(table, fileBase, new int[] { 4, -20, -20, 0 });
+                    ExportAsTxt(table, fileBase, 
+                        hasTimeBonus ? new int[] { 4, -20, 4, -20, 4, 0 } : new int[] { 4, -20, -20, 0 });
             }
             catch (Exception ex)
             {
@@ -59,7 +63,7 @@ namespace KeizerForClubs
             var t = new TableW3Headers(sTurnier, TableType.Paarungen, runde);
             t.Header2 = db.Locl_GetText("GUI_MENU", "Paarungen") + " " +
                 db.Locl_GetText("GUI_LABEL", "Runde") + " " + runde;
-            var timeBonus = db.GetOptionsTimeBonus();
+            var timeBonus = db.GetTimeBonus();
             var hasTimeBonus = timeBonus != null;
             var colsHeadsIds = hasTimeBonus ? "Pa.Brett Pa.Weiss Pa.TiWeiss Pa.Schwarz Pa.TiSchwarz Pa.Ergebnis" : 
                     "Pa.Brett Pa.Weiss Pa.Schwarz Pa.Ergebnis";
