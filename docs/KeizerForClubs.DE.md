@@ -232,6 +232,74 @@ Nur a-z, A-Z und 0-9 sind erlaubt.
 
 <br />
 
+
+#### Zeitbonus
+
+Das Programm bietet die Möglichkeit, verschiedene Bedenkzeiten zum Ausgleich von Rating-Unterschieden zu berechnen.  
+
+   * Die berechneten Zeiten werden nur angezeigt in der HTML-Paarungstabelle, die man über den Menüpunkt Listen/Paarungen/Ergebnisse bekommt. 
+   * Das Feld Zeitbonus nimmt die Parameter dafür auf. Ein Beispiel für einen Eintrag ist *curve=expo, min=5, sum=40, fak=0.006*
+   * Es ist zu beachten, daß immer das Komma als Feldtrenner dient und der Punkt als Dezimaltrenner, ungeachtet der aktuellen Kultureinstellungen des Computers.  
+   * Wenn etwas nicht stimmt mit den eingegebenen Parametern werden gar keine Zeiten angezeigt oder überall *-1* als Zeit. 
+     In dem Fall sollte man im Logfile nachschauen oder das Logfile an den Autor schicken.   
+   * Wenn das erste Zeichen des Zeitbonusfeldes ein *#* ist, wird das Zeitbonusfeld ignoriert.
+
+Das Programm berechnet die Bedenkzeiten für die Spieler im Fall *curve=expo* folgendermaßen (andere Kurventypen sind nicht implementiert): 
+```
+diff = Math.Abs(Rating1 - Rating2);
+TIMEstronger = (int)Math.Round(min + (sum - 2 * min) / (1 + Math.Exp(fak * diff)), 0);
+TIMEweaker = tbSum - TIMEstronger;
+```
+Für diese Formel gilt immer, ungeachtet der Werte für *min, sum und fak:* 
+
+   * Die summierte Bedenkzeit beider Spieler ist gleich *sum*.  
+   * Jeder Spieler bekommt immer mindestens *min* Bedenkzeit.
+   * Bei sehr großer Rating-Differenz hat der stärkere Spieler *min* Bedenkzeit und der schwächere bekommt *sum - min*. 
+
+Hier ein paar Beispiele mit diesen Parametern: *curve=expo, min=5, sum=40, fak=0.006*
+   
+<table style="margin: 2ex 5ex">
+<tbody>
+<tr>
+<th>Rating-Differenz</th>
+<th>schwächer</th>
+<th>stärker</th>
+</tr>
+<tr>
+<td>0</td>
+<td>20</td>
+<td>20</td>
+</tr>
+<tr>
+<td>50</td>
+<td>22</td>
+<td>18</td>
+</tr>
+<tr>
+<td>100</td>
+<td>24</td>
+<td>16</td>
+</tr>
+<tr>
+<td>200</td>
+<td>28</td>
+<td>12</td>
+</tr>
+<tr>
+<td>400</td>
+<td>33</td>
+<td>7</td>
+</tr>
+<tr>
+<td>800</td>
+<td>35</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+     
+<br />
+
 ### Menü Listen
 
 Durch Auswahl eines Eintrags im Listenmenü werden Ausgabelisten im Ordner _export_ erzeugt. Die Art der zu erzeugenden Ausgaben kann 
@@ -313,26 +381,6 @@ Es kann wünschenswert sein, daß mit erzeugten Tabellen irgendwas automatisch get
 
 In KeizerForClubs gibt es eine Schnittstelle dafür: Falls es ein Verzeichnis `script` gibt, das neben dem Verzeichnis `export` liegt und in dem Verzechnis eine Datei namens `kfcpost.cmd` liegt, so wird diese Datei als Batch-Datei aufgerufen und der Pfad zur gerade erzeugten Tabelle wird als Parameter übergeben. 
 Man kann aus dieser cmd-Datei natürlich alle möglichen anderen Kommandos aufrufen. 
-
-<br />
-
-#### Zeitbonus berechnen und anzeigen
-Das Programm bietet die Möglichkeit, verschiedene Bedenkzeiten zum Ausgleich von Rating-Unterschieden zu berechnen. 
-Das Programm berechnet diese folgendermaßen: 
-```
-diff = Math.Abs(Rating1 - Rating2);
-TIMEstronger = (int)Math.Round(tbMin + (tbSum - 2 * tbMin) / (1 + Math.Exp(0.006 * diff)), 0);
-TIMEweaker = tbSum - TIMEstronger;
-```
-Es gilt dann immer: 
-
-   * Die summierte Bedenkzeit beider Spieler ist gleich `tbSum`.  
-   * Bei sehr großer Rating-Differenz hat der stärkere Spieler `tbMin` Bedenkzeit und der schwächere bekommt `tbSum - tbMin`. 
-   
-Derzeit gibt es dafür kein User Interface, man muß die Werte tbSum und tbMin direkt in der Datenbank eintragen.
-Es sind dies in der ConfigTab die Werte tbSum = OPTION.TimeBonusSum und tbMin = OPTION.TimeBonusMin. 
-
-Die berechneten Zeiten werden nur angezeigt in der Paarungstabelle, die man über den Menüpunkt Listen/Paarungen/Ergebnisse bekommt. 
 
 <br />
 

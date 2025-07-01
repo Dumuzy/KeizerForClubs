@@ -165,8 +165,76 @@ Les noms complets des catégories sont utilisés dans l'en-tête des classements
 Seuls les caractères a-z, A-Z et 0-9 sont autorisés.
 
 
-<br />
+#### Bonus de temps
 
+Le programme offre la possibilité de calculer différents temps de réflexion pour compenser les différences de rating.  
+
+   * Les temps calculés ne sont affichés que dans le tableau d'appariement HTML que l'on obtient par le point de menu Listes/Appariements/Résultats. 
+   * Le champ *bonus temps* accueille les paramètres pour cela. Un exemple d'entrée est *curve=expo, min=5, sum=40, fak=0.006*
+   * Il faut noter que la virgule sert toujours de séparateur de champ et le point de séparateur décimal, indépendamment des 
+     paramètres culturels actuels de l'ordinateur.  
+   * Si quelque chose ne va pas avec les paramètres saisis, aucun temps n'est affiché ou bien *-1* est affiché partout comme temps. 
+     Dans ce cas, il faut consulter le fichier journal ou envoyer le fichier journal à l'auteur.   
+   * Si le premier caractère du champ de bonus de temps est un *#*, le champ de bonus de temps est ignoré.
+
+Le programme calcule les temps de réflexion pour les joueurs dans le cas *curve=expo* comme suit (les autres types de courbes ne sont pas implémentés) : 
+```
+diff = Math.Abs(Rating1 - Rating2) ;
+TIMEstronger = (int)Math.Round(min + (sum - 2 * min) / (1 + Math.Exp(fak * diff)), 0) ;
+TIMEweaker = tbSum - TIMEstronger ;
+```
+Pour cette formule, quelles que soient les valeurs de *min, sum et fak :*
+
+   * Le temps de réflexion additionné des deux joueurs est égal à *sum*.  
+   * Chaque joueur reçoit toujours au moins *min* de temps de réflexion.
+   * En cas de grande différence de classement, le joueur le plus fort a un temps de réflexion de *min* et le 
+     joueur le plus faible a un temps de réflexion de *sum - min*. 
+
+Voici quelques exemples avec les paramètres : *curve=expo, min=5, sum=40, fak=0.006*
+
+<table style="margin: 2ex 5ex">
+<tbody>
+<tr>
+<th>Rating-Difference</th>
+<th>plus fort</th>
+<th>plus faible</th>
+</tr>
+<tr>
+<td>0</td>
+<td>20</td>
+<td>20</td>
+</tr>
+<tr>
+<td>50</td>
+<td>22</td>
+<td>18</td>
+</tr>
+<tr>
+<td>100</td>
+<td>24</td>
+<td>16</td>
+</tr>
+<tr>
+<td>200</td>
+<td>28</td>
+<td>12</td>
+</tr>
+<tr>
+<td>400</td>
+<td>33</td>
+<td>7</td>
+</tr>
+<tr>
+<td>800</td>
+<td>35</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+
+     
+<br />
+     
 ### Menu Listes
 En sélectionnant une entrée dans le menu des listes, des fichiers de sortie seront générés dans le dossier _export_. Le type de sorties à générer peut être sélectionné dans l'onglet _Paramètres_.
 

@@ -220,6 +220,123 @@ header of the reports. The abbreviations must not contain any spaces or
 commas or other special characters. Only a-z, A-Z and 0-9 are
 allowed.</p>
 <p><br /></p>
+<h4 id="time-bonus">Time Bonus</h4>
+<p>The program offers the option of calculating different thinking times
+to compensate for rating differences.</p>
+<ul>
+<li>The calculated times are only displayed in the HTML pairing table,
+which can be accessed via the menu item Lists/Pairings/Results.</li>
+<li>The time bonus field contains the parameters for this. An example of
+an entry is <em>curve=expo, min=5, sum=40, fak=0.006</em></li>
+<li>Please note that the comma always serves as the field separator and
+the point as the decimal separator, regardless of the computer’s current
+cultural settings.</li>
+<li>If something is wrong with the parameters entered, no times are
+displayed at all or -1 is displayed everywhere as the time. In this case
+you should look in the log file or send the log file to the author.</li>
+<li>If the first character of the time bonus field is a <em>#</em>, the
+time bonus field is ignored.</li>
+</ul>
+<p>The program calculates the thinking times for the players in the case
+<em>curve=expo</em> as follows (other curve types are not
+implemented):</p>
+<pre><code>diff = Math.Abs(Rating1 - Rating2);
+TIMEstronger = (int)Math.Round(min + (sum - 2 * min) / (1 + Math.Exp(fak * diff)), 0);
+TIMEweaker = tbSum - TIMEstronger;</code></pre>
+<p>The following always applies to this formula, regardless of the
+values for <em>min, sum and fak:</em></p>
+<ul>
+<li>The summed thinking time of both players is equal to
+<em>sum</em>.</li>
+<li>Each player always gets at least <em>min</em> thinking time.</li>
+<li>If the rating difference is very large, the stronger player has
+<em>min</em> thinking time and the weaker player gets <em>sum -
+min</em>.</li>
+</ul>
+<p>Here are a few examples with the parameters: <em>curve=expo, min=5,
+sum=40, fak=0.006</em></p>
+<table style="margin: 2ex 5ex">
+<tbody>
+<tr>
+<th>
+Rating-Difference
+</th>
+<th>
+stronger
+</th>
+<th>
+weaker
+</th>
+</tr>
+<tr>
+<td>
+0
+</td>
+<td>
+20
+</td>
+<td>
+20
+</td>
+</tr>
+<tr>
+<td>
+50
+</td>
+<td>
+22
+</td>
+<td>
+18
+</td>
+</tr>
+<tr>
+<td>
+100
+</td>
+<td>
+24
+</td>
+<td>
+16
+</td>
+</tr>
+<tr>
+<td>
+200
+</td>
+<td>
+28
+</td>
+<td>
+12
+</td>
+</tr>
+<tr>
+<td>
+400
+</td>
+<td>
+33
+</td>
+<td>
+7
+</td>
+</tr>
+<tr>
+<td>
+800
+</td>
+<td>
+35
+</td>
+<td>
+5
+</td>
+</tr>
+</tbody>
+</table>
+<p><br /></p>
 <h3 id="lists-menu">Lists menu</h3>
 <p>By selecting an entry in the lists menu, output lists will be
 generated in the folder <em>export</em>. The type of outputs to be

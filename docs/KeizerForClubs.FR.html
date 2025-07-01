@@ -267,6 +267,128 @@ les noms de fichiers des tableaux. Les noms complets des catégories sont
 utilisés dans l’en-tête des classements. Les abréviations ne peuvent pas
 contenir d’espaces, de virgules ou d’autres caractères spéciaux. Seuls
 les caractères a-z, A-Z et 0-9 sont autorisés.</p>
+<h4 id="bonus-de-temps">Bonus de temps</h4>
+<p>Le programme offre la possibilité de calculer différents temps de
+réflexion pour compenser les différences de rating.</p>
+<ul>
+<li>Les temps calculés ne sont affichés que dans le tableau
+d’appariement HTML que l’on obtient par le point de menu
+Listes/Appariements/Résultats.</li>
+<li>Le champ <em>bonus temps</em> accueille les paramètres pour cela. Un
+exemple d’entrée est <em>curve=expo, min=5, sum=40, fak=0.006</em></li>
+<li>Il faut noter que la virgule sert toujours de séparateur de champ et
+le point de séparateur décimal, indépendamment des paramètres culturels
+actuels de l’ordinateur.<br />
+</li>
+<li>Si quelque chose ne va pas avec les paramètres saisis, aucun temps
+n’est affiché ou bien <em>-1</em> est affiché partout comme temps. Dans
+ce cas, il faut consulter le fichier journal ou envoyer le fichier
+journal à l’auteur.<br />
+</li>
+<li>Si le premier caractère du champ de bonus de temps est un
+<em>#</em>, le champ de bonus de temps est ignoré.</li>
+</ul>
+<p>Le programme calcule les temps de réflexion pour les joueurs dans le
+cas <em>curve=expo</em> comme suit (les autres types de courbes ne sont
+pas implémentés) :</p>
+<pre><code>diff = Math.Abs(Rating1 - Rating2) ;
+TIMEstronger = (int)Math.Round(min + (sum - 2 * min) / (1 + Math.Exp(fak * diff)), 0) ;
+TIMEweaker = tbSum - TIMEstronger ;</code></pre>
+<p>Pour cette formule, quelles que soient les valeurs de <em>min, sum et
+fak :</em></p>
+<ul>
+<li>Le temps de réflexion additionné des deux joueurs est égal à
+<em>sum</em>.<br />
+</li>
+<li>Chaque joueur reçoit toujours au moins <em>min</em> de temps de
+réflexion.</li>
+<li>En cas de grande différence de classement, le joueur le plus fort a
+un temps de réflexion de <em>min</em> et le joueur le plus faible a un
+temps de réflexion de <em>sum - min</em>.</li>
+</ul>
+<p>Voici quelques exemples avec les paramètres : <em>curve=expo, min=5,
+sum=40, fak=0.006</em></p>
+<table style="margin: 2ex 5ex">
+<tbody>
+<tr>
+<th>
+Rating-Difference
+</th>
+<th>
+plus fort
+</th>
+<th>
+plus faible
+</th>
+</tr>
+<tr>
+<td>
+0
+</td>
+<td>
+20
+</td>
+<td>
+20
+</td>
+</tr>
+<tr>
+<td>
+50
+</td>
+<td>
+22
+</td>
+<td>
+18
+</td>
+</tr>
+<tr>
+<td>
+100
+</td>
+<td>
+24
+</td>
+<td>
+16
+</td>
+</tr>
+<tr>
+<td>
+200
+</td>
+<td>
+28
+</td>
+<td>
+12
+</td>
+</tr>
+<tr>
+<td>
+400
+</td>
+<td>
+33
+</td>
+<td>
+7
+</td>
+</tr>
+<tr>
+<td>
+800
+</td>
+<td>
+35
+</td>
+<td>
+5
+</td>
+</tr>
+</tbody>
+</table>
 <p><br /></p>
 <h3 id="menu-listes">Menu Listes</h3>
 <p>En sélectionnant une entrée dans le menu des listes, des fichiers de

@@ -255,6 +255,128 @@ werden in der Kopfzeile der Berichte verwendet. Die Abkürzungen dürfen
 keine Leerzeichen, Kommas oder andere Sonderzeichen enthalten. Nur a-z,
 A-Z und 0-9 sind erlaubt.</p>
 <p><br /></p>
+<h4 id="zeitbonus">Zeitbonus</h4>
+<p>Das Programm bietet die Möglichkeit, verschiedene Bedenkzeiten zum
+Ausgleich von Rating-Unterschieden zu berechnen.</p>
+<ul>
+<li>Die berechneten Zeiten werden nur angezeigt in der
+HTML-Paarungstabelle, die man über den Menüpunkt
+Listen/Paarungen/Ergebnisse bekommt.</li>
+<li>Das Feld Zeitbonus nimmt die Parameter dafür auf. Ein Beispiel für
+einen Eintrag ist <em>curve=expo, min=5, sum=40, fak=0.006</em></li>
+<li>Es ist zu beachten, daß immer das Komma als Feldtrenner dient und
+der Punkt als Dezimaltrenner, ungeachtet der aktuellen
+Kultureinstellungen des Computers.<br />
+</li>
+<li>Wenn etwas nicht stimmt mit den eingegebenen Parametern werden gar
+keine Zeiten angezeigt oder überall <em>-1</em> als Zeit. In dem Fall
+sollte man im Logfile nachschauen oder das Logfile an den Autor
+schicken.<br />
+</li>
+<li>Wenn das erste Zeichen des Zeitbonusfeldes ein <em>#</em> ist, wird
+das Zeitbonusfeld ignoriert.</li>
+</ul>
+<p>Das Programm berechnet die Bedenkzeiten für die Spieler im Fall
+<em>curve=expo</em> folgendermaßen (andere Kurventypen sind nicht
+implementiert):</p>
+<pre><code>diff = Math.Abs(Rating1 - Rating2);
+TIMEstronger = (int)Math.Round(min + (sum - 2 * min) / (1 + Math.Exp(fak * diff)), 0);
+TIMEweaker = tbSum - TIMEstronger;</code></pre>
+<p>Für diese Formel gilt immer, ungeachtet der Werte für <em>min, sum
+und fak:</em></p>
+<ul>
+<li>Die summierte Bedenkzeit beider Spieler ist gleich
+<em>sum</em>.<br />
+</li>
+<li>Jeder Spieler bekommt immer mindestens <em>min</em> Bedenkzeit.</li>
+<li>Bei sehr großer Rating-Differenz hat der stärkere Spieler
+<em>min</em> Bedenkzeit und der schwächere bekommt <em>sum -
+min</em>.</li>
+</ul>
+<p>Hier ein paar Beispiele mit diesen Parametern: <em>curve=expo, min=5,
+sum=40, fak=0.006</em></p>
+<table style="margin: 2ex 5ex">
+<tbody>
+<tr>
+<th>
+Rating-Differenz
+</th>
+<th>
+schwächer
+</th>
+<th>
+stärker
+</th>
+</tr>
+<tr>
+<td>
+0
+</td>
+<td>
+20
+</td>
+<td>
+20
+</td>
+</tr>
+<tr>
+<td>
+50
+</td>
+<td>
+22
+</td>
+<td>
+18
+</td>
+</tr>
+<tr>
+<td>
+100
+</td>
+<td>
+24
+</td>
+<td>
+16
+</td>
+</tr>
+<tr>
+<td>
+200
+</td>
+<td>
+28
+</td>
+<td>
+12
+</td>
+</tr>
+<tr>
+<td>
+400
+</td>
+<td>
+33
+</td>
+<td>
+7
+</td>
+</tr>
+<tr>
+<td>
+800
+</td>
+<td>
+35
+</td>
+<td>
+5
+</td>
+</tr>
+</tbody>
+</table>
+<p><br /></p>
 <h3 id="menü-listen">Menü Listen</h3>
 <p>Durch Auswahl eines Eintrags im Listenmenü werden Ausgabelisten im
 Ordner <em>export</em> erzeugt. Die Art der zu erzeugenden Ausgaben kann
@@ -356,30 +478,6 @@ Verzeichnis <code>script</code> gibt, das neben dem Verzeichnis
 aufgerufen und der Pfad zur gerade erzeugten Tabelle wird als Parameter
 übergeben. Man kann aus dieser cmd-Datei natürlich alle möglichen
 anderen Kommandos aufrufen.</p>
-<p><br /></p>
-<h4 id="zeitbonus-berechnen-und-anzeigen">Zeitbonus berechnen und
-anzeigen</h4>
-<p>Das Programm bietet die Möglichkeit, verschiedene Bedenkzeiten zum
-Ausgleich von Rating-Unterschieden zu berechnen. Das Programm berechnet
-diese folgendermaßen:</p>
-<pre><code>diff = Math.Abs(Rating1 - Rating2);
-TIMEstronger = (int)Math.Round(tbMin + (tbSum - 2 * tbMin) / (1 + Math.Exp(0.006 * diff)), 0);
-TIMEweaker = tbSum - TIMEstronger;</code></pre>
-<p>Es gilt dann immer:</p>
-<ul>
-<li>Die summierte Bedenkzeit beider Spieler ist gleich
-<code>tbSum</code>.<br />
-</li>
-<li>Bei sehr großer Rating-Differenz hat der stärkere Spieler
-<code>tbMin</code> Bedenkzeit und der schwächere bekommt
-<code>tbSum - tbMin</code>.</li>
-</ul>
-<p>Derzeit gibt es dafür kein User Interface, man muß die Werte tbSum
-und tbMin direkt in der Datenbank eintragen. Es sind dies in der
-ConfigTab die Werte tbSum = OPTION.TimeBonusSum und tbMin =
-OPTION.TimeBonusMin.</p>
-<p>Die berechneten Zeiten werden nur angezeigt in der Paarungstabelle,
-die man über den Menüpunkt Listen/Paarungen/Ergebnisse bekommt.</p>
 <p><br /></p>
 <h3 id="keizer-system-und-schweizer-system">Keizer System und Schweizer
 System</h3>

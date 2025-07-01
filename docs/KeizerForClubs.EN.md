@@ -235,6 +235,77 @@ spaces or commas or other special characters. Only a-z, A-Z and 0-9 are allowed.
 
 <br />
 
+
+#### Time Bonus
+
+The program offers the option of calculating different thinking times to compensate for rating differences.
+
+   * The calculated times are only displayed in the HTML pairing table, which can be accessed via the menu item Lists/Pairings/Results.
+   * The time bonus field contains the parameters for this. An example of an entry is *curve=expo, min=5, sum=40, fak=0.006*
+   * Please note that the comma always serves as the field separator and the point as the decimal separator, 
+     regardless of the computer's current cultural settings.
+   * If something is wrong with the parameters entered, no times are displayed at all or -1 is displayed everywhere as the time. 
+     In this case you should look in the log file or send the log file to the author.
+   * If the first character of the time bonus field is a *#*, the time bonus field is ignored. 
+     
+The program calculates the thinking times for the players in the case *curve=expo* as follows (other curve types are not implemented):
+```
+diff = Math.Abs(Rating1 - Rating2);
+TIMEstronger = (int)Math.Round(min + (sum - 2 * min) / (1 + Math.Exp(fak * diff)), 0);
+TIMEweaker = tbSum - TIMEstronger;
+```
+
+The following always applies to this formula, regardless of the values for *min, sum and fak:*
+
+   * The summed thinking time of both players is equal to *sum*.
+   * Each player always gets at least *min* thinking time.
+   * If the rating difference is very large, the stronger player has *min* thinking time and the weaker player gets *sum - min*.
+   
+Here are a few examples with the parameters: *curve=expo, min=5, sum=40, fak=0.006*
+
+<table style="margin: 2ex 5ex">
+<tbody>
+<tr>
+<th>Rating-Difference</th>
+<th>stronger</th>
+<th>weaker</th>
+</tr>
+<tr>
+<td>0</td>
+<td>20</td>
+<td>20</td>
+</tr>
+<tr>
+<td>50</td>
+<td>22</td>
+<td>18</td>
+</tr>
+<tr>
+<td>100</td>
+<td>24</td>
+<td>16</td>
+</tr>
+<tr>
+<td>200</td>
+<td>28</td>
+<td>12</td>
+</tr>
+<tr>
+<td>400</td>
+<td>33</td>
+<td>7</td>
+</tr>
+<tr>
+<td>800</td>
+<td>35</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+     
+<br />
+
+
 ### Lists menu
 By selecting an entry in the lists menu, output lists will be generated in the folder _export_. The type of outputs to be generated can be 
 selected on the _Settings_ tab. 
