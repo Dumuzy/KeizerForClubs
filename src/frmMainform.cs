@@ -794,9 +794,11 @@ for determining the first round pairings.";
                     int pid2 = Convert.ToInt16(grdPairings.Rows[e.RowIndex].Cells[4].Value);
                     db.UpdPairingResult(Convert.ToInt16(numRoundSelect.Value), pid1, pid2, gameResult);
 
-                    if(db.IsRoundLastAndFinished(Helper.ToInt(numRoundSelect.Value)))
+                    if (db.IsRoundLastAndFinished(Helper.ToInt(numRoundSelect.Value)))
+                    {
+                        RecalcIfNeeded();
                         new ReportingUnit(sTurniername, sFilename, db).WriteCurrentTablesToDb();
-
+                    }
                 }
             }
         }
