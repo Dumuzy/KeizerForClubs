@@ -15,7 +15,8 @@ for /f usebackq %%i in (`tclsh extract-vers.tcl %projfile%`) do (
 
 echo Version parsed from %projfile% is %vers%
 
-set temp0=C:\tmp\kfc-pack\
+set tempdrive=D:
+set temp0=%tempdrive%\tmp\kfc-pack\
 set packname=Keizer_%vers%
 set tempdir=%temp0%%packname%
 
@@ -33,15 +34,11 @@ copy KFC2.exe  %tempdir%\KeizerForClubs.exe
 copy ..\..\..\..\cfg\* cfg
 robocopy ..\..\..\..\docs\ docs *.html *.png *.pdf *.txt /E
 
-rem This is only for debugging T82.
-@echo on
-rem copy ..\..\..\..\System.Data.SQLite.w32.dll .
-rem copy ..\..\..\..\System.Data.SQLite.x64.dll .
-@echo off
 
 
 robocopy .  %tempdir% *.dll *.json *.s3db Keizer*.html *.ini *.png *.pdf *.txt *.css *.xsl /E
 
+%tempdrive%
 cd %tempdir%\..
 
 7za a -tzip kfc %packname% 
