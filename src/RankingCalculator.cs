@@ -20,11 +20,12 @@ namespace KeizerForClubs
             int maxRound = db.GetMaxRound();
             Stopwatches.Start($"AllPlayersAllRoundsCalculateTa-All MaxRound={maxRound}");
             cReportingUnit?.DeleteDump();
+            bool shallPreviousRoundDecay = db.GetConfigBool("OPTION.DecayPrevRound");
 
             //Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0.
             db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
             this.AllPlayersSetInitialStartPtsTa(maxRound + 1); // Keizer_StartPts in die DB setzen.
-            this.AllPlayersSetKeizerSumPtsTa();    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
+            this.AllPlayersSetKeizerSumPtsTa(0, shallPreviousRoundDecay);    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
             // If nExtraRecursions is > 0, at the end of the calculation, that many
             // extra rounds of calculation are appended. Only for testing stuff, currently. 
@@ -51,7 +52,7 @@ namespace KeizerForClubs
                     for (int runde2 = 1; runde2 <= runde1; ++runde2)
                         this.OneRoundAllPairingsSetKeizerPtsTa(runde2, runde1);
                     Stopwatches.Next("AllPlayersAllRoundsCalculateTa-4");
-                    this.AllPlayersSetKeizerSumPtsTa();
+                    this.AllPlayersSetKeizerSumPtsTa(runde1, shallPreviousRoundDecay);
                     Stopwatches.Next("AllPlayersAllRoundsCalculateTa-5");
                     this.AllPlayersSetRankAndStartPtsTa();
                     Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-5");
@@ -188,13 +189,15 @@ namespace KeizerForClubs
 
         /// <summary> Berechnet die Keizer-Punkt-Summe aller Spieler anhand der in der DB stehende Punkte 
         /// für die Spiele und schreibt die Summen in die DB. </summary>
-        private void AllPlayersSetKeizerSumPtsTa()
+        private void AllPlayersSetKeizerSumPtsTa(int runde, bool shallPreviousRoundDecay)
         {
             db.BeginTransaction();
             SqliteInterface.stPlayer[] players = new SqliteInterface.stPlayer[100];
             int playerCount = db.GetPlayerList(ref players, "", " ", db.GetMaxRound());
+            float startPointsFaktor = !shallPreviousRoundDecay ? 1 : runde >= 5 ? 0 :
+                runde <= 0 ? 1 : (5.0f - runde) / 5;
             for (int index = 0; index < playerCount; ++index)
-                players[index].KeizerSumPts = db.GetPlayer_PunktSumme(players[index].Id);
+                players[index].KeizerSumPts = db.GetPlayer_PunktSumme(players[index].Id, startPointsFaktor);
             for (int index = 0; index < playerCount; ++index)
                 db.UpdPlayer_KeizerSumPts(players[index].Id, players[index].KeizerSumPts);
             db.EndTransaction();

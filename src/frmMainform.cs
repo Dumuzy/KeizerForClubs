@@ -37,7 +37,7 @@ namespace KeizerForClubs
         private TextBox tbNiceName, tbCategories, tbTimeBonus;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
-        private CheckBox chkFreilosVerteilen, chkNovusRandomBoard;
+        private CheckBox chkFreilosVerteilen, chkDecayPrevRound, chkNovusRandomBoard;
         private CheckBox chkHtml, chkXml, chkTxt, chkCsv, chkWickerNormalization;
         private ToolStripMenuItem mnuStartLanguage;
         private ToolStripMenuItem mnuPlayers, mnuPlayersImport, mnuPlayersDeleteAll, mnuPlayersRebaseIds;
@@ -138,6 +138,7 @@ namespace KeizerForClubs
             tbBonusVerlust.Value = db.GetConfigInt("BONUS.Verlust", 0);
 
             chkFreilosVerteilen.Checked = db.GetConfigBool("OPTION.DistBye");
+            chkDecayPrevRound.Checked = db.GetConfigBool("OPTION.DecayPrevRound");
             chkNovusRandomBoard.Checked = db.GetConfigBool("OPTION.NovusRandom", false);
             chkPairingOnlyPlayed.Checked = db.GetConfigBool("OPTION.ShowOnlyPlayed");
             numRoundsGameRepeat.Value = (Decimal)db.GetConfigInt("OPTION.GameRepeat");
@@ -495,6 +496,7 @@ for determining the first round pairings.";
                 db.SetConfigInt("BONUS.Verlust", this.tbBonusVerlust.Value);
 
                 db.SetConfigBool("OPTION.DistBye", this.chkFreilosVerteilen.Checked);
+                db.SetConfigBool("OPTION.DecayPrevRound", this.chkDecayPrevRound.Checked);
                 db.SetConfigBool("OPTION.NovusRandom", this.chkNovusRandomBoard.Checked);
                 db.SetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
                 db.SetConfigFloat("OPTION.RatioFirst2Last", Helper.ToSingle(ddlRatioFirst2Last.SelectedValue));
@@ -890,6 +892,7 @@ for determining the first round pairings.";
 
             chkPairingOnlyPlayed.Text = db.Locl_GetText("GUI_LABEL", "Nur gespielte");
             chkFreilosVerteilen.Text = db.Locl_GetText("GUI_LABEL", "FreilosVerteilen");
+            chkDecayPrevRound.Text = db.Locl_GetText("GUI_LABEL", "DecayPrevRound");
             chkNovusRandomBoard.Text = db.Locl_GetText("GUI_LABEL", "NovusRandom");
             lblRunde.Text = db.Locl_GetText("GUI_LABEL", "Runde");
             numRoundSelect.Text = db.Locl_GetText("GUI_LABEL", "Runde");

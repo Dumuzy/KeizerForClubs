@@ -64,6 +64,7 @@ namespace KeizerForClubs
             this.ddlFirstRoundRandom = new ComboBox();
             this.tooltip = new ToolTip();
             this.chkFreilosVerteilen = new CheckBox();
+            this.chkDecayPrevRound = new CheckBox();
             this.chkNovusRandomBoard = new CheckBox();
             this.chkHtml = new CheckBox();
             this.chkXml = new CheckBox();
@@ -261,6 +262,7 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add(this.ddlRatioFirst2Last);
             this.tabSettings.Controls.Add(this.ddlFirstRoundRandom);
             this.tabSettings.Controls.Add(this.chkFreilosVerteilen);
+            this.tabSettings.Controls.Add(this.chkDecayPrevRound);
             this.tabSettings.Controls.Add(this.chkNovusRandomBoard);
             this.tabSettings.Controls.Add(this.btDonate1);
             this.tabSettings.Controls.Add(this.chkHtml);
@@ -269,7 +271,7 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add(this.chkCsv);
             this.tabSettings.Controls.Add(this.chkWickerNormalization);
             this.tabSettings.Controls.Add(this.lblOutputTo);
-            this.tabSettings.Controls.AddRange(new Control[] { lblNiceName, tbNiceName, lblCategories, tbCategories, 
+            this.tabSettings.Controls.AddRange(new Control[] { lblNiceName, tbNiceName, lblCategories, tbCategories,
                 lblTimeBonus, tbTimeBonus });
 
             this.tabSettings.Location = new Point(4, 4);
@@ -393,6 +395,26 @@ Keizer points much more graspable.
 
 
             yOutput += dy;
+            this.chkDecayPrevRound.CheckAlign = chkDecayPrevRound.TextAlign= ContentAlignment.MiddleRight;
+            this.chkDecayPrevRound.Size = new Size(271, 24);
+            this.chkDecayPrevRound.Location = new Point(xloc + 521 - chkDecayPrevRound.Size.Width, yOutput);
+            this.chkDecayPrevRound.TabIndex = 8;
+            this.chkDecayPrevRound.UseVisualStyleBackColor = true;
+            var ttdp = @"Normally, player Xyz gets the Keizer points Xyz has earned 
+by playing. And added to that are the Keizer points a victory
+against himself would net. (Rank-Pb in the cross table.)
+This is very useful for the first rounds, but may
+feel a bit unfair for later rounds.
+(In reality, it doesn't matter much mostly.)
+
+If this checkbox is checked, a factor is used to reduce the
+self-victory value by one fifth  every round, so that from
+round five on, it is zero.";
+            this.tooltip.SetToolTip(chkDecayPrevRound, ttdp);
+
+
+
+            yOutput += dy;
             this.lblNiceName.Location = new Point(xloc, yOutput);
             this.lblNiceName.Size = new Size(154, 23);
             this.lblNiceName.TextAlign = ContentAlignment.MiddleRight;
@@ -414,7 +436,7 @@ Keizer points much more graspable.
             this.tbTimeBonus.Size = new Size(362, 23);
 
 
-            this.btDonate1.Location = new Point(43, 330);
+            this.btDonate1.Location = new Point(43, 330 + dy);
             this.btDonate1.Name = "lblDonate";
             this.btDonate1.Size = new Size(149, 23);
             this.btDonate1.TabIndex = 30;
@@ -577,11 +599,12 @@ Keizer points much more graspable.
         {
             var yloc = 15 + (num - 1) * 25;
             InitializeBonusText(num, xloc, yloc, name, ref lblText);
-            InitializeBonusTrackbar(num, xloc + 155, yloc, name, ref tb);
-            InitializeBonusValue(num, xloc + 360, yloc, name, ref lblValue);
+            int tblen = 200;
+            InitializeBonusTrackbar(num, xloc + 155, yloc, name, tblen, ref tb);
+            InitializeBonusValue(num, xloc + tblen + 160, yloc, name, ref lblValue);
         }
 
-        private void InitializeBonusTrackbar(int num, int xloc, int yloc, string name, ref TrackBar tb)
+        private void InitializeBonusTrackbar(int num, int xloc, int yloc, string name, int tblen, ref TrackBar tb)
         {
             tb = new TrackBar();
             tb.BeginInit();
@@ -591,7 +614,7 @@ Keizer points much more graspable.
             tb.Maximum = 100;
             tb.Name = $"tbBonus" + name;
             tb.AutoSize = false;
-            tb.Size = new Size(200, 20);
+            tb.Size = new Size(tblen, 20);
             tb.SmallChange = 5;
             tb.TabIndex = num;
             tb.TickFrequency = 5;

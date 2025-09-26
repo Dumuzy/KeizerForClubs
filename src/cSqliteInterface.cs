@@ -663,13 +663,14 @@ namespace KeizerForClubs
         /// momentan aus der DB ergibt. Das ist zu Anfang der Berechnung des Tabellenstands einer Runde 
         /// ein anderer Wert als am Ende. </summary>
         /// <param name="ID">Spieler-ID</param>
-        public float GetPlayer_PunktSumme(int ID)
+        public float GetPlayer_PunktSumme(int ID, float startPointsFaktor)
         {
-            sqlCommand.CommandText = @" select  Keizer_StartPts +   
+            sqlCommand.CommandText = @" select  Keizer_StartPts*:fak +   
                 (Select ifnull(Sum( Pts_W),0.0) from Pairing where PID_W = p1.ID) +    
                 (Select ifnull(Sum( Pts_B),0.0) from Pairing where PID_B = p1.ID)  as summe    
                 from player p1  where ID=:pID ";
             sqlCommand.Parameters.AddWithValue("pID", (object)ID);
+            sqlCommand.Parameters.AddWithValue("fak", (object)startPointsFaktor);
             sqlCommand.Prepare();
             return Convert.ToSingle(Convert.ToDouble(sqlCommand.ExecuteScalar()));
         }
