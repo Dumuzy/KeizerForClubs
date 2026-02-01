@@ -1109,8 +1109,11 @@ namespace KeizerForClubs
                             pList[playerCount].KeizerSumPts = sqLiteDataReader.IsDBNull(5) ? 0.0f : sqLiteDataReader.GetFloat(5);
                             pList[playerCount].KeizerPrevPts = sqLiteDataReader.IsDBNull(6) ? 0.0f : sqLiteDataReader.GetFloat(6);
                             pList[playerCount].Rank = sqLiteDataReader.IsDBNull(7) ? 0 : (int)sqLiteDataReader.GetInt16(7);
-                            pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
-                            pList[playerCount].FreeCnt += FreeWinMulti * (sqLiteDataReader.IsDBNull(9) ? 0 : (int)sqLiteDataReader.GetInt16(9));
+                            // Neue Methode zur Freilosvergabe, ab Feb 2026: Sonstwie gefehlt zählt nicht mehr zur Freilosvergabe. 
+                            pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(9) ? 0 : (int)sqLiteDataReader.GetInt16(9);
+                            // Auskommentiert: Hier die alte Methode, die ich vor Feb 2026 verwendet hatte. Wer sonstwie gefehlt hat, kriegt eher kein Freilos. 
+                            //pList[playerCount].FreeCnt = sqLiteDataReader.IsDBNull(8) ? 0 : (int)sqLiteDataReader.GetInt16(8);
+                            //pList[playerCount].FreeCnt += FreeWinMulti * (sqLiteDataReader.IsDBNull(9) ? 0 : (int)sqLiteDataReader.GetInt16(9));
                             pList[playerCount].RatingWDelta = sqLiteDataReader.IsDBNull(10) ? 0 : (int)sqLiteDataReader.GetInt16(10);
                             pList[playerCount].Categories = sqLiteDataReader.IsDBNull(11) ? "" : sqLiteDataReader.GetString(11);
 
