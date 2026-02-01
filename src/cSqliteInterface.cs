@@ -688,11 +688,11 @@ namespace KeizerForClubs
             return Convert.ToSingle(sqlCommand.ExecuteScalar());
         }
 
-        /// <summary> Returns the number of "excused" games of the player with id up until runde. </summary>
-        public int GetPlayer_CountOfExcused(int id, int runde)
+        /// <summary> Returns the number of "excused" or "unexcused" games of the player with id up until runde. </summary>
+        public int GetPlayer_CountOfExcusedOrUnexcused(int id, int runde)
         {
             sqlCommand.CommandText = $@" SELECT Count(1) from Pairing 
-                    where rnd <= {runde} and PID_W={id} and result={(int)Results.Excused} ";
+                    where rnd <= {runde} and PID_W={id} and result in ({(int)Results.Excused}, {(int)Results.Unexcused}) ";
             sqlCommand.Prepare();
             return Convert.ToInt32(sqlCommand.ExecuteScalar());
         }

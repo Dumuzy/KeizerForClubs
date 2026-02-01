@@ -20,12 +20,13 @@ namespace KeizerForClubs
             int maxRound = db.GetMaxRound();
             Stopwatches.Start($"AllPlayersAllRoundsCalculateTa-All MaxRound={maxRound}");
             cReportingUnit?.DeleteDump();
-            bool shallPreviousRoundDecay = db.GetConfigBool("OPTION.DecayPrevRound");
+            shallPreviousRoundDecay = db.GetConfigBool("OPTION.DecayPrevRound");
+            shallBonusDecay = db.GetConfigBool("OPTION.DecayBonus");
 
             //Setzt alle Bewertungen aller Paarungen und alle Keizer_SumPts auf 0.
             db.UpdPairing_AllPairingsAndAllKeizerSumsResetValuesTa();
             this.AllPlayersSetInitialStartPtsTa(maxRound + 1); // Keizer_StartPts in die DB setzen.
-            this.AllPlayersSetKeizerSumPtsTa(0, shallPreviousRoundDecay);    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
+            this.AllPlayersSetKeizerSumPtsTa(0);    // Keizer_SumPts in die DB setzen, hier noch Keizer_SumPts = Keizer_StartPts.
             cReportingUnit?.DebugPairingsAndStandings(0);
             // If nExtraRecursions is > 0, at the end of the calculation, that many
             // extra rounds of calculation are appended. Only for testing stuff, currently. 
@@ -52,7 +53,7 @@ namespace KeizerForClubs
                     for (int runde2 = 1; runde2 <= runde1; ++runde2)
                         this.OneRoundAllPairingsSetKeizerPtsTa(runde2, runde1);
                     Stopwatches.Next("AllPlayersAllRoundsCalculateTa-4");
-                    this.AllPlayersSetKeizerSumPtsTa(runde1, shallPreviousRoundDecay);
+                    this.AllPlayersSetKeizerSumPtsTa(runde1);
                     Stopwatches.Next("AllPlayersAllRoundsCalculateTa-5");
                     this.AllPlayersSetRankAndStartPtsTa();
                     Stopwatches.Stop("AllPlayersAllRoundsCalculateTa-5");
@@ -189,7 +190,7 @@ namespace KeizerForClubs
 
         /// <summary> Berechnet die Keizer-Punkt-Summe aller Spieler anhand der in der DB stehende Punkte 
         /// für die Spiele und schreibt die Summen in die DB. </summary>
-        private void AllPlayersSetKeizerSumPtsTa(int runde, bool shallPreviousRoundDecay)
+        private void AllPlayersSetKeizerSumPtsTa(int runde)
         {
             db.BeginTransaction();
             SqliteInterface.stPlayer[] players = new SqliteInterface.stPlayer[100];
@@ -261,11 +262,14 @@ namespace KeizerForClubs
                 }
                 else if (pair.Result == SqliteInterface.Results.Excused)
                 {
-                    float multi = GetExcusedMultiplikator(pWhite.Id, runde);
+                    float multi = GetBonusDecayMultiplier(pWhite.Id, runde);
                     erg_w = multi * pWhite.KeizerStartPts * form.tbBonusExcused.Value / 100.0f;
                 }
                 else if (pair.Result == SqliteInterface.Results.Unexcused)
-                    erg_w = pWhite.KeizerStartPts * form.tbBonusUnexcused.Value / 100.0f;
+                {
+                    float multi = GetBonusDecayMultiplier(pWhite.Id, runde);
+                    erg_w = multi * pWhite.KeizerStartPts * form.tbBonusUnexcused.Value / 100.0f;
+                }
                 else if (pair.Result == SqliteInterface.Results.Hindered)
                     erg_w = pWhite.KeizerStartPts * form.tbBonusClub.Value / 100.0f;
                 else if (pair.Result == SqliteInterface.Results.FreeWin)
@@ -310,13 +314,13 @@ namespace KeizerForClubs
             return true;
         }
 
-        float GetExcusedMultiplikator(int playerId, int runde)
+        float GetBonusDecayMultiplier(int playerId, int runde)
         {
             float multi = 1.0f;
-            if (false)  // TODO T80. Implement user interface. 
+            if (shallBonusDecay)
             {
-                var nExcused = db.GetPlayer_CountOfExcused(playerId, runde);
-                multi = nExcused > 0 ? 1.0f / nExcused : 1.0f;
+                var nMissing = db.GetPlayer_CountOfExcusedOrUnexcused(playerId, runde);
+                multi = nMissing > 1 ? 1.0f / (float)Math.Pow(2, nMissing - 1) : 1.0f;
             }
             return multi;
         }
@@ -403,5 +407,7 @@ namespace KeizerForClubs
         readonly SqliteInterface db;
         readonly frmMainform form;
         readonly ReportingUnit cReportingUnit;
+        bool shallPreviousRoundDecay, shallBonusDecay;
+
     }
 }

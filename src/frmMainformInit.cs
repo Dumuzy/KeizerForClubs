@@ -65,6 +65,7 @@ namespace KeizerForClubs
             this.tooltip = new ToolTip();
             this.chkFreilosVerteilen = new CheckBox();
             this.chkDecayPrevRound = new CheckBox();
+            this.chkDecayBonus = new CheckBox();
             this.chkNovusRandomBoard = new CheckBox();
             this.chkHtml = new CheckBox();
             this.chkXml = new CheckBox();
@@ -263,6 +264,7 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add(this.ddlFirstRoundRandom);
             this.tabSettings.Controls.Add(this.chkFreilosVerteilen);
             this.tabSettings.Controls.Add(this.chkDecayPrevRound);
+            this.tabSettings.Controls.Add(this.chkDecayBonus);
             this.tabSettings.Controls.Add(this.chkNovusRandomBoard);
             this.tabSettings.Controls.Add(this.btDonate1);
             this.tabSettings.Controls.Add(this.chkHtml);
@@ -395,8 +397,25 @@ Keizer points much more graspable.
 
 
             yOutput += dy;
+            this.chkDecayBonus.CheckAlign = chkDecayBonus.TextAlign = ContentAlignment.MiddleRight;
+            this.chkDecayBonus.Size = new Size(251, 24);
+            this.chkDecayBonus.Location = new Point(xloc + 259 - chkDecayBonus.Size.Width, yOutput);
+            this.chkDecayBonus.TabIndex = 8;
+            this.chkDecayBonus.UseVisualStyleBackColor = true;
+            var ttdb = @"Normally, the same excused and unexcused boni are granted,
+indenpendent of how often a player has missed. It has come out that this policy
+supports missing in the tournament too much. On the other hand, we really 
+don't want to punish players who just are really sick once. 
+
+If this checkbox is checked, the boni for excused/unexcused missing are 
+divided by 2 for every time a player is lacking excused/unexcused. 
+So e.g if the base bonus is set to 32 and a player misses 3 times, he gets
+32% for the first miss, 16% for the second and 8% for the third miss."; 
+            this.tooltip.SetToolTip(chkDecayBonus, ttdb);
+
+
             this.chkDecayPrevRound.CheckAlign = chkDecayPrevRound.TextAlign= ContentAlignment.MiddleRight;
-            this.chkDecayPrevRound.Size = new Size(271, 24);
+            this.chkDecayPrevRound.Size = new Size(251, 24);
             this.chkDecayPrevRound.Location = new Point(xloc + 521 - chkDecayPrevRound.Size.Width, yOutput);
             this.chkDecayPrevRound.TabIndex = 8;
             this.chkDecayPrevRound.UseVisualStyleBackColor = true;
