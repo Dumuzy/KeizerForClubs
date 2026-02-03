@@ -196,13 +196,14 @@ Seuls les caractères a-z, A-Z et 0-9 sont autorisés.
 
 Le programme offre la possibilité de calculer différents temps de réflexion pour compenser les différences de rating.  
 
-   * Les temps calculés ne sont affichés que dans le tableau d'appariement HTML que l'on obtient par le point de menu Listes/Appariements/Résultats. 
-   * Le champ *bonus temps* accueille les paramètres pour cela. Un exemple d'entrée est *curve=expo, min=5, sum=40, fak=0.006*
-   * Il faut noter que la virgule sert toujours de séparateur de champ et le point de séparateur décimal, indépendamment des 
-     paramètres culturels actuels de l'ordinateur.  
-   * Si quelque chose ne va pas avec les paramètres saisis, aucun temps n'est affiché ou bien *-1* est affiché partout comme temps. 
-     Dans ce cas, il faut consulter le fichier journal ou envoyer le fichier journal à l'auteur.   
-   * Si le premier caractère du champ de bonus de temps est un *#*, le champ de bonus de temps est ignoré.
+   * Les temps calculés ne sont affichés que dans le tableau d’appariements HTML, 
+     accessible via le menu Listes/Appariements/Résultats. 
+   * Le champ *Bonus temps* accueille les paramètres correspondants. Voici un exemple d'entrée : *curve=expo, min=5, sum=40, fak=0.006*
+   * Veuillez noter que la virgule sert toujours de séparateur de champs et le point de séparateur décimal, 
+     quels que soient les paramètres régionaux actuels de l'ordinateur.  
+   * Si les paramètres saisis sont incorrects, aucun temps n'est affiché ou -1 est affiché partout comme temps. 
+     Dans ce cas, il faut consulter le fichier journal ou envoyer le fichier journal à l'auteur. 
+   * Si le premier caractère du champ bonus de temps est un *#*, le champ bonus de temps est ignoré.
 
 Le programme calcule les temps de réflexion pour les joueurs dans le cas *curve=expo* comme suit (les autres types de courbes ne sont pas implémentés) : 
 ```
