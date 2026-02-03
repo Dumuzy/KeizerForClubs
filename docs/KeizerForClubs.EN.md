@@ -203,6 +203,7 @@ is the default. The higher the number, the more the better players stay
 separated from the others. I recommend lower values for tournaments with
 less than 20 players. 
 
+
 #### Normalization of victory
 
 If this checkbox is checked, all the Keizer points 
@@ -217,6 +218,33 @@ It's easier to calculate with whole numbers if you don't have a computer.
 
 Nowadays, all the calculation is done by the computer and so we can use much 
 smaller but broken numbers.) 
+
+
+#### Reduce boni for excused/unexcused
+
+When unchecked, the same absence boni are granted,
+indenpendent of how often a player has missed. It has come out that this policy
+supports missing in the tournament too much. On the other hand, we really 
+don't want to punish players who just are really sick once. 
+
+If this checkbox is checked, the boni for excused/unexcused missing are 
+divided by 2 for every time a player is lacking excused/unexcused. 
+So e.g if the base bonus is set to 32 and a player misses 3 times, he gets
+32% for the first miss, 16% for the second and 8% for the third miss.
+
+
+#### Reduce value of previous round's place
+
+When unchecked, player Xyz gets the Keizer points Xyz has earned 
+by playing. And added to that are the Keizer points a victory
+against himself would net. (Rank-Pb in the cross table.)
+This is very useful for the first rounds, but 
+feels a bit unfair for later rounds.
+(In reality, it doesn't matter much mostly.)
+
+If this checkbox is checked, a factor is used to reduce the
+self-victory value by one fifth  every round, so that from
+round five on, it is zero.
 
 #### Categories
 Imagine you've got a tournament where you want to have separate standings tables for different 

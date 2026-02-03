@@ -211,6 +211,29 @@ Heutzutage werden alle Berechnungen vom Computer durchgeführt, und so können wir
 kleinere, aber gebrochene Zahlen verwenden.)
 
 
+#### Reduziere Boni f. entschuldigt/unentschuldigt
+
+Wenn diese Option nicht aktiviert ist, werden die gleichen Boni für Abwesenheiten gewährt, egal wie oft der Spieler gefehlt hat. Es hat sich herausgestellt, dass diese Regelung das Fehlen im Turnier zu sehr fördert. Andererseits möchten wir Spieler, die nur einmal wirklich krank sind, wirklich nicht bestrafen.
+
+Wenn dieses Kontrollkästchen aktiviert ist, werden die Boni für entschuldigte/unentschuldigte Fehlzeiten 
+für jede entschuldigte/unentschuldigte Fehlzeit eines Spielers durch 2 geteilt. 
+Wenn beispielsweise der Basisbonus auf 32 festgelegt ist und ein Spieler dreimal fehlt, erhält er
+32 % für die erste Abwesenheit, 16 % für die zweite und 8 % für die dritte Abwesenheit.
+
+
+#### Reduziere Wert d. Plazierung voriger Runde
+
+Wenn dieses Kontrollkästchen nicht aktiviert ist, erhält Spieler Xyz die Keizer-Punkte, die Xyz 
+durch sein Spiel verdient hat. Hinzu kommen die Keizer-Punkte, die ein Sieg
+gegen ihn selbst einbringen würde. (Rank-Pb in der Kreuztabelle.)
+Dies ist für die ersten Runden sehr nützlich, fühlt sich aber für spätere Runden etwas unfair an.
+(In der Realität spielt dies meist keine große Rolle.)
+
+Wenn dieses Kontrollkästchen aktiviert ist, wird ein Faktor verwendet, um den
+Selbstsiegswert in jeder Runde um ein Fünftel zu reduzieren , sodass er ab
+Runde fünf gleich null ist.
+
+
 #### Kategorien
 
 Stellen sie sich vor, sie haben ein Turnier, bei dem sie getrennte Wertungstabellen für verschiedene 

@@ -4,7 +4,7 @@ set pandoc=pandoc.exe
 cd bin\x86\Debug\net6.0-windows\docs
 rm *.html *.md
 
-cd ..\..\..\..\Release\x86\net6.0-windows\docs
+cd ..\..\..\Release\net6.0-windows\docs
 rm *.html *.md
 
 
