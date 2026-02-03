@@ -100,7 +100,29 @@ namespace KeizerForClubs
             public string Name;
             public PlayerState State;
             public float KeizerStartPts;
-            public override string ToString() => $"{Id} {Name} state:{State} kStart {KeizerStartPts} ";
+            public int Rating;
+            public void SetCategories(string cats) { Categories = (cats ?? "").SplitToWords(",".ToCharArray()).ToLiro(); }
+            public Liro<string> Categories { get; private set; }
+
+
+            public override string ToString() => $"{Id} {Name} state:{State} rating:{Rating} kStart:{KeizerStartPts} cats:{Categories}";
+
+            /// <summary> Der dem Spieler zugeordnete k-Wert. 32 per default, sonst aus der Kategorie gelesen, die mit kv anfängt
+            /// und wie kv123 aussieht. </summary>
+            public int KValue
+            {
+                get
+                {
+                    int kv = 32;
+                    var kvCat = Categories.FirstOrDefault(c => c.StartsWith("kv"));
+                    if (!string.IsNullOrEmpty(kvCat) && kvCat.Length > 2)
+                    {
+                        kvCat = kvCat.Substring(2);
+                        kv = Helper.ToInt(kvCat);
+                    }
+                    return kv;
+                }
+            }
         }
 
         public struct stPairing
@@ -489,6 +511,38 @@ namespace KeizerForClubs
         }
 
 
+        /// <summary> Gibt die Liste aller Spieler mit geschätzten Ratings nach der angegebenen Runde 
+        /// zurück. Das Rating ist ein EloGlickoRating und die k-Werte der Spieler können per 
+        /// Kategorie vergeben werden. </summary>
+        public Li<clPlayerBase> GetPlayersEstimatedRatings(int runde)
+        {
+            Li<clPlayerBase> players = GetPlayersBase();
+            if (runde != 0)
+            {
+                for (int i = 1; i <= runde; ++i)
+                {
+                    var pairs = GetClPairingLi($" WHERE Rnd={i} AND Result in {ReallyPlayedResultsSql} ", "");
+                    foreach (var pair in pairs)
+                    {
+                        var pw = players.First(p => p.Id == pair.P.IdW);
+                        var pb = players.First(p => p.Id == pair.P.IdB);
+                        var egw = new EloGlickoRating(pw.Rating, pw.KValue);
+                        var egb = new EloGlickoRating(pb.Rating, pb.KValue);
+                        var resWhite = pair.P.Result == Results.WinWhite ? 1 :
+                                pair.P.Result == Results.Draw ? 0.5 : 0;
+                        var resBlack = 1 - resWhite;
+                        egw.SetNewRatingAndDeviation(resWhite, pb.Rating);
+                        egb.SetNewRatingAndDeviation(resBlack, pw.Rating);
+
+                        pw.Rating = Helper.ToInt(egw.Rating);
+                        pb.Rating = Helper.ToInt(egb.Rating);
+                    }
+                }
+            }
+            return players;
+        }
+
+
         // Farbverteilung eines Spieler abfragen:
         //  Gibt die Differenz aus Weiß- und Schwarzpartien des Spielers zurück. 
         public int GetPlayerWeissUeberschuss(int ID)
@@ -583,13 +637,14 @@ namespace KeizerForClubs
             return n == 0 ? new stPlayer { Id = -1 } : arr[0];
         }
 
-        /// <summary> Returns the players with the given Ids in the order of the ids. 
-        /// New empty player with state unknown and id -1, if one is not found.</summary>
-        public Tuple<clPlayerBase, clPlayerBase> GetPlayerBaseById(int id, int id2)
+        /// <summary> Returns all players if no arguments given or players with searched for ids, if ids given. </summary>
+        public Li<clPlayerBase> GetPlayersBase(int id = -1, int id2 = -1)
         {
-            Stopwatches.Start("GetPlayerBaseById");
-            sqlCommand.CommandText = " SELECT id, name, state, Keizer_StartPts FROM Player p WHERE " +
-                (id2 == -1 ? $"id = {id}" : $"id in ({id}, {id2})");
+            sqlCommand.CommandText = " SELECT id, name, state, Keizer_StartPts, Rating, Categories FROM Player p " +
+                    (
+                        (id2 == -1 && id == -1) ? "" :
+                        (id2 == -1 ? $" WHERE id = {id}" : $" WHERE id in ({id}, {id2})")
+                    );
             Li<clPlayerBase> lip = new();
             clPlayerBase p = null;
             using (SQLiteDataReader sqLiteDataReader = sqlCommand.ExecuteReader())
@@ -603,9 +658,21 @@ namespace KeizerForClubs
                         int num = sqLiteDataReader.IsDBNull(2) ? 0 : sqLiteDataReader.GetInt32(2);
                         p.State = (PlayerState)num;
                         p.KeizerStartPts = sqLiteDataReader.IsDBNull(3) ? 0.0f : sqLiteDataReader.GetFloat(3);
+                        p.Rating = sqLiteDataReader.IsDBNull(4) ? 0 : sqLiteDataReader.GetInt16(4);
+                        p.SetCategories(sqLiteDataReader.IsDBNull(5) ? "" : sqLiteDataReader.GetString(5));
                         lip.Add(p);
                     }
                 }
+            return lip;
+        }
+
+        /// <summary> Returns the players with the given Ids in the order of the ids. 
+        /// New empty player with state unknown and id -1, if one is not found.</summary>
+        public Tuple<clPlayerBase, clPlayerBase> GetPlayerBaseById(int id, int id2)
+        {
+            Stopwatches.Start("GetPlayerBaseById");
+
+            var lip = GetPlayersBase(id, id2);
 
             while (lip.Count < 2)
                 lip.Add(new clPlayerBase { Id = -1, State = PlayerState.Unknown });

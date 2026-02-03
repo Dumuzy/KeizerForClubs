@@ -9,25 +9,6 @@ namespace KeizerForClubs
 {
     internal class Rating
     {
-        /// <summary> Returns the new rating number and the expected Result from 0 to 1.</summary>
-        /// <param name="resultFrom0to1"></param>
-        /// <param name="oldRating"></param>
-        /// <param name="opponentsRating"></param>
-        /// <param name="k"></param>
-        /// <returns>(newRating, expectedScoreFrom0to1, ratingChange)</returns>
-        public static (double, double, double) GetNewRating(double resultFrom0to1, double oldRating, double opponentsRating, double k)
-        {
-            var expectedScore = (oldRating - opponentsRating) / (4 * C);
-            if (expectedScore > 0.5)
-                expectedScore = 0.5;
-            else if (expectedScore < -0.5)
-                expectedScore = -0.5;
-
-            var realScore = resultFrom0to1 - 0.5;
-            var newRating = oldRating + k * (realScore - expectedScore);
-            return (newRating, expectedScore + 0.5, newRating - oldRating);
-        }
-
         /// <summary> Berechnet näherungsweise die Performance eines Spielers in einem Turnier. </summary>
         /// <param name="gegnerRatings">Ein Array, das die DWZ der Gegner enthält.</param>
         /// <param name="ergebnisse">Ein Array, das die Ergebnisse gegen die Gegner enthält, jeweils 1, 0.5 oder 0.</param>
