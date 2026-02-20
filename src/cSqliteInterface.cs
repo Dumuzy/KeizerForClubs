@@ -1510,16 +1510,19 @@ namespace KeizerForClubs
             var sql = new Li<string>();
             sql.Add($@" DROP TABLE IF EXISTS {tn};");
             sql.Add($"CREATE TABLE {tn} (id INTEGER PRIMARY KEY, line TEXT NOT NULL);");
-            sql.Add($"INSERT into {tn} (line) VALUES('{table.Header1}');");
-            sql.Add($"INSERT into {tn} (line) VALUES('{table.Header2}');");
+            sql.Add($"INSERT into {tn} (line) VALUES(@th1);");
+            sqlCommand.Parameters.AddWithValue("@th1", table.Header1);
+            sql.Add($"INSERT into {tn} (line) VALUES(@th2);");
+            sqlCommand.Parameters.AddWithValue("@th2", table.Header2);
             sql.Add($"INSERT into {tn} (line) VALUES('{string.Join(tableSplitter, table.Footer)}');");
             for (int i = 0; i < table.Count; ++i)
             {
-                var line = string.Join(tableSplitter, table[i]);
+                var line = string.Join(tableSplitter, table[i]).Replace("'", "''");
                 sql.Add($"INSERT into {tn} (line) VALUES('{line}');");
             }
             sqlCommand.CommandText = string.Join("\n", sql);
             sqlCommand.ExecuteNonQuery();
+            sqlCommand.Parameters.Clear();
         }
 
         public TableW3Headers ReadTableWHeadersFromDb(TableType tt, int runde)
