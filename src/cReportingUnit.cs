@@ -276,6 +276,8 @@ namespace KeizerForClubs
                 kppFormat2 = (bonusVerlust != 0 && bonusVerlust < 50) ? kppFormat + "0" : kppFormat;
             }
 
+            var playersWithEstimatedRatings = db.GetPlayersEstimatedRatings(t.Runde);
+
             for (int index1 = 0, numPlayer = 1; index1 < players.Count; ++index1)
             {
                 var player = players[index1];
@@ -292,7 +294,11 @@ namespace KeizerForClubs
                 line.Add(player.KeizerPrevPts.ToString(kppFormat2));
                 line.Add(player.KeizerSumPts.ToString("0.00"));
                 line.Add(player.GamePts.ToString());
-                line.Add(Ext.ToDebug(db.GetPlayersRatingPerformance(player.Id)));
+                Li<string> performances = new();
+                performances.Add(Ext.ToDebug(db.GetPlayersRatingPerformance(player.Id)));
+                if (playersWithEstimatedRatings != null)
+                    performances.Add(playersWithEstimatedRatings.First(p => p.Id == player.Id).Rating.ToString());
+                line.Add(string.Join(" / ", performances));
 
                 for (int runde = 1; runde <= t.Runde; ++runde)
                 {

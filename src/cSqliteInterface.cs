@@ -10,6 +10,9 @@ namespace KeizerForClubs
         None = 0, Stand, Kreuz, Spieler, Paarungen
     }
 
+    [Flags]
+    public enum ShowPerformance { None = 0, DefaultElo = 1, EloGlicko = 2 };
+
 
     public class SqliteInterface
     {
@@ -365,6 +368,11 @@ namespace KeizerForClubs
             return res;
         }
 
+        public ShowPerformance GetConfigShowPerformance()
+        {
+            var sp = (ShowPerformance)GetConfigInt("OPTION.ShowPerformance", (int)ShowPerformance.DefaultElo);
+            return sp;
+        }
         #endregion Config
 
         #region Player
@@ -514,10 +522,12 @@ namespace KeizerForClubs
         /// <summary> Gibt die Liste aller Spieler mit geschätzten Ratings nach der angegebenen Runde 
         /// zurück. Das Rating ist ein EloGlickoRating und die k-Werte der Spieler können per 
         /// Kategorie vergeben werden. </summary>
+        /// <returns> Falls die EloGlickoRatings nicht aktiviert sind: null. </returns>
         public Li<clPlayerBase> GetPlayersEstimatedRatings(int runde)
         {
-            Li<clPlayerBase> players = GetPlayersBase();
-            if (runde != 0)
+            var showPerf  = GetConfigShowPerformance();
+            Li<clPlayerBase> players = Ext.HasFlag(showPerf, ShowPerformance.EloGlicko) ? GetPlayersBase() : null;
+            if (runde != 0 && players != null)
             {
                 for (int i = 1; i <= runde; ++i)
                 {
