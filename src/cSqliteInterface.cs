@@ -572,12 +572,19 @@ namespace KeizerForClubs
                 if (pList[index].IdB == ID)
                     --playerFarbzaehlung;
             }
-            if (maxRoundsSameColor != 0)
+
+            // Für die maxRoundsSameColour zählen wir wie auch für die Farbzählung oben
+            // Freilose nicht mit. So macht es wohl auch die FIDE im Schweizer System. 
+            // 
+            // Und weil ich die maxRoundsSameColour im Wesentlichen eingebaut habe, damit
+            // Leute, die das Schweizer System gewohnt sind, nicht so mit Ungewohntem
+            // überrascht werden, mach ich das hier wie die FIDE. 
+            if (maxRoundsSameColor != 0 && cnt >= maxRoundsSameColor)
             {
                 // Wenn maxRoundsSameColor == 2, guck ich ob der in den letzten 2 Runden
                 // einmal Weiß hatte, falls ja, kann er Schwarz kriegen in der nächsten. 
                 canGetWhite = canGetBlack = false;
-                for (int index = 0; index < maxRoundsSameColor - 1; ++index)
+                for (int index = 0; index < maxRoundsSameColor; ++index)
                 {
                     if (pList[index].IdW == ID)
                         canGetBlack = true;

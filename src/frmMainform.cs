@@ -1116,13 +1116,13 @@ for determining the first round pairings.";
                                 = db.GetPlayerColorInfo(player1.Id, maxRoundsSameColor);
                             (int p2WeissPlus, bool p2CanGetWhite, bool p2CanGetBlack) 
                                 = db.GetPlayerColorInfo(player2.Id, maxRoundsSameColor);
+
                             if (p1WeissPlus > p2WeissPlus && p2CanGetWhite && p1CanGetBlack)
                                 SetPairing2List(brett, player2, player1);
                             else if (p1WeissPlus < p2WeissPlus && p1CanGetWhite && p2CanGetBlack)
                                 SetPairing2List(brett, player1, player2);
                             else
                             {
-                                // TODO für T109: Wird nicht korrekt behandelt im Fall p1Wplus==p2Wplus
                                 if (p1WeissPlus == p2WeissPlus)
                                 {
                                     // WeissPlus Gleichheit. 
@@ -1139,8 +1139,24 @@ for determining the first round pairings.";
                                                 SetPairing2List(brett, player1, player2);
                                         }
                                         else
-                                            // sonst kriegt der weiter vorne in der Rangliste schwarz. 
-                                            SetPairing2List(brett, player2, player1);
+                                        {
+                                            // Sonst kriegt der weiter vorne in der Rangliste
+                                            // schwarz, falls erlaubt.
+                                            if (p2CanGetWhite && p1CanGetBlack)
+                                                SetPairing2List(brett, player2, player1);
+                                            // Andernfalls kriegt der weiter vorn in der Rangliste
+                                            // Weiß, falls erlaubt.
+                                            else if (p1CanGetWhite && p2CanGetBlack)
+                                                SetPairing2List(brett, player1, player2);
+                                            else
+                                            {
+                                                // WeissPlus Gleichheit, aber nicht erste Runde und
+                                                // beide Farbverteilungen dieser 2 Spieler nicht erlaubt.
+                                                // Die Paarung ist nicht möglich.
+                                                player2.State = SqliteInterface.PlayerState.Available;
+                                                continue;
+                                            }
+                                        }
                                     }
                                     else
                                     {
@@ -1148,15 +1164,22 @@ for determining the first round pairings.";
                                         // werden die Farben vertauscht.
                                         var cntPlayer1W = db.CountPairingVorhandenSinceOneWay(0, player1.Id, player2.Id);
                                         var cntPlayer2W = nplayed - cntPlayer1W;
-                                        if (cntPlayer1W > cntPlayer2W)
+                                        if (cntPlayer1W > cntPlayer2W && p2CanGetWhite && p1CanGetBlack)
                                             SetPairing2List(brett, player2, player1);
-                                        else
+                                        else if(cntPlayer1W < cntPlayer2W && p1CanGetWhite && p2CanGetBlack)
                                             SetPairing2List(brett, player1, player2);
+                                        else
+                                        {
+                                            // WeissPlus Gleichheit, aber die vertauschten Farben sind nicht
+                                            // möglich. Die Paarung ist nicht möglich.
+                                            player2.State = SqliteInterface.PlayerState.Available;
+                                            continue;
+                                        }
                                     }
                                 }
                                 else
-                                {  //keine WeissPlusGleichheit, aber canGetWhite oder canGetBlack 
-                                   // spricht gegen die Paarung, die probiert wurde.
+                                {  // Keine WeissPlusGleichheit, aber canGetWhite oder canGetBlack 
+                                   // spricht gegen die Paarung, die probiert wurde. Paarung ist unmöglich. 
                                     player2.State = SqliteInterface.PlayerState.Available;
                                     continue;
                                 }
