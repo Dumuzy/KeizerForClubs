@@ -554,14 +554,17 @@ namespace KeizerForClubs
 
 
         // Farbverteilung eines Spieler abfragen:
-        //  Gibt die Differenz aus Weiß- und Schwarzpartien des Spielers zurück. 
-        public int GetPlayerWeissUeberschuss(int ID)
+        // Gibt die Differenz aus Weiß- und Schwarzpartien des Spielers zurück sowie
+        // ob der Spieler in der nächsten Runde Weiß haben darf und ob der Spieler in 
+        // der nächsten Runde Schwarz haben darf.  
+        public (int, bool, bool) GetPlayerColorInfo(int ID, int maxRoundsSameColor)
         {
+            bool canGetWhite = true, canGetBlack = true;
             int playerFarbzaehlung = 0;
             string str = ID.ToString();
             string sWhere = " where ((PID_W=" + str + " and PID_B>=0) or PID_B=" + str + ") ";
             SqliteInterface.stPairing[] pList = new SqliteInterface.stPairing[50];
-            int cnt = GetPairingList(ref pList, sWhere, "");
+            int cnt = GetPairingList(ref pList, sWhere, " ORDER BY Rnd DESC");
             for (int index = 0; index < cnt; ++index)
             {
                 if (pList[index].IdW == ID)
@@ -569,7 +572,20 @@ namespace KeizerForClubs
                 if (pList[index].IdB == ID)
                     --playerFarbzaehlung;
             }
-            return playerFarbzaehlung;
+            if (maxRoundsSameColor != 0)
+            {
+                // Wenn maxRoundsSameColor == 2, guck ich ob der in den letzten 2 Runden
+                // einmal Weiß hatte, falls ja, kann er Schwarz kriegen in der nächsten. 
+                canGetWhite = canGetBlack = false;
+                for (int index = 0; index < maxRoundsSameColor - 1; ++index)
+                {
+                    if (pList[index].IdW == ID)
+                        canGetBlack = true;
+                    if (pList[index].IdB == ID)
+                        canGetWhite = true;
+                }
+            }
+            return (playerFarbzaehlung, canGetWhite, canGetBlack);
         }
 
         public string GetPlayerName(int ID)

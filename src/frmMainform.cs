@@ -30,10 +30,10 @@ namespace KeizerForClubs
         private ToolStripMenuItem mnuListenStanding, mnuListenStandingFull;
         private ToolStripMenuItem mnuListenPairing, mnuListenAll, mnuListenPodium;
         private NumericUpDown numRoundsGameRepeat;
-        private ComboBox ddlRatioFirst2Last, ddlFirstRoundRandom;
+        private ComboBox ddlRatioFirst2Last, ddlFirstRoundRandom, ddlRoundsSameColor;
         private ToolTip tooltip;
         private Label lblRoundsGameRepeat, lblOutputTo, lblNiceName, lblCategories, lblTimeBonus,
-            lblRatioFirst2Last, lblFirstRoundRandom;
+            lblRatioFirst2Last, lblFirstRoundRandom, lblRoundsSameColor;
         private TextBox tbNiceName, tbCategories, tbTimeBonus;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem mnuStartStart;
@@ -159,6 +159,20 @@ lower this number, the closer are Keizer system and Swiss system.
             this.tooltip.SetToolTip(this.lblRatioFirst2Last, ttddl);
             this.tooltip.AutomaticDelay = 2000;
             this.tooltip.InitialDelay = 200;
+
+            var rounds = db.GetConfigText("OPTION.RoundsSameColor");
+            var idx2 = (ddlRoundsSameColor.DataSource as List<string>).IndexOf(rounds);
+            if (idx2 == -1)
+                idx2 = (ddlRoundsSameColor.DataSource as List<string>).IndexOf("--");
+            ddlRoundsSameColor.CreateControl();  // Without this CreateControl, the following SelectedIndex= crashes. God knows why. 
+            if (idx2 != ddlRoundsSameColor.SelectedIndex)
+                ddlRoundsSameColor.SelectedIndex = idx2;
+            var ttrsc = @"Bla bla TODO T109 bla";  
+            this.tooltip.SetToolTip(this.ddlRoundsSameColor, ttrsc);
+            this.tooltip.SetToolTip(this.lblRoundsSameColor, ttrsc);
+            this.tooltip.AutomaticDelay = 2000;
+            this.tooltip.InitialDelay = 200;
+
 
             var firstRoundRandom = db.GetConfigInt("OPTION.FirstRoundRandom", 0);
             var idxf = (ddlFirstRoundRandom.DataSource as List<int>).IndexOf(firstRoundRandom);
@@ -503,6 +517,7 @@ for determining the first round pairings.";
                 db.SetConfigInt("OPTION.GameRepeat", (int)Convert.ToInt16(this.numRoundsGameRepeat.Value));
                 db.SetConfigFloat("OPTION.RatioFirst2Last", Helper.ToSingle(ddlRatioFirst2Last.SelectedValue));
                 db.SetConfigInt("OPTION.FirstRoundRandom", Helper.ToInt(ddlFirstRoundRandom.SelectedValue));
+                db.SetConfigText("OPTION.RoundsSameColor", ddlRoundsSameColor.SelectedValue as string);
                 db.SetConfigBool("OPTION.Html", this.chkHtml.Checked);
                 db.SetConfigBool("OPTION.Xml", this.chkXml.Checked);
                 db.SetConfigBool("OPTION.Txt", this.chkTxt.Checked);
@@ -902,6 +917,7 @@ for determining the first round pairings.";
             lblRoundsGameRepeat.Text = db.Locl_GetText("GUI_LABEL", "NumRundeWdh");
             lblRatioFirst2Last.Text = db.Locl_GetText("GUI_LABEL", "First2Last");
             lblFirstRoundRandom.Text = db.Locl_GetText("GUI_LABEL", "FirstRoundRandom");
+            lblRoundsSameColor.Text = db.Locl_GetText("GUI_LABEL", "RoundsSameColor");
             lblOutputTo.Text = db.Locl_GetText("GUI_LABEL", "OutputTo");
             lblNiceName.Text = db.Locl_GetText("GUI_LABEL", "NiceName");
             lblCategories.Text = db.Locl_GetText("GUI_LABEL", "Categories");
@@ -1076,6 +1092,7 @@ for determining the first round pairings.";
             if (brett == 0)
                 DealFreilos();
             int minrunde = currRunde - Convert.ToInt16(this.numRoundsGameRepeat.Value);
+            int maxRoundsSameColor = Helper.ToInt(this.ddlRoundsSameColor.SelectedValue);
             if (this.iPairingRekursionCnt++ > 100000)
                 return false;
             if (brett * 2 + 1 >= this.iPairingPlayerCntAvailable)
@@ -1095,40 +1112,53 @@ for determining the first round pairings.";
                         {
                             Stopwatches.Start("RunPairingRecursion-1");
                             player2.State = SqliteInterface.PlayerState.Paired;
-                            int p1WeissPlus = db.GetPlayerWeissUeberschuss(player1.Id);
-                            int p2WeissPlus = db.GetPlayerWeissUeberschuss(player2.Id);
-                            if (p1WeissPlus > p2WeissPlus)
+                            (int p1WeissPlus, bool p1CanGetWhite, bool p1CanGetBlack)
+                                = db.GetPlayerColorInfo(player1.Id, maxRoundsSameColor);
+                            (int p2WeissPlus, bool p2CanGetWhite, bool p2CanGetBlack) 
+                                = db.GetPlayerColorInfo(player2.Id, maxRoundsSameColor);
+                            if (p1WeissPlus > p2WeissPlus && p2CanGetWhite && p1CanGetBlack)
                                 SetPairing2List(brett, player2, player1);
-                            else if (p1WeissPlus < p2WeissPlus)
+                            else if (p1WeissPlus < p2WeissPlus && p1CanGetWhite && p2CanGetBlack)
                                 SetPairing2List(brett, player1, player2);
                             else
-                            {  // WeissPlus Gleichheit. 
-                                var nplayed = db.CountPairingVorhandenSince(0, player1.Id, player2.Id);
-                                // Falls die zwei noch nie oder eine grade Anzahl Male gegeneinander gspielt haben, ...
-                                if (nplayed % 2 == 0)
+                            {
+                                // TODO für T109: Wird nicht korrekt behandelt im Fall p1Wplus==p2Wplus
+                                if (p1WeissPlus == p2WeissPlus)
                                 {
-                                    // falls erste Runde und FirstRoundRandom, wird die Farbe ausgelost, 
-                                    if (currRunde == 1 && db.GetConfigInt("OPTION.FirstRoundRandom") != 0)
+                                    // WeissPlus Gleichheit. 
+                                    var nplayed = db.CountPairingVorhandenSince(0, player1.Id, player2.Id);
+                                    // Falls die zwei noch nie oder eine grade Anzahl Male gegeneinander gspielt haben, ...
+                                    if (nplayed % 2 == 0)
                                     {
-                                        if (random.NextSingle() > 0.5f)
+                                        // falls erste Runde und FirstRoundRandom, wird die Farbe ausgelost, 
+                                        if (currRunde == 1 && db.GetConfigInt("OPTION.FirstRoundRandom") != 0)
+                                        {
+                                            if (random.NextSingle() > 0.5f)
+                                                SetPairing2List(brett, player2, player1);
+                                            else
+                                                SetPairing2List(brett, player1, player2);
+                                        }
+                                        else
+                                            // sonst kriegt der weiter vorne in der Rangliste schwarz. 
+                                            SetPairing2List(brett, player2, player1);
+                                    }
+                                    else
+                                    {
+                                        // Falls die zwei eine ungrade Anzahl Male gegeneinander gspielt haben, 
+                                        // werden die Farben vertauscht.
+                                        var cntPlayer1W = db.CountPairingVorhandenSinceOneWay(0, player1.Id, player2.Id);
+                                        var cntPlayer2W = nplayed - cntPlayer1W;
+                                        if (cntPlayer1W > cntPlayer2W)
                                             SetPairing2List(brett, player2, player1);
                                         else
                                             SetPairing2List(brett, player1, player2);
                                     }
-                                    else
-                                        // sonst kriegt der weiter vorne in der Rangliste schwarz. 
-                                        SetPairing2List(brett, player2, player1);
                                 }
                                 else
-                                {
-                                    // Falls die zwei eine ungrade Anzahl Male gegeneinander gspielt haben, 
-                                    // werden die Farben vertauscht.
-                                    var cntPlayer1W = db.CountPairingVorhandenSinceOneWay(0, player1.Id, player2.Id);
-                                    var cntPlayer2W = nplayed - cntPlayer1W;
-                                    if (cntPlayer1W > cntPlayer2W)
-                                        SetPairing2List(brett, player2, player1);
-                                    else
-                                        SetPairing2List(brett, player1, player2);
+                                {  //keine WeissPlusGleichheit, aber canGetWhite oder canGetBlack 
+                                   // spricht gegen die Paarung, die probiert wurde.
+                                    player2.State = SqliteInterface.PlayerState.Available;
+                                    continue;
                                 }
                             }
                             Stopwatches.Stop("RunPairingRecursion-1");

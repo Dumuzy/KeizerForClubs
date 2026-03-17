@@ -40,18 +40,22 @@ namespace KeizerForClubs
             this.tabSettings = new TabPage();
 
             ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.1");
-            int xloc = 12;
+            int xloc = 5;
             InitializeBonus(1, xloc, "Clubgame", ref lblBonusClub, ref tbBonusClub, ref lblBonusClubValue);
             InitializeBonus(2, xloc, "Excused", ref lblBonusExcused, ref tbBonusExcused, ref lblBonusExcusedValue);
             InitializeBonus(3, xloc, "Unexcused", ref lblBonusUnexcused, ref tbBonusUnexcused, ref lblBonusUnexcusedValue);
+            int bonusWidth = 260;
+            xloc += bonusWidth;
             InitializeBonus(4, xloc, "Retired", ref lblBonusRetired, ref tbBonusRetired, ref lblBonusRetiredValue);
             InitializeBonus(5, xloc, "Freilos", ref lblBonusFreilos, ref tbBonusFreilos, ref lblBonusFreilosValue);
             InitializeBonus(6, xloc, "Verlust", ref lblBonusVerlust, ref tbBonusVerlust, ref lblBonusVerlustValue);
+            xloc -= bonusWidth;
             ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.2");
 
             this.lblRoundsGameRepeat = new Label();
             this.lblRatioFirst2Last = new Label();
             this.lblFirstRoundRandom = new Label();
+            this.lblRoundsSameColor = new Label();
             this.lblOutputTo = new Label();
             this.lblNiceName = new Label();
             this.tbNiceName = new TextBox();
@@ -62,6 +66,7 @@ namespace KeizerForClubs
             this.numRoundsGameRepeat = new NumericUpDown();
             this.ddlRatioFirst2Last = new ComboBox();
             this.ddlFirstRoundRandom = new ComboBox();
+            this.ddlRoundsSameColor = new ComboBox();
             this.tooltip = new ToolTip();
             this.chkFreilosVerteilen = new CheckBox();
             this.chkDecayPrevRound = new CheckBox();
@@ -260,6 +265,8 @@ namespace KeizerForClubs
             this.tabSettings.Controls.Add(this.lblRatioFirst2Last);
             this.tabSettings.Controls.Add(this.lblFirstRoundRandom);
             this.tabSettings.Controls.Add(this.numRoundsGameRepeat);
+            this.tabSettings.Controls.Add(this.lblRoundsSameColor);
+            this.tabSettings.Controls.Add(this.ddlRoundsSameColor);
             this.tabSettings.Controls.Add(this.ddlRatioFirst2Last);
             this.tabSettings.Controls.Add(this.ddlFirstRoundRandom);
             this.tabSettings.Controls.Add(this.chkFreilosVerteilen);
@@ -285,7 +292,7 @@ namespace KeizerForClubs
             this.tabSettings.UseVisualStyleBackColor = true;
             this.tabSettings.Leave += TabSettingsLeave;
 
-            var yOutput = 180;
+            int yOutput = 130, dy = 23;
             xloc -= 4;
 
             this.chkFreilosVerteilen.CheckAlign = ContentAlignment.MiddleRight;
@@ -317,7 +324,6 @@ namespace KeizerForClubs
             this.chkNovusRandomBoard.TextAlign = ContentAlignment.MiddleRight;
             ExLogger.Instance.LogInfo("frmMainForm.IniComp 1.5");
 
-            int dy = 23;
 
             yOutput += dy;
             this.lblRoundsGameRepeat.Location = new Point(xloc - 5, yOutput);
@@ -337,6 +343,15 @@ namespace KeizerForClubs
             this.ddlRatioFirst2Last.Size = new Size(40, 21);
             List<float> list = new List<float>(new float[] { 4, 3.5f, 3, 2.5f, 2, 1.5f, 1.2f, 1.1f, 1.01f });
             this.ddlRatioFirst2Last.DataSource = list;
+
+
+            yOutput += dy;
+            this.lblRoundsSameColor.Location = new Point(xloc + 280, yOutput);
+            this.lblRoundsSameColor.Size = new Size(200, 23);
+            this.lblRoundsSameColor.TextAlign = ContentAlignment.MiddleRight;
+            this.ddlRoundsSameColor.Location = new Point(xloc + 481, yOutput);
+            this.ddlRoundsSameColor.Size = new Size(40, 21);
+            this.ddlRoundsSameColor.DataSource = "2 3 4 5 --".SplitToWords().ToLi();
 
 
             yOutput += dy;
@@ -614,11 +629,13 @@ round five on, it is zero.";
             ExLogger.Instance.LogInfo("frmMainForm.IniComp 2.0");
         }
 
-        private void InitializeBonus(int num, int xloc, string name, ref Label lblText, ref TrackBar tb, ref Label lblValue)
+        private void InitializeBonus(int num, int xloc, string name, ref Label lblText, 
+            ref TrackBar tb, ref Label lblValue)
         {
-            var yloc = 15 + (num - 1) * 25;
+            var numy = (num-1) % 3 +1;
+            var yloc = 15 + (numy - 1) * 25;
             InitializeBonusText(num, xloc, yloc, name, ref lblText);
-            int tblen = 200;
+            int tblen = 110;
             InitializeBonusTrackbar(num, xloc + 155, yloc, name, tblen, ref tb);
             InitializeBonusValue(num, xloc + tblen + 160, yloc, name, ref lblValue);
         }
@@ -659,9 +676,10 @@ round five on, it is zero.";
 
             lblValue.Location = new Point(xloc, yloc);
             lblValue.Name = $"lblBonus{name}Value";
-            lblValue.Size = new Size(100, 23);
+            lblValue.Size = new Size(23, 23);
             lblValue.TabIndex = 10 + num;
             lblValue.TextAlign = ContentAlignment.MiddleLeft;
+            // lblValue.BackColor = Color.Yellow;
         }
     }
 }
