@@ -574,6 +574,8 @@ for determining the first round pairings.";
             db.SetConfigInt("WIN.colPairingNameBlack.wid", colPairingNameBlack.Width);
             db.SetConfigInt("WIN.colPlayerName.wid", colPlayerName.Width);
             db.SetConfigInt("WIN.colPlayerCats.wid", colPlayerCategories.Width);
+            db.SetConfigInt("WIN.colPlayerState.wid", colPlayerState.Width);
+            db.SetConfigInt("WIN.colPlayerRating.wid", colRating.Width);
             db.SetConfigInt("WIN.chkPairingOnlyPlayed.locX", chkPairingOnlyPlayed.Location.X);
         }
 
@@ -598,6 +600,8 @@ for determining the first round pairings.";
                 colPairingNameBlack.Width = db.GetConfigInt("WIN.colPairingNameBlack.wid");
                 colPlayerName.Width = db.GetConfigInt("WIN.colPlayerName.wid");
                 colPlayerCategories.Width = db.GetConfigInt("WIN.colPlayerCats.wid", 30);
+                colPlayerState.Width = db.GetConfigInt("WIN.colPlayerState.wid", 200);
+                colRating.Width = db.GetConfigInt("WIN.colPlayerRating.wid", 70);
                 chkPairingOnlyPlayed.Location = new Point(db.GetConfigInt("WIN.chkPairingOnlyPlayed.locX"),
                         chkPairingOnlyPlayed.Location.Y);
             }
