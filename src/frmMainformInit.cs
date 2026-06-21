@@ -156,6 +156,7 @@ namespace KeizerForClubs
             this.grdPlayers.CurrentCellDirtyStateChanged += new EventHandler(this.GrdPlayersDirty);
             this.grdPlayers.DataError += new DataGridViewDataErrorEventHandler(this.GrdPlayersDataError);
             this.grdPlayers.CellValidating += new DataGridViewCellValidatingEventHandler(this.GrdPlayersCellValidating);
+            this.grdPlayers.CellFormatting += grdPlayers_CellFormatting;
             this.colPlayerID.HeaderText = "ID";
             this.colPlayerID.Name = "colPlayerID";
             this.colPlayerID.ReadOnly = true;
@@ -169,6 +170,7 @@ namespace KeizerForClubs
             this.colPlayerState.HeaderText = "State";
             this.colPlayerState.Name = "colPlayerState";
             this.colPlayerState.Width = 200;
+            this.colPlayerState.FlatStyle = FlatStyle.Flat;
             this.tabPairings.Controls.Add(this.pnlPairingPanel);
             this.tabPairings.Controls.Add(this.grdPairings);
             this.tabPairings.Location = new Point(4, 4);

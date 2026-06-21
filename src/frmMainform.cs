@@ -961,6 +961,47 @@ for determining the first round pairings.";
             }
         }
 
+        private void grdPlayers_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            var row = grdPlayers.Rows[e.RowIndex];
+
+            // Verhindert, dass der Code für Headerzeilen (RowIndex = −1) ausgeführt wird.
+            if (e.RowIndex < 0) return;
+
+            var statusValue = (PlayerState)db.Locl_GetPlayerState(row.Cells[grdPlayersStateCol].Value as string);
+
+            Color backColor, foreColor = Color.Black;
+            switch (statusValue)
+            {
+                case PlayerState.Available:
+                    backColor = Color.FromArgb(225, 255, 225);
+                    break;
+                case PlayerState.Retired:
+                    backColor = Color.FromArgb(230, 230, 230);
+                    break;
+                case PlayerState.Deleted:
+                    backColor = Color.LightCoral;
+                    break;
+                default:
+                    backColor = Color.White;
+                    break;
+            }
+
+            // ganze Zeile färben (für normale Zellen)
+            row.DefaultCellStyle.BackColor = backColor;
+            row.DefaultCellStyle.ForeColor = foreColor;
+
+            // Spezialbehandlung für Combobox-Zellen
+            if (e.ColumnIndex == grdPlayersStateCol)
+            {
+                e.CellStyle.BackColor = backColor;
+                e.CellStyle.ForeColor = foreColor;
+                e.CellStyle.SelectionBackColor = backColor;
+                e.CellStyle.SelectionForeColor = foreColor;
+            }
+        }
+
+
         private void LoadPairingList()
         {
             var pairingList = db.GetPairingLi(" WHERE rnd=" + this.numRoundSelect.Value.ToString(), " ORDER BY board ");
