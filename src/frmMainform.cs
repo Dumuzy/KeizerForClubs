@@ -307,6 +307,7 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             SwitchToPairingTab();
+            SetPreRegisteredPlayers2Available();
             DelDeletedPlayers();
             WriteCurrentTablesToDbIfNeeded();
             if (db.GetPairings_NoResult() == 0)
@@ -320,6 +321,7 @@ for determining the first round pairings.";
         {
             IncNumClicks();
             SwitchToPairingTab();
+            SetPreRegisteredPlayers2Available();
             DelDeletedPlayers();
             WriteCurrentTablesToDbIfNeeded();
             int maxRound = db.GetMaxRound();
@@ -844,7 +846,7 @@ for determining the first round pairings.";
         private void ApplyPlayerStateTexte()
         {
             int m = db.GetMaxRound();
-            string condition = m != 0 ? " AND key not in ('2', 'A') " : " AND key<>'2' ";
+            string condition = m != 0 ? " AND key not in ('2', 'A', 'C') " : " AND key<>'2' ";
             string[] texte = new string[20];
             int topicTexte1 = db.Locl_GetTopicTexte("PLAYERSTATE", condition, ref texte);
 
@@ -940,6 +942,16 @@ for determining the first round pairings.";
             }
         }
 
+        void SetPreRegisteredPlayers2Available()
+        {
+            int n = db.SetPreRegisteredPlayers2Available();
+            if (n > 0)
+            {
+                LoadPlayerList();
+                LoadPairingList();
+            }
+        }
+
         /// <summary> Erzeugt die Spielerliste auf dem Spieler-Tab.</summary>
         private void LoadPlayerList()
         {
@@ -985,6 +997,9 @@ for determining the first round pairings.";
                     break;
                 case PlayerState.Deleted:
                     backColor = Color.LightCoral;
+                    break;
+                case PlayerState.PreRegistered:
+                    backColor = Color.FromArgb(190, 240, 255);
                     break;
                 default:
                     backColor = Color.White;

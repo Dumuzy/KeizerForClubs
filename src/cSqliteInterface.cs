@@ -32,6 +32,7 @@ namespace KeizerForClubs
             Retired = 9,
             Deleted = 10,
             NotYetStarted = 11,
+            PreRegistered = 12,
         };
 
         public enum Results
@@ -856,6 +857,24 @@ namespace KeizerForClubs
             }
             return nDeleted;
         }
+
+        /// <summary> In der Player-Liste kann man Player auf status "preregistered" setzen. Diese Fkt. 
+        /// setzt den Status all dieser Player auf den Status "available". </summary>
+        /// <returns>Anzahl geändertet Spieler. </returns>
+        public int SetPreRegisteredPlayers2Available() 
+        {
+            int nChanged = 0;
+            sqlCommand.CommandText = " SELECT COUNT(1) from player where state = " + (int)PlayerState.PreRegistered;
+            nChanged = Helper.ToInt(sqlCommand.ExecuteScalar());
+            if (nChanged > 0)
+            {
+                sqlCommand.CommandText = " UPDATE player SET state = " + (int)PlayerState.Available + 
+                        " where state = " + (int)PlayerState.PreRegistered;
+                sqlCommand.ExecuteScalar();
+            }
+            return nChanged;
+        }
+
 
         public void DeleteAllPlayersTa()
         {
