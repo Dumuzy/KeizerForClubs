@@ -1381,7 +1381,7 @@ namespace KeizerForClubs
                     // entschuldigt oder so sein.  
                     if (runde == 0)
                     {
-                        if (playerCurrState.IsContainedIn(new PlayerState[]{
+                        if (playerCurrState.IsContainedIn(new PlayerState[]{ PlayerState.PreRegistered,
                                 PlayerState.Retired, PlayerState.Excused, PlayerState.Unexcused, PlayerState.Hindered }))
                             players[i].State = playerCurrState;
                         else
